@@ -5,30 +5,30 @@ import { emitEvent, isTMA, mockTelegramEnv } from '@telegram-apps/sdk-react';
 // so you will not see it in your final bundle.
 if (import.meta.env.DEV) {
   if (!await isTMA('complete')) {
-    const themeParams = {
-      accent_text_color: '#FF942C',
-      bg_color: '#FFFFFF',
-      button_color: '#FF942C',
-      button_text_color: '#ffffff',
-      destructive_text_color: '#ec3942',
-      header_bg_color: '#17212b',
-      hint_color: '#708499',
-      // link_color: '#6ab3f3',
-      // secondary_bg_color: '#232e3c',
-      section_bg_color: '#F4F4F4',
-      // section_header_text_color: '#6ab3f3',
-      // subtitle_text_color: '#708499',
-      text_color: '#000000',
-    } as const;
-    const noInsets = { left: 0, top: 0, bottom: 0, right: 0 } as const;
+    // const themeParams = {
+    //   accent_text_color: '#FF942C',
+    //   bg_color: '#FFFFFF',
+    //   button_color: '#FF942C',
+    //   button_text_color: '#ffffff',
+    //   destructive_text_color: '#ec3942',
+    //   header_bg_color: '#17212b',
+    //   hint_color: '#708499',
+    //   // link_color: '#6ab3f3',
+    //   // secondary_bg_color: '#232e3c',
+    //   section_bg_color: '#F4F4F4',
+    //   // section_header_text_color: '#6ab3f3',
+    //   // subtitle_text_color: '#708499',
+    //   text_color: '#000000',
+    // } as const;
+    // const noInsets = { left: 0, top: 0, bottom: 0, right: 0 } as const;
 
     mockTelegramEnv({
       onEvent(e) {
         // Here you can write your own handlers for all known Telegram Mini Apps methods:
         // https://docs.telegram-mini-apps.com/platform/methods
-        if (e[0] === 'web_app_request_theme') {
-          return emitEvent('theme_changed', { theme_params: themeParams });
-        }
+        // if (e[0] === 'web_app_request_theme') {
+        //   return emitEvent('theme_changed', { theme_params: {}});
+        // }
         if (e[0] === 'web_app_request_viewport') {
           return emitEvent('viewport_changed', {
             height: window.innerHeight,
@@ -37,17 +37,17 @@ if (import.meta.env.DEV) {
             is_state_stable: true,
           });
         }
-        if (e[0] === 'web_app_request_content_safe_area') {
-          return emitEvent('content_safe_area_changed', noInsets);
-        }
-        if (e[0] === 'web_app_request_safe_area') {
-          return emitEvent('safe_area_changed', noInsets);
-        }
+        // if (e[0] === 'web_app_request_content_safe_area') {
+        //   return emitEvent('content_safe_area_changed', noInsets);
+        // }
+        // if (e[0] === 'web_app_request_safe_area') {
+        //   return emitEvent('safe_area_changed', noInsets);
+        // }
       },
       launchParams: new URLSearchParams([
         // Discover more launch parameters:
         // https://docs.telegram-mini-apps.com/platform/launch-parameters#parameters-list
-        ['tgWebAppThemeParams', JSON.stringify(themeParams)],
+        ['tgWebAppThemeParams', JSON.stringify({})],
         // Your init data goes here. Learn more about it here:
         // https://docs.telegram-mini-apps.com/platform/init-data#parameters-list
         //
