@@ -2,10 +2,12 @@ import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import react from '@vitejs/plugin-react-swc';
 import mkcert from 'vite-plugin-mkcert';
+import tailwindcss from '@tailwindcss/vite';
+import path from "path"
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/reactjs-template/',
+  base: '/brio/',
   css: {
     preprocessorOptions: {
       scss: {
@@ -17,6 +19,9 @@ export default defineConfig({
     // Allows using React dev server along with building a React application with Vite.
     // https://npmjs.com/package/@vitejs/plugin-react-swc
     react(),
+    // Adds TailwindCSS support.
+    // https://www.npmjs.com/package/@tailwindcss/vite
+    tailwindcss(),
     // Allows using the compilerOptions.paths property in tsconfig.json.
     // https://www.npmjs.com/package/vite-tsconfig-paths
     tsconfigPaths(),
@@ -32,6 +37,11 @@ export default defineConfig({
   server: {
     // Exposes your dev server and makes it accessible for the devices in the same network.
     host: true,
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
   },
 });
 

@@ -1,9 +1,8 @@
 {
-  "name": "reactjs-template",
+  "name": "brio",
   "private": true,
   "version": "0.0.1",
   "type": "module",
-  "homepage": "https://telegram-mini-apps.github.io/reactjs-template",
   "scripts": {
     "deploy": "gh-pages -d dist",
     "dev": "vite",
@@ -15,13 +14,21 @@
     "predeploy": "npm run build"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.2.3",
+    "@tailwindcss/vite": "^4.1.13",
     "@telegram-apps/sdk-react": "^3.3.6",
     "@telegram-apps/telegram-ui": "^2.1.9",
     "@tonconnect/ui-react": "^2.2.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "embla-carousel-react": "^8.6.0",
     "eruda": "^3.4.3",
+    "lucide-react": "^0.544.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.30.1"
+    "react-router-dom": "^6.30.1",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^4.1.13"
   },
   "devDependencies": {
     "@eslint/js": "^9.23.0",
@@ -37,6 +44,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "gh-pages": "^6.3.0",
     "globals": "^15.15.0",
+    "tw-animate-css": "^1.3.8",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.40.0",
     "vite": "^6.3.5",

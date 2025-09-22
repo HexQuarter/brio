@@ -1,43 +1,27 @@
-import { Section, Cell, Image, List } from '@telegram-apps/telegram-ui';
+import { Title, LargeTitle, Button } from '@telegram-apps/telegram-ui';
 import type { FC } from 'react';
 
-import { Link } from '@/components/Link/Link.tsx';
 import { Page } from '@/components/Page.tsx';
-
-import tonSvg from './ton.svg';
+import { ComingSoon } from '@/components/ComingSoon';
 
 export const IndexPage: FC = () => {
   return (
     <Page back={false}>
-      <List>
-        <Section
-          header="Features"
-          footer="You can use these pages to learn more about features, provided by Telegram Mini Apps and other useful projects"
-        >
-          <Link to="/ton-connect">
-            <Cell
-              before={<Image src={tonSvg} style={{ backgroundColor: '#007AFF' }}/>}
-              subtitle="Connect your TON wallet"
-            >
-              TON Connect
-            </Cell>
-          </Link>
-        </Section>
-        <Section
-          header="Application Launch Data"
-          footer="These pages help developer to learn more about current launch information"
-        >
-          <Link to="/init-data">
-            <Cell subtitle="User data, chat information, technical data">Init Data</Cell>
-          </Link>
-          <Link to="/launch-params">
-            <Cell subtitle="Platform identifier, Mini Apps version, etc.">Launch Parameters</Cell>
-          </Link>
-          <Link to="/theme-params">
-            <Cell subtitle="Telegram application palette information">Theme Parameters</Cell>
-          </Link>
-        </Section>
-      </List>
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '90vh' }}>
+        <div style={{ alignItems: 'center', display: 'flex', flexDirection: 'column', gap: 30 }}>
+          <LargeTitle>Welcome to Brio</LargeTitle>
+          <Title>
+            Now you can send and receive Bitcoin
+            securely to anyone in the telegram
+            community - just using their telegram handle 
+            or number
+          </Title>
+          <div>
+            <Button size="l" style={{ marginTop: 20, marginBottom: 20 }}>Get Started</Button>
+          </div>
+        </div>
+        <ComingSoon />
+      </div>
     </Page>
   );
 };
