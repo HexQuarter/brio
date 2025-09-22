@@ -14,7 +14,10 @@ import './index.css';
 // Mock the environment in case, we are outside Telegram.
 import './mockEnv.ts';
 
+import './i18n';
+
 const root = ReactDOM.createRoot(document.getElementById('root')!);
+
 
 try {
   const launchParams = retrieveLaunchParams();
