@@ -18,7 +18,7 @@ export function SetupWalletPage() {
                     </div>
                     <div className="flex justify-between">
                         <Button className="w-40" onClick={() => navigate('/wallet/create')}>{t('walletSetup.createButton')}</Button>
-                        <Button variant="secondary" className="w-40">{t('walletSetup.restoreButton')}</Button>
+                        <Button variant="secondary" className="w-40" onClick={() => navigate('/wallet/restore')}>{t('walletSetup.restoreButton')}</Button>
                     </div>
                     <div className="flex justify-center align-center text-ring">
                         <Link to='/app'>{t('walletSetup.skipButton')}</Link>

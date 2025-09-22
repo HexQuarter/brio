@@ -1,0 +1,88 @@
+import { Page } from "@/components/Page";
+import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
+
+import * as bip39 from '@scure/bip39';
+import { wordlist } from '@scure/bip39/wordlists/english.js';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+export function RestoreWalletPage() {
+    const { t } = useTranslation();
+    const navigate = useNavigate();             
+
+    const [mnemonic, setMnemonic] = useState<string[]>(["", "", "", "", "", "", "", "", "", "", "", ""]);
+    const [error, setError] = useState<string | null>(null);
+
+    // catch copy paste
+    useEffect(() => {
+        const handlePaste = (e: ClipboardEvent) => {
+            e.preventDefault();
+
+            setError(null);
+            const clipboardData = e.clipboardData || (window as any).clipboardData;
+            const pastedText = clipboardData.getData('Text').trim();
+            const mnenonic = [...Array(12)].map(() => '');
+            const words = pastedText.split(/\s+/)
+            words.forEach((word: string, index: number) => {
+                mnenonic[index] = word;
+            });
+
+            setMnemonic(mnenonic);
+
+            if (!bip39.validateMnemonic(mnenonic.join(' '), wordlist)) {
+                setError(t('walletRestore.invalidMnemonic'));
+                return;
+            }
+
+            // Store in sessionStorage for safe transmission between pages (cleartext for now)
+            sessionStorage.setItem('wallet_mnemonic', mnenonic.join(' '));
+        };
+
+        // Attach to the first input for simplicity
+        const input = document.querySelector('input');
+        if (input) {
+            input.addEventListener('paste', handlePaste as any);
+        }
+        return () => {
+            if (input) {
+                input.removeEventListener('paste', handlePaste as any);
+            }
+        };
+    }, [mnemonic]);
+    
+    return (
+        <Page back={true}>
+            <div className="flex flex-col gap-20">
+                <div className='flex flex-col gap-5'>
+                    <div className="flex flex-col gap-10">
+                        <h2 className='text-4xl'>{t('walletRestore.title')}</h2>
+                        <p>{t('walletRestore.description')}</p>
+                    </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                    {mnemonic.map((_word, index) => (
+                        <input
+                            key={index}
+                            className={`border-2 rounded p-2 h-10 text-primary ${
+                                error ? 'border-red-500 text-red-500' : 'border-primary'
+                            }`}
+                            onChange={(e) => {
+                                const updated = [...mnemonic];
+                                updated[index] = e.target.value;
+                                setMnemonic(updated);
+                            }}
+                            value={mnemonic[index]}
+                        />
+                    ))}
+                    {error && <p className="col-span-3 text-red-500 text-sm italic mt-2">{error}</p>}
+                </div>
+                {mnemonic.join('').length > 0 && !error && (
+                    <div className="flex justify-center">
+                        <Button className="w-40" onClick={() => navigate('/wallet/secure')}>{t('walletRestore.nextButton')}</Button>
+                    </div>
+                )}
+            </div>
+        </Page>
+    );
+}

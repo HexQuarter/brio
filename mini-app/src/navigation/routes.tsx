@@ -4,6 +4,7 @@ import { WelcomePage } from '@/pages/WelcomePage';
 import { SetupWalletPage } from '@/pages/SetupWalletPage';
 import { CreateWalletPage } from '@/pages/CreateWalletPage';
 import { SecureWalletPage } from '@/pages/SecureWalletPage';
+import { RestoreWalletPage } from '@/pages/RestoreWalletPage';
 
 interface Route {
   path: string;
@@ -16,5 +17,6 @@ export const routes: Route[] = [
   { path: '/welcome', Component: WelcomePage },
   { path: '/wallet/setup', Component: SetupWalletPage, title: 'Setup Wallet' },
   { path: '/wallet/create', Component: CreateWalletPage, title: 'Create Wallet' },
+  { path: '/wallet/restore', Component: RestoreWalletPage, title: 'Restore Wallet' },
   { path: '/wallet/secure', Component: SecureWalletPage, title: 'Secure Wallet' }
 ];

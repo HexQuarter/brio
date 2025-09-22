@@ -22,6 +22,11 @@
     "walletCreate.warning": "Do not share it. No one can help if you lose this.",
     "walletCreate.nextButton": "Secure My Wallet",
 
+    "walletRestore.title": "Your Wallet, Your Keys",
+    "walletRestore.description": "Paste your recovery phrase below to restore access to your wallet.",
+    "walletRestore.nextButton": "Secure My Wallet",
+    "walletRestore.invalidMnemonic": "The mnemonic phrase you entered is invalid. Please check and try again.",
+
     "walletSecure.title": "Secure your wallet with password",
     "walletSecure.description": "Choose a password you willll remember. Only you can unlock Brio.",
     "walletSecure.inputPlaceholder": "Enter your password",
