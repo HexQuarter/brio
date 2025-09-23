@@ -1,25 +1,51 @@
-import { useMemo } from 'react';
+import { type PropsWithChildren } from 'react';
 import { Navigate, Route, Routes, HashRouter } from 'react-router-dom';
-import { retrieveLaunchParams, useSignal, isMiniAppDark } from '@telegram-apps/sdk-react';
 import { AppRoot } from '@telegram-apps/telegram-ui';
 
-import { routes } from '@/navigation/routes.tsx';
-import { WalletProvider } from '@/lib/useWallet';
+import { useWallet } from '@/lib/useWallet';
 import { MainPage } from '@/pages/MainPage';
+import { WelcomePage } from '@/pages/WelcomePage';
+import { OnBoardingPage } from '@/pages/onboarding/OnBoardingPage';
+import { CreateWalletPage } from '@/pages/onboarding/CreateWalletPage';
+import { RestoreWalletPage } from '@/pages/onboarding/RestoreWalletPage';
+import { SecureWalletPage } from '@/pages/onboarding/SecureWalletPage';
+import { WalletMainPage } from '@/pages/wallet/WalletMainPage';
+import { WelcomeWallet } from './wallet/Welcome';
+import { WalletReceive } from './wallet/WalletReceive';
+import { WalletSend } from './wallet/WalletSend';
+import { WalletActivity } from './wallet/WalletActivity';
+
+function AppRoute({ children } : PropsWithChildren<{}>) {
+  const wallet = useWallet()
+  if (!wallet.walletExists) {
+      return <Navigate to="/welcome" replace />;
+  }
+  return <>{children}</>;
+}
 
 export function App() {
-  const lp = useMemo(() => retrieveLaunchParams(), []);
-  const isDark = useSignal(isMiniAppDark);
-
   return (
-    <AppRoot
-      appearance={isDark ? 'dark' : 'light'}
-      platform={['macos', 'ios'].includes(lp.tgWebAppPlatform) ? 'ios' : 'base'}
-    >
+    <AppRoot>
       <HashRouter>
         <Routes>
-          {routes.map((route) => <Route key={route.path} {...route} />)}
-          {/* <Route path="*" element={<Navigate to="/"/>}/> */}
+          <Route path="/" element={
+            <AppRoute>
+              <MainPage />
+            </AppRoute>
+          }>
+            <Route index element={<Navigate to="/wallet" replace />} />
+            <Route path="/wallet" element={<WalletMainPage />}>
+              <Route index element={<WelcomeWallet />} />
+              <Route path="receive" element={<WalletReceive />} />
+              <Route path="send" element={<WalletSend />} />
+              <Route path="activity" element={<WalletActivity />} />
+            </Route>
+          </Route>
+          <Route path="/welcome" Component={WelcomePage} />
+          <Route path="/onboarding" Component={OnBoardingPage} />
+          <Route path="/onboarding/create-wallet" Component={CreateWalletPage} />
+          <Route path="/onboarding/restore-wallet" Component={RestoreWalletPage} />
+          <Route path="/onboarding/secure-wallet" Component={SecureWalletPage} />
         </Routes>
       </HashRouter>
     </AppRoot>

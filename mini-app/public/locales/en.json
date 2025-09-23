@@ -44,7 +44,8 @@
 
     "wallet.menuReceiveBTC": "Receive BTC",
     "wallet.menuSendBTC": "Send BTC",
-    "wallet.menuActivity": "Activity"
+    "wallet.menuActivity": "Activity",
+    "wallet.totalBalance": "Total balance"
 
 
 }

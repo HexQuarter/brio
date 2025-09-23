@@ -38,7 +38,7 @@ export function CreateWalletPage() {
                     {t('walletCreate.warning')}
                 </div>
                 <div className="flex justify-center">
-                    <Button className="w-40" onClick={() => navigate('/wallet/secure')}>{t('walletCreate.nextButton')}</Button>
+                    <Button className="w-40" onClick={() => navigate('/onboarding/secure-wallet')}>{t('walletCreate.nextButton')}</Button>
                 </div>
             </div>
         </Page>

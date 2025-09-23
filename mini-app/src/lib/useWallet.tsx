@@ -51,16 +51,12 @@ async function decrypt(cipher: string, password: string): Promise<string | null>
 }
 
 export const WalletProvider = ({children}: {children: ReactNode}) => {
-    const [walletExists, setWalletExists] = useState(false);
-    const [decryptedWallet, setDecryptedWallet] = useState<string | null>(null);
-    const [promptForPassword, setPromptForPassword] = useState(false);
-    const [lastActive, setLastActive] = useState(Date.now());
+    const cipher = localStorage.getItem(WALLET_KEY);
 
-    useEffect(() => {
-        const cipher = localStorage.getItem(WALLET_KEY);
-        setWalletExists(!!cipher);
-        setPromptForPassword(!!cipher);
-    }, []);
+    const [walletExists, _setWalletExists] = useState(!!cipher);
+    const [decryptedWallet, setDecryptedWallet] = useState<string | null>(null);
+    const [promptForPassword, setPromptForPassword] = useState(!!cipher);
+    const [lastActive, setLastActive] = useState(Date.now());
 
     useEffect(() => {
         const interval = setInterval(() => {

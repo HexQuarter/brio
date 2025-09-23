@@ -79,7 +79,7 @@ export function RestoreWalletPage() {
                 </div>
                 {mnemonic.join('').length > 0 && !error && (
                     <div className="flex justify-center">
-                        <Button className="w-40" onClick={() => navigate('/wallet/secure')}>{t('walletRestore.nextButton')}</Button>
+                        <Button className="w-40" onClick={() => navigate('/onboarding/secure-wallet')}>{t('walletRestore.nextButton')}</Button>
                     </div>
                 )}
             </div>

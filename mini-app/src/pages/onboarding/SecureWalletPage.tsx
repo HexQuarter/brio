@@ -16,7 +16,7 @@ export function SecureWalletPage() {
 
     if (!sessionStorage.getItem('wallet_mnemonic')) {
         console.log('No mnemonic found, redirecting to setup');
-        navigate('/wallet/setup')
+        navigate('/onboarding')
         return;
     }
 

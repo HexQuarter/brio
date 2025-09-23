@@ -1,9 +1,5 @@
-import { TonConnectUIProvider } from '@tonconnect/ui-react';
-
 import { App } from '@/components/App.tsx';
 import { ErrorBoundary } from '@/components/ErrorBoundary.tsx';
-import { publicUrl } from '@/helpers/publicUrl.ts';
-import { Wallet } from 'lucide-react';
 import { WalletProvider } from '@/lib/useWallet';
 
 function ErrorBoundaryError({ error }: { error: unknown }) {
@@ -29,11 +25,6 @@ export function Root() {
       <WalletProvider>
         <App />
       </WalletProvider>
-    {/* <TonConnectUIProvider
-        manifestUrl={publicUrl('tonconnect-manifest.json')}
-      > 
-        <App/>
-      </TonConnectUIProvider> */}
     </ErrorBoundary>
   );
 }

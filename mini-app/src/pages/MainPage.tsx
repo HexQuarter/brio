@@ -3,36 +3,28 @@ import { Button } from "@/components/ui/button";
 import { useWallet } from "@/lib/useWallet";
 import { useTranslation } from "react-i18next";
 import { BsCurrencyBitcoin } from "react-icons/bs";
-import { WalletMainPage } from "./WalletMainPage";
-import { useState } from "react";
+import { AppList, type App } from "@/components/AppList";
+import { Outlet, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 export function MainPage() {
     const wallet = useWallet(); 
     const { t } = useTranslation();
+    const navigate = useNavigate();
 
     const apps = [
         { 
             name: "Wallet", 
             icon: BsCurrencyBitcoin, 
             className: "text-white bg-primary rounded-full p-2",
-            component: <WalletMainPage />
+            path: "/wallet"
         },
     ];
 
-    const [selectedApp, setSelectedApp] = useState(apps[0]);
-    
     return (
         <Page back={false}>
             <div className="flex flex-col h-dvh pb-10">
-                <div className="flex flex-col gap-5">
-                    {apps.map((app) => (
-                        <div key={app.name} className={`flex flex-col items-center gap-2 p-5 mb-5`} onClick={() => setSelectedApp(app)}>
-                            <app.icon className={`w-10 h-10 ${app.className}`}/>
-                            <span className="text-sm">{app.name}</span>
-                        </div>
-                    ))}
-                </div>
-                
+                <AppList apps={apps} onChange={(app: App) => navigate(app.path)} />
                 {!wallet.walletExists &&
                     <div className="bg-gray-100 p-5 rounded-xl flex-1 flex flex-col">
                         <div className="p-5 bg-white rounded-xl flex-1">
@@ -54,7 +46,7 @@ export function MainPage() {
                     </div>
                 }
 
-                {wallet.walletExists && selectedApp.component}
+                {wallet.walletExists && <Outlet />}
             </div>
         </Page>
     );
