@@ -5,6 +5,7 @@ import { SetupWalletPage } from '@/pages/SetupWalletPage';
 import { CreateWalletPage } from '@/pages/CreateWalletPage';
 import { SecureWalletPage } from '@/pages/SecureWalletPage';
 import { RestoreWalletPage } from '@/pages/RestoreWalletPage';
+import { MainPage } from '@/pages/MainPage';
 
 interface Route {
   path: string;
@@ -15,8 +16,9 @@ interface Route {
 
 export const routes: Route[] = [
   { path: '/welcome', Component: WelcomePage },
-  { path: '/wallet/setup', Component: SetupWalletPage, title: 'Setup Wallet' },
-  { path: '/wallet/create', Component: CreateWalletPage, title: 'Create Wallet' },
-  { path: '/wallet/restore', Component: RestoreWalletPage, title: 'Restore Wallet' },
-  { path: '/wallet/secure', Component: SecureWalletPage, title: 'Secure Wallet' }
+  { path: '/wallet/setup', Component: SetupWalletPage, title: 'Setup Wallet | Brio' },
+  { path: '/wallet/create', Component: CreateWalletPage, title: 'Create Wallet | Brio' },
+  { path: '/wallet/restore', Component: RestoreWalletPage, title: 'Restore Wallet | Brio' },
+  { path: '/wallet/secure', Component: SecureWalletPage, title: 'Secure Wallet | Brio' },
+  { path: '*', Component: MainPage, title: 'Brio' },
 ];

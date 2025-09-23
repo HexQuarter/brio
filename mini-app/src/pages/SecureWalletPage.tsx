@@ -58,7 +58,7 @@ export function SecureWalletPage() {
             salt: Array.from(salt)
         }));
         sessionStorage.removeItem('wallet_mnemonic');
-        navigate('/app');
+        navigate('/');
     }
 
     return (

@@ -28,9 +28,23 @@
     "walletRestore.invalidMnemonic": "The mnemonic phrase you entered is invalid. Please check and try again.",
 
     "walletSecure.title": "Secure your wallet with password",
-    "walletSecure.description": "Choose a password you willll remember. Only you can unlock Brio.",
+    "walletSecure.description": "Choose a password you will remember. Only you can unlock Brio.",
     "walletSecure.inputPlaceholder": "Enter your password",
     "walletSecure.nextButton": "Go to my Wallet",
-    "walletSecure.emptyPassword": "Please enter a password to secure your wallet."
+    "walletSecure.emptyPassword": "Please enter a password to secure your wallet.",
+
+    "main.nowalletTitle": "Your Bitcoin buddies are waiting!",
+    "main.nowalletDescription_1": "To join the fun — sending, sharing, playing, and paying — you will need a wallet.",
+    "main.nowalletDescription_2": "Think of it as your ticket in.",
+    "main.nowalletDescription_3": "No worries, it is quick, free, and yours only.",
+    "main.createButton": "Create Wallet",
+    "main.restoreButton": "Restore My Wallet",
+    "main.welcomeTitle": "Welcome back to Brio!",
+    "main.welcomeDescription": "Your wallet is ready — you’re all set to send, share, and play with Bitcoin.",
+
+    "wallet.menuReceiveBTC": "Receive BTC",
+    "wallet.menuSendBTC": "Send BTC",
+    "wallet.menuActivity": "Activity"
+
 
 }

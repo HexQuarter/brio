@@ -4,6 +4,8 @@ import { retrieveLaunchParams, useSignal, isMiniAppDark } from '@telegram-apps/s
 import { AppRoot } from '@telegram-apps/telegram-ui';
 
 import { routes } from '@/navigation/routes.tsx';
+import { WalletProvider } from '@/lib/useWallet';
+import { MainPage } from '@/pages/MainPage';
 
 export function App() {
   const lp = useMemo(() => retrieveLaunchParams(), []);

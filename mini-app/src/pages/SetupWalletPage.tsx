@@ -16,7 +16,7 @@ export function SetupWalletPage() {
                         <h2 className='text-4xl'>{t('walletSetup.title')}</h2>
                         <p>{t('walletSetup.description')}</p>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex gap-5 justify-center">
                         <Button className="w-40" onClick={() => navigate('/wallet/create')}>{t('walletSetup.createButton')}</Button>
                         <Button variant="secondary" className="w-40" onClick={() => navigate('/wallet/restore')}>{t('walletSetup.restoreButton')}</Button>
                     </div>
