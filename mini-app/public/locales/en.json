@@ -47,7 +47,11 @@
     "wallet.menuActivity": "Activity",
     "wallet.totalBalance": "Total balance",
 
-    "wallet.receiveTitle": "Receive BTC to this address",
+    "wallet.receiveTitle": "Receive BTC",
+    "wallet.receive.lightningTitle": "On Lightning",
+    "wallet.receive.btcTitle": "On Native Bitcoin",
+    "wallet.receive.lightningInvoice": "Lightning invoice",
+    "wallet.receive.btcAddress": "Bitcoin address",
 
     "wallet.sendTelegram": "Send on Telegram",
     "wallet.payBitcoin": "Pay via Bitcoin",
