@@ -40,12 +40,24 @@
     "main.createButton": "Create Wallet",
     "main.restoreButton": "Restore My Wallet",
     "main.welcomeTitle": "Welcome back to Brio!",
-    "main.welcomeDescription": "Your wallet is ready — you’re all set to send, share, and play with Bitcoin.",
+    "main.welcomeDescription": "Your wallet is ready — you are all set to send, share, and play with Bitcoin.",
 
     "wallet.menuReceiveBTC": "Receive BTC",
     "wallet.menuSendBTC": "Send BTC",
     "wallet.menuActivity": "Activity",
-    "wallet.totalBalance": "Total balance"
+    "wallet.totalBalance": "Total balance",
+
+    "wallet.receiveTitle": "Receive BTC to this address",
+
+    "wallet.sendTelegram": "Send on Telegram",
+    "wallet.payBitcoin": "Pay via Bitcoin",
+    "wallet.telegram.handle": "Telegram Handle",
+    "wallet.telegram.handle.placeholder": "Enter Telegram placeholder (i.e. @JohnDoe)",
+    "wallet.telegram.phoneNumber": "Phone number",
+    "wallet.telegram.phoneNumber.placeholder": "Enter contact phone number (i.e. +336xxxxxx)",
+    "wallet.amount": "Amount",
+    "wallet.address": "Address",
+    "wallet.bitcoin.address.placeholder": "Enter/Paste/Scan receipient address"
 
 
 }

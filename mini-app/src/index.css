@@ -11,11 +11,6 @@ body {
   font-family: 'Poppins'!important;
 }
 
-button {
-  border-radius: 40px!important;
-  padding: 32px!important;
-}
-
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

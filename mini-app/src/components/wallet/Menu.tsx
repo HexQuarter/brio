@@ -48,7 +48,7 @@ export const WalletMenu: React.FC = () => {
     return (
         <div className="flex flex-row  items-center">
             {menuItems.map((item: any,  i: number) => (
-                <div className={`flex flex-col gap-2 items-center ${item.selected ? 'text-white': 'text-slate-500'} w-30`} onClick={() => handleMenuItemClicked(i)}>
+                <div key={item.path} className={`flex flex-col gap-2 items-center ${item.selected ? 'text-white': 'text-slate-500'} w-30`} onClick={() => handleMenuItemClicked(i)}>
                     <div className={`w-12 h-12 ${!item.selected ? 'border-1 border-slate-500': ''}  rounded-full flex items-center justify-center ${item.selected ? 'bg-primary': ''}`}>
                         <item.icon className="w-5 h-5"/>
                     </div>
