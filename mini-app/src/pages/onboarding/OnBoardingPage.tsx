@@ -22,7 +22,7 @@ export function OnBoardingPage() {
                             <Button variant="secondary" className="w-40" onClick={() => navigate('/onboarding/restore-wallet')}>{t('walletSetup.restoreButton')}</Button>
                         </div>
                         <div className="flex justify-center align-center text-ring">
-                            <Link to='/'>{t('walletSetup.skipButton')}</Link>
+                            <Link to='/?visit'>{t('walletSetup.skipButton')}</Link>
                         </div>
                     </div>
                 </div>

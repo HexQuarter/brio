@@ -1,5 +1,5 @@
 import { type PropsWithChildren } from 'react';
-import { Navigate, Route, Routes, HashRouter } from 'react-router-dom';
+import { Navigate, Route, Routes, HashRouter, useLocation } from 'react-router-dom';
 import { AppRoot } from '@telegram-apps/telegram-ui';
 import { useWallet } from '@/lib/useWallet';
 import { MainPage } from '@/pages/MainPage';
@@ -15,8 +15,9 @@ import { WalletSend } from './wallet/WalletSend';
 import { WalletActivity } from './wallet/WalletActivity';
 
 function AppRoute({ children } : PropsWithChildren<{}>) {
+  const location = useLocation()
   const wallet = useWallet()
-  if (!wallet.walletExists) {
+  if (!wallet.walletExists && location.search != '?visit') {
       return <Navigate to="/welcome" replace />;
   }
   return <>{children}</>;
