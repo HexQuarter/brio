@@ -2,6 +2,7 @@
 import { Page } from "@/components/Page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"
+import { useWallet } from "@/lib/useWallet";
 import { useState } from "react";
 
 import { useTranslation } from "react-i18next";
@@ -10,6 +11,7 @@ import { useNavigate } from "react-router";
 export function SecureWalletPage() {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const wallet = useWallet()
 
     const [error, setError] = useState<string | null>(null);    
     const [password, setPassword] = useState<string>('');
@@ -26,38 +28,7 @@ export function SecureWalletPage() {
             setError(t('walletSecure.emptyPassword'));
             return;
         }
-        const enc = new TextEncoder();
-        const keyMaterial =  await window.crypto.subtle.importKey(
-            "raw",
-            enc.encode(password),
-            "PBKDF2",
-            false,
-            ["deriveBits", "deriveKey"],
-        );
-
-        const salt = window.crypto.getRandomValues(new Uint8Array(16));
-        const key = await window.crypto.subtle.deriveKey(
-            {
-                name: "PBKDF2",
-                salt: salt,
-                iterations: 100000,
-                hash: "SHA-256",
-            },
-            keyMaterial,
-            { name: "AES-GCM", length: 256 },
-            true,
-            ["encrypt", "decrypt"],
-        );
-
-        const mnemonic = sessionStorage.getItem('wallet_mnemonic') as string;
-        const iv = window.crypto.getRandomValues(new Uint8Array(12));
-        const cipher = await window.crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(mnemonic));
-        localStorage.setItem('wallet_cipher', JSON.stringify({
-            cipher: Array.from(new Uint8Array(cipher)),
-            iv: Array.from(iv),
-            salt: Array.from(salt)
-        }));
-        sessionStorage.removeItem('wallet_mnemonic');
+        await wallet.storeWallet(password)
         navigate('/');
     }
 

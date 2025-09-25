@@ -6,11 +6,12 @@ import init, {
     defaultConfig,
 } from '@breeztech/breez-sdk-liquid/web'
 
-type WalletContextType = {
+export type WalletContextType = {
     walletExists: boolean;
     promptForPassword: boolean;
     decryptWallet: (password: string) => Promise<boolean>;
     breezSdk: BindingLiquidSdk | undefined;
+    storeWallet: (password: string) => Promise<void>
 };
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -67,7 +68,7 @@ const requireUnlock = () => {
 export const WalletProvider = ({children}: {children: ReactNode}) => {
     const cipher = localStorage.getItem(WALLET_KEY)
 
-    const [walletExists, _setWalletExists] = useState(!!cipher);
+    const [walletExists, setWalletExists] = useState(!!cipher);
     const [promptForPassword, setPromptForPassword] = useState(!!cipher && requireUnlock());
     const [breezSdk, setBreezSdk] = useState<BindingLiquidSdk | undefined>(undefined);
 
@@ -75,6 +76,21 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         const sdk = await initBreezSdk(mnemonic)
         setBreezSdk(sdk)
     }
+
+    useEffect(() => {
+        const checkWallet = () => {
+            if(!walletExists && isWalletExist()) {
+                setWalletExists(true)
+            } else {
+                setWalletExists(false)
+            }
+        }
+
+        // Listen for other tabs / external changes
+        window.addEventListener("storage", checkWallet);
+
+        return () => window.removeEventListener("storage", checkWallet);
+    }, [])
 
     useEffect(() => {
         if (!promptForPassword) {
@@ -111,13 +127,50 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         return false
     }
 
+    const storeWallet = async (password: string) => {
+        const enc = new TextEncoder();
+        const keyMaterial =  await window.crypto.subtle.importKey(
+            "raw",
+            enc.encode(password),
+            "PBKDF2",
+            false,
+            ["deriveBits", "deriveKey"],
+        );
+
+        const salt = window.crypto.getRandomValues(new Uint8Array(16));
+        const key = await window.crypto.subtle.deriveKey(
+            {
+                name: "PBKDF2",
+                salt: salt,
+                iterations: 100000,
+                hash: "SHA-256",
+            },
+            keyMaterial,
+            { name: "AES-GCM", length: 256 },
+            true,
+            ["encrypt", "decrypt"],
+        );
+
+        const mnemonic = sessionStorage.getItem('wallet_mnemonic') as string;
+        const iv = window.crypto.getRandomValues(new Uint8Array(12));
+        const cipher = await window.crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(mnemonic));
+        localStorage.setItem('wallet_cipher', JSON.stringify({
+            cipher: Array.from(new Uint8Array(cipher)),
+            iv: Array.from(iv),
+            salt: Array.from(salt)
+        }));
+        sessionStorage.removeItem('wallet_mnemonic');
+        setWalletExists(true)
+    }
+
     return (
         <WalletContext.Provider
             value={{
                 walletExists,
                 promptForPassword,
                 decryptWallet,
-                breezSdk
+                breezSdk,
+                storeWallet
             }}
         >
             {children}

@@ -1,7 +1,6 @@
 import { type PropsWithChildren } from 'react';
 import { Navigate, Route, Routes, HashRouter } from 'react-router-dom';
 import { AppRoot } from '@telegram-apps/telegram-ui';
-
 import { useWallet } from '@/lib/useWallet';
 import { MainPage } from '@/pages/MainPage';
 import { WelcomePage } from '@/pages/WelcomePage';

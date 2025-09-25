@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import { BsCurrencyBitcoin } from "react-icons/bs";
 import { AppList, type App } from "@/components/AppList";
 import { Outlet, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 import { UnlockWalletPage } from "./wallet/UnlockWalletPage";
 
 export function MainPage() {
@@ -38,8 +37,8 @@ export function MainPage() {
                                         <p>{t('main.nowalletDescription_3')}</p>
                                     </div>
                                     <div className="flex flex-col gap-5 items-center">
-                                        <Button className="w-40">{t('main.createButton')}</Button>
-                                        <Button variant="secondary" className="w-40">{t('main.restoreButton')}</Button>
+                                        <Button className="w-40" onClick={() => navigate('/onboarding/create-wallet')}>{t('main.createButton')}</Button>
+                                        <Button variant="secondary" className="w-40" onClick={() => navigate('/onboarding/restore-wallet')}>{t('main.restoreButton')}</Button>
                                     </div>
                                 </div>
                             </div>
