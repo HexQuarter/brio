@@ -42,6 +42,13 @@
     "main.welcomeTitle": "Welcome back to Brio!",
     "main.welcomeDescription": "Your wallet is ready — you are all set to send, share, and play with Bitcoin.",
 
+    "walletUnlock.title": "Unlock your wallet",
+    "walletUnlock.description": "To access your wallet, please enter the password securing your funds.",
+    "walletUnlock.inputPlaceholder": "Enter your password",
+    "walletUnlock.nextButton": "Access my wallet",
+    "walletUnlock.emptyPassword": "Please enter a password to unlock your wallet.",
+    "walletUnlock.invalidPassword": "Please enter a valid password.",
+
     "wallet.menuReceiveBTC": "Receive BTC",
     "wallet.menuSendBTC": "Send BTC",
     "wallet.menuActivity": "Activity",

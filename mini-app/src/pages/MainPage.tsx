@@ -6,6 +6,7 @@ import { BsCurrencyBitcoin } from "react-icons/bs";
 import { AppList, type App } from "@/components/AppList";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { UnlockWalletPage } from "./wallet/UnlockWalletPage";
 
 export function MainPage() {
     const wallet = useWallet(); 
@@ -46,7 +47,12 @@ export function MainPage() {
                     </div>
                 }
 
-                {wallet.walletExists && <Outlet />}
+                {wallet.walletExists && wallet.promptForPassword &&
+                    <UnlockWalletPage />
+                }
+                {wallet.walletExists && !wallet.promptForPassword &&
+                    <Outlet />
+                }
             </div>
         </Page>
     );
