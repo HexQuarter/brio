@@ -5,13 +5,14 @@ import { PiCurrencyDollarBold } from "react-icons/pi";
 
 
 interface WalletBalanceProps {
+    balance: number
     visibleBalance: boolean
 }
 
-export const WalletBalance: React.FC<WalletBalanceProps> = ({ visibleBalance = true }) => {
+export const WalletBalance: React.FC<WalletBalanceProps> = ({ visibleBalance = true, balance }) => {
     const { t } = useTranslation();
 
-    const [bitcoinBalance, setBitcoinBalance] = useState(0.0001)
+    const [bitcoinBalance, setBitcoinBalance] = useState(balance)
     const [fiatBalance, setFiatBalance] = useState(1000)
 
     return (
