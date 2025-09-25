@@ -1,5 +1,3 @@
-import { FiEye, FiSettings } from "react-icons/fi";
-
 import { WalletBalance } from '@/components/wallet/WalletBalance';
 
 import {  Outlet } from 'react-router-dom';
@@ -13,7 +11,6 @@ export const WalletMainPage = () => {
     const { breezSdk } = useWallet()
 
     const [balance, setBalance] = useState(0)
-    const [visibleBalance, setVisibleBalance] = useState(true)
 
     useEffect(() => { 
         if (breezSdk) {
@@ -27,13 +24,7 @@ export const WalletMainPage = () => {
 
   return (
     <div className="flex flex-col gap-5 h-full">
-        <div className="flex gap-10 items-end justify-between">
-            <WalletBalance  balance={balance} visibleBalance={visibleBalance}/>
-            <div className='flex gap-4 mb-3'>
-                <FiEye className='text-gray-400' onClick={() => setVisibleBalance(!visibleBalance)}/>
-                <FiSettings className='text-gray-400' />
-            </div>
-        </div>
+        <WalletBalance  balance={balance} />
         <div className="bg-gray-100 p-5 rounded-xl flex-1 flex flex-col">
             <div className="flex flex-col gap-20 items-center mt-5">
                 <WalletMenu />
