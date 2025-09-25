@@ -1,32 +1,48 @@
-import { useEffect, useState } from "react"
-import { Input } from "../ui/input"
-import { Label } from "../ui/label"
+import { Suspense, useEffect, useState } from "react"
 import { t } from "i18next"
 
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { Slider } from "@/components/ui/slider"
+
 interface Props {
-     onAdddressChange: (address: string) => void,
-     onBtcAmountChange: (amount: number) => void
+    min: number
+    max: number
+    price: number
+    onSend: (address: string, amount: number) => void
 }
 
-export const TelegramSendForm: React.FC<Props> = ({onAdddressChange, onBtcAmountChange}) => {
+export const TelegramSendForm: React.FC<Props> = ({ min, max, price, onSend}) => {
 
     const [handle, setHandle] = useState("")
     const [phoneNumber, setPhoneNumber] = useState("")
-    const [amount, setAmount] = useState(0.0)
-       const [btcAmount, setBtcAmount] = useState(0)
-   
-    useEffect(() => {
-        // TODO: retrieve address from either Telegram handle or phone number using the API
-        //onAdddressChange(address)
-    }, [handle, phoneNumber])
+    const [address, setAddress] = useState("")
+    const [amount, setAmount] = useState(0)
+    const [btcAmount, setBtcAmount] = useState(0)
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        // TODO: convert amount to btcAmount
-        onBtcAmountChange(btcAmount)
+        if (min > 0 && max > 0) {
+            const defaultValue = (max-min) / 2
+            setAmount(defaultValue)
+            setLoading(false)
+        }
+    }, [price, max, min])
+
+    useEffect(() => {
+        if (price) {
+            setBtcAmount(amount / price)
+        }   
     }, [amount])
 
+    useEffect(() => {
+        // TODO: retrieve address from either Telegram handle or phone number using the API
+        //setAddress(address)
+    }, [handle, phoneNumber])
+
     return (
-        <div className='flex flex-col gap-10 pt-10 '>
+        <div className='flex flex-col gap-10 pt-10'>
             <div className='flex flex-col gap-1'>
                 <Label htmlFor="handle" className='text-gray-400'>{t('wallet.telegram.handle')}</Label>
                 <Input id='handle' placeholder={t('wallet.telegram.handle.placeholder')} value={handle} onChange={(e) => setHandle(e.target.value)}/>
@@ -38,16 +54,20 @@ export const TelegramSendForm: React.FC<Props> = ({onAdddressChange, onBtcAmount
             </div>
 
             <div>
-                <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')}</Label>
-                <div className="flex flex-col gap-2">
-                    <div className='flex items-center gap-5 border-b border-gray-200 hover:border-primary'>
-                        <Input id="amount" type='number' placeholder="100" className='border-none' value={amount} onChange={(e) => setAmount(parseFloat(e.target.value))}/>
-                        <span>USD</span>
-                    </div>
-                    { /* TODO: Display BTC amount as decimal */ }
-                    <span className='text-xs text-gray-400'>{btcAmount} BTC</span>
-                </div>
+                <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')} {loading && <Loading />}</Label>
+                {!loading && 
+                    <Slider min={min} max={max} onValueChange={setAmount} value={amount} price={price} />
+                }
+                
+            </div>
+
+            <div className="flex justify-center">
+                <Button onClick={() => onSend(address, btcAmount)}>Send</Button>
             </div>
         </div>
     )
+}
+
+function Loading() {
+  return <span className="text-xs">(loading...)</span>;
 }

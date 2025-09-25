@@ -8,6 +8,8 @@ export const fetchBtcPrice = async (currency = "usd") => {
     })
     const bitcoinData = response.data.find((coinInfo : any) => coinInfo.id == 'bitcoin')
     if (bitcoinData) {
-        return bitcoinData.current_price
+        return bitcoinData.current_price as number
     }
+
+    return null
 }

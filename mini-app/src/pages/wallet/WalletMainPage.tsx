@@ -23,7 +23,7 @@ export const WalletMainPage = () => {
     }, [breezSdk])
 
   return (
-    <div className="flex flex-col gap-5 h-full">
+    <div className="flex flex-col gap-5 h-full pb-10">
         <WalletBalance  balance={balance} />
         <div className="bg-gray-100 p-5 rounded-xl flex-1 flex flex-col">
             <div className="flex flex-col gap-20 items-center mt-5">

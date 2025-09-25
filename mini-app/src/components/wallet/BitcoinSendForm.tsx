@@ -4,15 +4,20 @@ import { Label } from "@/components/ui/label";
 import { useState, useEffect} from "react";
 import { IDetectedBarcode, Scanner } from '@yudiel/react-qr-scanner';
 import { t } from "i18next";
+import { Button } from "@/components/ui/button"
+import { Slider } from "@/components/ui/slider";
 
 interface Props {
-     onAdddressChange: (address: string) => void
-     onBtcAmountChange: (amount: number) => void
+    min: number
+    max: number
+    price: number
+    onSend: (address: string, amount: number) => void
 }
 
-export const BitcoinSendForm: React.FC<Props> = ({ onAdddressChange, onBtcAmountChange }) => {
+export const BitcoinSendForm: React.FC<Props> = ({ min, max, price, onSend}) => {
+
     const [address, setAddress] = useState("")
-    const [amount, setAmount] = useState(0.0)
+    const [amount, setAmount] = useState(min * price)
     const [btcAmount, setBtcAmount] = useState(0)
     const [scanner, setScanner] = useState(false)
 
@@ -22,12 +27,17 @@ export const BitcoinSendForm: React.FC<Props> = ({ onAdddressChange, onBtcAmount
     }
 
     useEffect(() => {
-        onAdddressChange(address)
-    }, [address])
+        const defaultValue = (max-min) / 2
+        setAmount(defaultValue)
+        if (price) {
+            setBtcAmount(defaultValue / price)
+        }
+    }, [price, max, min])
 
-     useEffect(() => {
-        // TODO: convert amount to btcAmount
-        onBtcAmountChange(btcAmount)
+    useEffect(() => {
+        if (price) {
+            setBtcAmount(amount / price)
+        }   
     }, [amount])
 
     const onScannerResult = (detectedCodes: IDetectedBarcode[]) => {
@@ -52,16 +62,15 @@ export const BitcoinSendForm: React.FC<Props> = ({ onAdddressChange, onBtcAmount
                 {scanner && <Scanner onScan={onScannerResult} />}
             </div>
             
-            <div>
-                <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')}</Label>
-                <div className="flex flex-col gap-2">
-                    <div className='flex items-center gap-5 border-b border-gray-200 hover:border-primary'>
-                        <Input id="amount" type='number' placeholder="100" className='border-none' value={amount} onChange={(e) => setAmount(parseFloat(e.target.value))}/>
-                        <span>USD</span>
-                    </div>
-                    { /* TODO: Display BTC amount as decimal */ }
-                    <span className='text-xs text-gray-400'>{btcAmount} BTC</span>
+            { price &&
+                <div>
+                    <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')}</Label>
+                    <Slider min={min} max={max} value={amount} onValueChange={setAmount} price={price}/>
                 </div>
+            }
+
+            <div className="flex justify-center">
+                <Button onClick={() => onSend(address, btcAmount)}>Send</Button>
             </div>
         </div>
     )

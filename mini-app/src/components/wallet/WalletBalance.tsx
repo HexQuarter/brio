@@ -20,7 +20,9 @@ export const WalletBalance: React.FC<WalletBalanceProps> = ({ balance }) => {
      useEffect(() => {
       async function updateFiatPrice() {
          const btcPrice = await fetchBtcPrice()
-         setFiatBalance(bitcoinBalance * btcPrice)
+         if (btcPrice) {
+            setFiatBalance(bitcoinBalance * btcPrice)
+         }
       }
 
       updateFiatPrice()

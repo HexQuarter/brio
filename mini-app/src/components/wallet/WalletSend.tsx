@@ -1,15 +1,52 @@
 import { t } from 'i18next';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
 
 import { TelegramSendForm } from '@/components/wallet/TelegramSendForm';
 import { BitcoinSendForm } from '@/components/wallet/BitcoinSendForm';
+import { useWallet } from '@/lib/useWallet';
+import { fetchBtcPrice } from '@/lib/coingecko';
 
 export const WalletSend : React.FC = () => {
 
-    const handleAddressChange = (address: string) => {}
-    const [btcAmount, setBtcAmount] = useState(0)
+    const wallet = useWallet()
+    const [price, setPrice] = useState(0)
+    
+    const [minBitcoin, setMinBitcoin] = useState(0)
+    const [maxBitcoin, setMaxBitcoin] = useState(0)
+    const [minLightning, setMinLightning] = useState(0)
+    const [maxLightning, setMaxLigthning] = useState(0)
+
+    useEffect(() => {
+        if (wallet.breezSdk) {
+            const loadPrices = async () => {
+                const btcPrice = await fetchBtcPrice()
+                if (btcPrice) {
+                    setPrice(btcPrice)
+                    const bitcoinLimits = await wallet?.breezSdk?.fetchOnchainLimits()
+                    const lightningLimits = await wallet.breezSdk?.fetchLightningLimits()
+
+                    if (bitcoinLimits) {
+                        setMinBitcoin(bitcoinLimits.send.minSat / (10**8) * btcPrice)
+                        setMaxBitcoin(bitcoinLimits.send.maxSat / (10**8) * btcPrice)
+                    }
+                     if (lightningLimits) {
+                        setMinLightning(lightningLimits.send.minSat / (10**8) * btcPrice)
+                        setMaxLigthning(lightningLimits.send.maxSat / (10**8) * btcPrice)
+                    }
+                }
+            }
+
+            loadPrices()
+        }
+    }, [wallet.breezSdk])
+
+    const handleBtcSend = async (address: string, amount: number) => {
+    }
+
+    const handleLightningSend = () => {
+
+    }
 
     return (
         <div className="flex flex-col gap-10">
@@ -19,15 +56,13 @@ export const WalletSend : React.FC = () => {
                     <TabsTrigger value="btc">{t('wallet.payBitcoin')}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="telegram">
-                    <TelegramSendForm onAdddressChange={handleAddressChange} onBtcAmountChange={setBtcAmount}/>
+                    <TelegramSendForm min={minLightning} max={maxLightning} price={price} onSend={handleLightningSend}/>
                 </TabsContent>
                 <TabsContent value="btc">
-                    <BitcoinSendForm onAdddressChange={handleAddressChange} onBtcAmountChange={setBtcAmount}/>
+                    <BitcoinSendForm min={minBitcoin} max={maxBitcoin} price={price}  onSend={handleBtcSend}/>
                 </TabsContent>
             </Tabs>
-            <div className="flex justify-center">
-                <Button>Send</Button>
-            </div>
+            
         </div>
     )
 }

@@ -10,7 +10,7 @@ type WalletContextType = {
     walletExists: boolean;
     promptForPassword: boolean;
     decryptWallet: (password: string) => Promise<boolean>;
-    breezSdk: BindingLiquidSdk | null;
+    breezSdk: BindingLiquidSdk | undefined;
 };
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -69,7 +69,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
 
     const [walletExists, _setWalletExists] = useState(!!cipher);
     const [promptForPassword, setPromptForPassword] = useState(!!cipher && requireUnlock());
-    const [breezSdk, setBreezSdk] = useState<BindingLiquidSdk | null>(null);
+    const [breezSdk, setBreezSdk] = useState<BindingLiquidSdk | undefined>(undefined);
 
     const loadSdk = async (mnemonic: string) => {
         const sdk = await initBreezSdk(mnemonic)
@@ -89,7 +89,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
                 localStorage.removeItem(WALLET_UNLOCK_LAST_DATE) 
                 sessionStorage.removeItem(SESSION_MNEMONIC_KEY) 
                 setPromptForPassword(true)
-                setBreezSdk(null)
+                setBreezSdk(undefined)
             }
         }, 1000);
         
