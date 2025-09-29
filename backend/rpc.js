@@ -25,7 +25,8 @@ export const rpcHandler = async (req, res) => {
     }
 
     try {
-        await handler({ db: req.db, payload })
+	req.body = payload
+	await handler(req, res)
     } catch (err) {
         console.error(err)
         return res.status(500).json({ error: 'internal server error' })
