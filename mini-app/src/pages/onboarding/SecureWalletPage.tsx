@@ -37,6 +37,8 @@ export function SecureWalletPage() {
         const lp = retrieveLaunchParams()
 
         const digestHandle = await crypto.subtle.digest('sha-256', new TextEncoder().encode(lp.tgWebAppData?.user?.username as string))
+        console.log('send available', sendData.isAvailable())
+        console.log('send supported', sendData.isSupported())
         sendData(JSON.stringify( { action: "new-wallet", handle: buf2hex(digestHandle) }));
         navigate('/');
     }
