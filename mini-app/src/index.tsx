@@ -18,6 +18,7 @@ const root = ReactDOM.createRoot(document.getElementById('root')!);
 
 try {
   const launchParams = retrieveLaunchParams();
+  console.log('Launch params:', launchParams);
   const { tgWebAppPlatform: platform } = launchParams;
   const debug = (launchParams.tgWebAppStartParam || '').includes('platformer_debug')
     || import.meta.env.DEV;
@@ -36,5 +37,6 @@ try {
       );
     });
 } catch (e) {
+  console.error('Failed to get launch params:', e);
   root.render(<EnvUnsupported/>);
 }
