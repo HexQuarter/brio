@@ -39,6 +39,7 @@ export default defineConfig({
   server: {
     // Exposes your dev server and makes it accessible for the devices in the same network.
     host: true,
+    allowedHosts: ["https://master.d1rq177b3hizoj.amplifyapp.com"]
   },
   resolve: {
     alias: {
