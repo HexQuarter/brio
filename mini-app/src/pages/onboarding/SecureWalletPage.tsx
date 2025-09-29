@@ -30,6 +30,7 @@ export function SecureWalletPage() {
             setError(t('walletSecure.emptyPassword'));
             return;
         }
+        await wallet.decryptWallet(password)
         await wallet.storeWallet(password)
 
         const lp = retrieveLaunchParams()
