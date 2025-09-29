@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 import init, {
@@ -13,18 +14,26 @@ export type WalletContextType = {
     breezSdk: BindingLiquidSdk | undefined;
     storeWallet: (password: string) => Promise<void>
     bolt12Destination: string | null
-    btcAddress: string | null
+    btcAddress: string | null,
+    bitcoinLimits: Limit,
+    lightningLimits: Limit
 };
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
 const WALLET_KEY = 'wallet_cipher'
 const WALLET_UNLOCK_LAST_DATE = 'wallet_unlock_last_date'
-const SESSION_MNEMONIC_KEY = 'wallet_session_mnemonic'
 const WALLET_BOLT12_DESTINATION = 'wallet_bolt12_destination'
 const WALLET_BTC_ADDRESS = 'wallet_btc_address'
 
+const SESSION_MNEMONIC_KEY = 'wallet_session_mnemonic'
+const SESSION_BTC_LIMITS = 'btc_limits'
+const SESSION_LIGHTNING_LIMITS = 'lightning_limits'
+const SESSION_LIMITS_LAST_DATE = 'limits_last_date'
+
+
 const INACTIVITY_SPAN_MS = 10 * 60 * 1000; // 10 minutes
+const LIMITS_REFRESH_SPAN_MS = 5 * 60 * 1000 // 5 minutes
 
 async function decrypt(cipher: string, password: string): Promise<string | null> {
     // Decrypt using AES-GCM with PBKDF2-derived key
@@ -69,6 +78,25 @@ const requireUnlock = () => {
     return lastUnlockDate ? Date.now() - parseInt(lastUnlockDate) > INACTIVITY_SPAN_MS : true
 }
 
+const requiredReloadLimits = () => {
+    return sessionStorage.getItem(SESSION_LIMITS_LAST_DATE)
+        ? Date.now() - parseInt(sessionStorage.getItem(SESSION_LIMITS_LAST_DATE) as string) > LIMITS_REFRESH_SPAN_MS
+        : false
+}
+
+type Limit = {
+    min: number
+    max: number
+}
+
+const storePreloadedLimits = async (sdk: BindingLiquidSdk) => {
+    const { bitcoin, lightning} = await preloadLimits(sdk)
+    sessionStorage.setItem(SESSION_BTC_LIMITS, JSON.stringify(bitcoin))
+    sessionStorage.setItem(SESSION_LIGHTNING_LIMITS, JSON.stringify(lightning))
+    sessionStorage.setItem(SESSION_LIMITS_LAST_DATE, Date.now().toString())
+    return {bitcoin, lightning}
+}
+
 export const WalletProvider = ({children}: {children: ReactNode}) => {
     const cipher = localStorage.getItem(WALLET_KEY)
 
@@ -77,7 +105,12 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     const [breezSdk, setBreezSdk] = useState<BindingLiquidSdk | undefined>(undefined);
     const [bolt12Destination, setBolt12Destination] = useState<string | null>(localStorage.getItem(WALLET_BOLT12_DESTINATION))
     const [btcAddress, setBtcAddress] = useState<string | null>(localStorage.getItem(WALLET_BTC_ADDRESS))
-    
+
+    const btcLimits = JSON.parse(sessionStorage.getItem(SESSION_BTC_LIMITS) || JSON.stringify({ min: 0, max: 0}))
+    const lnLimits = JSON.parse(sessionStorage.getItem(SESSION_LIGHTNING_LIMITS) || JSON.stringify({ min: 0, max: 0}))
+
+    const [bitcoinLimits, setBitcoinLimits] = useState<Limit>(btcLimits)
+    const [lightningLimits, setLightningLimits] = useState<Limit>(lnLimits)
 
     const loadSdk = async (mnemonic: string) => {
         const sdk = await initBreezSdk(mnemonic)
@@ -97,6 +130,13 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
                 setBtcAddress(addr)
                 localStorage.setItem(WALLET_BTC_ADDRESS, addr)
             }
+        }
+
+        if (!sessionStorage.getItem(SESSION_BTC_LIMITS) || !sessionStorage.getItem(SESSION_LIGHTNING_LIMITS) || requiredReloadLimits()) {
+            console.log('loading limits')
+            const { bitcoin, lightning } = await storePreloadedLimits(sdk)
+            setBitcoinLimits(bitcoin)
+            setLightningLimits(lightning)
         }
     }
 
@@ -122,6 +162,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
             if (mnemonic) {
                 loadSdk(mnemonic)
             }
+            
         }
         
         const interval = setInterval(() => {
@@ -135,6 +176,14 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         
         return () => clearInterval(interval);
     }, [promptForPassword])
+
+    useEffect(() => {
+        setInterval(() => {
+            if (requiredReloadLimits()) {
+                breezSdk && storePreloadedLimits(breezSdk)
+            }
+        }, 1_000)
+    }, [])
 
     const decryptWallet = async (password: string) => {
         const cipher = localStorage.getItem(WALLET_KEY)
@@ -196,7 +245,9 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
                 breezSdk,
                 storeWallet,
                 bolt12Destination,
-                btcAddress
+                btcAddress,
+                bitcoinLimits,
+                lightningLimits
             }}
         >
             {children}
@@ -247,6 +298,22 @@ async function getBtcAddress(sdk: BindingLiquidSdk) {
         return null
     }
     return null
+}
+
+async function preloadLimits(sdk: BindingLiquidSdk) {
+    const bitcoinLimits = await sdk.fetchOnchainLimits()
+    const lightningLimits = await sdk.fetchLightningLimits()
+
+    return {
+        bitcoin: { 
+            min: bitcoinLimits ? bitcoinLimits.send.minSat / (10**8) : 0,
+            max: bitcoinLimits ? bitcoinLimits.send.maxSat / (10**8) : 0
+        },
+        lightning: { 
+            min: lightningLimits ? lightningLimits.send.minSat / (10**8) : 0,
+            max: lightningLimits ? lightningLimits.send.maxSat / (10**8) : 0
+        }
+    }
 }
 
 export const useWallet = () => {

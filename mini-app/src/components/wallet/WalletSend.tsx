@@ -9,37 +9,33 @@ import { fetchBtcPrice } from '@/lib/coingecko';
 
 export const WalletSend : React.FC = () => {
 
-    const wallet = useWallet()
+    const { bitcoinLimits, lightningLimits } = useWallet()
     const [price, setPrice] = useState(0)
     
-    const [minBitcoin, setMinBitcoin] = useState(0)
-    const [maxBitcoin, setMaxBitcoin] = useState(0)
-    const [minLightning, setMinLightning] = useState(0)
-    const [maxLightning, setMaxLigthning] = useState(0)
+    const [minBitcoin, setMinBitcoin] = useState(bitcoinLimits.min)
+    const [maxBitcoin, setMaxBitcoin] = useState(bitcoinLimits.max)
+    const [minLightning, setMinLightning] = useState(lightningLimits.min)
+    const [maxLightning, setMaxLigthning] = useState(lightningLimits.max)
 
     useEffect(() => {
-        if (wallet.breezSdk) {
-            const loadPrices = async () => {
-                const btcPrice = await fetchBtcPrice()
-                if (btcPrice) {
-                    setPrice(btcPrice)
-                    const bitcoinLimits = await wallet?.breezSdk?.fetchOnchainLimits()
-                    const lightningLimits = await wallet.breezSdk?.fetchLightningLimits()
+        const loadPrices = async () => {
+            const btcPrice = await fetchBtcPrice()
 
-                    if (bitcoinLimits) {
-                        setMinBitcoin(bitcoinLimits.send.minSat / (10**8) * btcPrice)
-                        setMaxBitcoin(bitcoinLimits.send.maxSat / (10**8) * btcPrice)
-                    }
-                     if (lightningLimits) {
-                        setMinLightning(lightningLimits.send.minSat / (10**8) * btcPrice)
-                        setMaxLigthning(lightningLimits.send.maxSat / (10**8) * btcPrice)
-                    }
+            if (btcPrice) {
+                setPrice(btcPrice)
+                if (bitcoinLimits) {
+                    setMinBitcoin(bitcoinLimits.min * btcPrice)
+                    setMaxBitcoin(bitcoinLimits.max * btcPrice)
+                }
+                    if (lightningLimits) {
+                    setMinLightning(lightningLimits.min * btcPrice)
+                    setMaxLigthning(lightningLimits.max * btcPrice)
                 }
             }
-
-            loadPrices()
         }
-    }, [wallet.breezSdk])
+
+        loadPrices()
+    }, [])
 
     const handleBtcSend = async (_address: string, _amount: number) => {
     }
