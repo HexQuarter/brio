@@ -15,6 +15,13 @@ import './i18n';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 
+if (window.location.hash.startsWith('#tgWebAppData=')) {
+  const search = window.location.hash.slice(1); // strip "#"
+  const newUrl =
+    window.location.pathname + '?' + search + '#/'; // put params into search, keep router hash root
+  window.history.replaceState(null, '', newUrl);
+}
+
 
 try {
   const launchParams = retrieveLaunchParams();
@@ -30,8 +37,6 @@ try {
     mockForMacOS: platform === 'macos',
   })
     .then(() => {
-
-      console.log("Rendering App")
 
       root.render(
         <StrictMode>
