@@ -41,7 +41,7 @@ export const WalletSend : React.FC = () => {
         }
     }, [wallet.breezSdk])
 
-    const handleBtcSend = async (address: string, amount: number) => {
+    const handleBtcSend = async (_address: string, _amount: number) => {
     }
 
     const handleLightningSend = () => {

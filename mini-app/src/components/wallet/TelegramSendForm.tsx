@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { t } from "i18next"
 
 import { Input } from "@/components/ui/input"
@@ -17,7 +17,7 @@ export const TelegramSendForm: React.FC<Props> = ({ min, max, price, onSend}) =>
 
     const [handle, setHandle] = useState("")
     const [phoneNumber, setPhoneNumber] = useState("")
-    const [address, setAddress] = useState("")
+    const [address, _setAddress] = useState("")
     const [amount, setAmount] = useState(0)
     const [btcAmount, setBtcAmount] = useState(0)
     const [loading, setLoading] = useState(true)

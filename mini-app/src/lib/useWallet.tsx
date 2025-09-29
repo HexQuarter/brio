@@ -79,7 +79,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
 
     useEffect(() => {
         const checkWallet = () => {
-            if(!walletExists && isWalletExist()) {
+            if(!walletExists) {
                 setWalletExists(true)
             } else {
                 setWalletExists(false)

@@ -14,7 +14,7 @@ export const WalletBalance: React.FC<WalletBalanceProps> = ({ balance }) => {
     const { t } = useTranslation();
 
     const [visibleBalance, setVisibleBalance] = useState(true)
-    const [bitcoinBalance, setBitcoinBalance] = useState(balance)
+    const [bitcoinBalance, _setBitcoinBalance] = useState(balance)
     const [fiatBalance, setFiatBalance] = useState(0)
 
      useEffect(() => {
