@@ -34,6 +34,15 @@ export function SecureWalletPage() {
 
         const lp = retrieveLaunchParams()
         const walletInfo = await wallet.breezSdk?.getInfo()
+        console.log(walletInfo)
+
+        console.log(JSON.stringify({
+                operation: 'create-user',
+                payload: {
+                    publicKey: walletInfo?.walletInfo.pubkey,
+                    initData: lp.tgWebAppData
+                }
+            }))
 
         const response = await fetch('https://dev.backend.brio.hexquarter.com/rpc', {
             method: 'POST',
