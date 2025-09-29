@@ -15,11 +15,11 @@ interface Props {
 }
 
 export const BitcoinSendForm: React.FC<Props> = ({ min, max, price, onSend}) => {
-
     const [address, setAddress] = useState("")
-    const [amount, setAmount] = useState(min * price)
+    const [amount, setAmount] = useState(0)
     const [btcAmount, setBtcAmount] = useState(0)
     const [scanner, setScanner] = useState(false)
+    const [loading, setLoading] = useState(true)
 
     const pasteAddress = async () => {
         const text = await navigator.clipboard.readText();
@@ -27,10 +27,10 @@ export const BitcoinSendForm: React.FC<Props> = ({ min, max, price, onSend}) => 
     }
 
     useEffect(() => {
-        const defaultValue = (max-min) / 2
-        setAmount(defaultValue)
-        if (price) {
-            setBtcAmount(defaultValue / price)
+        if (min > 0 && max > 0) {
+            const defaultValue = (max-min) / 2
+            setAmount(Math.round(defaultValue))
+            setLoading(false)
         }
     }, [price, max, min])
 
@@ -46,6 +46,23 @@ export const BitcoinSendForm: React.FC<Props> = ({ min, max, price, onSend}) => 
         }
         setAddress(detectedCodes[0].rawValue)
         setScanner(false)
+    }
+
+   const handleChangeAmount = (amount: number) => {
+        if(Number.isNaN(amount)) {
+            return
+        }
+
+        if (amount < min) {
+            setAmount(min)
+            return 
+        }
+
+        if (amount > max) {
+            setAmount(max)
+            return 
+        }
+        setAmount(amount)
     }
 
     return (
@@ -65,7 +82,9 @@ export const BitcoinSendForm: React.FC<Props> = ({ min, max, price, onSend}) => 
             { price &&
                 <div>
                     <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')}</Label>
-                    <Slider min={min} max={max} value={amount} onValueChange={setAmount} price={price}/>
+                    {!loading && 
+                        <Slider min={min} max={max} onValueChange={handleChangeAmount} value={amount} price={price} />
+                    }
                 </div>
             }
 

@@ -25,7 +25,7 @@ export const TelegramSendForm: React.FC<Props> = ({ min, max, price, onSend}) =>
     useEffect(() => {
         if (min > 0 && max > 0) {
             const defaultValue = (max-min) / 2
-            setAmount(defaultValue)
+            setAmount(Math.round(defaultValue))
             setLoading(false)
         }
     }, [price, max, min])
@@ -40,6 +40,23 @@ export const TelegramSendForm: React.FC<Props> = ({ min, max, price, onSend}) =>
         // TODO: retrieve address from either Telegram handle or phone number using the API
         //setAddress(address)
     }, [handle, phoneNumber])
+
+    const handleChangeAmount = (amount: number) => {
+        if(Number.isNaN(amount)) {
+            return
+        }
+
+          if (amount < min) {
+            setAmount(min)
+            return 
+        }
+
+        if (amount > max) {
+            setAmount(max)
+            return 
+        }
+        setAmount(amount)
+    }
 
     return (
         <div className='flex flex-col gap-10 pt-10'>
@@ -56,7 +73,7 @@ export const TelegramSendForm: React.FC<Props> = ({ min, max, price, onSend}) =>
             <div>
                 <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')} {loading && <Loading />}</Label>
                 {!loading && 
-                    <Slider min={min} max={max} onValueChange={setAmount} value={amount} price={price} />
+                    <Slider min={min} max={max} onValueChange={handleChangeAmount} value={amount} price={price} />
                 }
                 
             </div>

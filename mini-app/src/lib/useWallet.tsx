@@ -105,6 +105,9 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
             if(!walletExists) {
                 setWalletExists(true)
             }
+            else {
+                setWalletExists(false)
+             }
         }
 
         // Listen for other tabs / external changes

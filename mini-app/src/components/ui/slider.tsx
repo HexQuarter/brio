@@ -2,6 +2,8 @@ import * as React from "react"
 import * as SliderPrimitive from "@radix-ui/react-slider"
 
 import { cn } from "@/lib/utils"
+import { Input } from "@/components/ui/input"
+import { formatBtcAmount, formatFiatAmount } from "@/helpers/number"
 
 interface SliderProps {
   value: number
@@ -12,19 +14,20 @@ interface SliderProps {
   onValueChange: (amount: number) => void
 }
 
-const formatBtcAmount = (amount: number, price?: number) => {
-  if (price) {
-    return new Intl.NumberFormat("en", {maximumFractionDigits: 8}).format(amount / price)
-  }
-}
-
-const formatFiatAmount = (amount: number) => new Intl.NumberFormat("en", {maximumFractionDigits: 2}).format(amount)
-
 export const Slider: React.FC<SliderProps> = ({ value, min, max, price, onValueChange, className, ...props }) => {
   return (
     <div className='flex flex-col items-center gap-5 mt-5'>
-      <div>
-        <p className="text-2xl text-primary text-center">{formatFiatAmount(value)} USD</p>
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center text-primary justify-center w-40">
+          <Input 
+            type="number"
+            step={1}
+            className="w-[5] text-2xl border-primary border-b-1 text-center" 
+            value={value} 
+            onChange={(e) => onValueChange(parseFloat(e.target.value)) }
+            inputMode="decimal" />
+          <span className="">USD</span>
+        </div>
         <p className='text-xs text-gray-400 text-center'>{formatBtcAmount(value , price)} BTC</p>
       </div>
       <SliderPrimitive.Root
@@ -32,6 +35,7 @@ export const Slider: React.FC<SliderProps> = ({ value, min, max, price, onValueC
         value={[value]}
         min={min}
         max={max}
+        step={1}
         minStepsBetweenThumbs={1}
         className={cn(
           "relative flex w-full touch-none items-center select-none data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col",

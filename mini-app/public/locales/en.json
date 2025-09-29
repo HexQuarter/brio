@@ -63,9 +63,9 @@
     "wallet.sendTelegram": "Send on Telegram",
     "wallet.payBitcoin": "Pay via Bitcoin",
     "wallet.telegram.handle": "Telegram Handle",
-    "wallet.telegram.handle.placeholder": "Enter Telegram placeholder (i.e. @JohnDoe)",
+    "wallet.telegram.handle.placeholder": "(i.e. @JohnDoe)",
     "wallet.telegram.phoneNumber": "Phone number",
-    "wallet.telegram.phoneNumber.placeholder": "Enter contact phone number (i.e. +336xxxxxx)",
+    "wallet.telegram.phoneNumber.placeholder": "(i.e. +336xxxxxxxx)",
     "wallet.amount": "Amount",
     "wallet.address": "Address",
     "wallet.bitcoin.address.placeholder": "Enter/Paste/Scan receipient address"
