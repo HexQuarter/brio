@@ -35,7 +35,7 @@ export function SecureWalletPage() {
         const lp = retrieveLaunchParams()
         const walletInfo = await wallet.breezSdk?.getInfo()
 
-        const response = await fetch('http://18.206.176.159:3000/rpc', {
+        const response = await fetch('https://dev.backend.brio.hexquarter.com/rpc', {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",
