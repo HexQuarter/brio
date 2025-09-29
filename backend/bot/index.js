@@ -2,6 +2,11 @@ import { Telegraf } from 'telegraf';
 
 export const getBotToken = () => process.env['BOT_TOKEN']
 
+export const getBotId = () => {
+  const token = getBotToken()
+  return token.split(':')[0]
+}
+
 export const startBot = (token) => {
   const bot = new Telegraf(token);
 

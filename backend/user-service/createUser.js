@@ -1,13 +1,12 @@
 import * as z from "zod";
-import { createHash, createHmac } from "crypto"
-import { getBotToken } from "../bot/index.js";
+import { getBotId } from "../bot/index.js";
+
+import nacl from "tweetnacl";
 
 const CreateSchema = z.object({
     publicKey: z.string(),
-    // number: z.string(),
     initData: z.any()
 });
-
 
 export const handler = async (req, res) => {
     const parsingResult = CreateSchema.safeParse(req.body)
@@ -21,8 +20,8 @@ export const handler = async (req, res) => {
     //     number: user.number
     // })
 
-    if(!verifyTelegramAuth(createUserRequest.initData)) {
-        return res.status(403).json({ message: "invalid Telegram InitData"})
+    if(!verifyTelegramAuth(createUserRequest.initData, getBotId())) {
+        return res.status(401).json({ message: "invalid Telegram InitData"})
     }
 
     console.log(createUserRequest.initData)
@@ -33,20 +32,43 @@ export const handler = async (req, res) => {
     res.status(201).json({ status: "ok" })
 }
 
-function verifyTelegramAuth(initData) {
-  const secret = createHash("sha256").update(getBotToken()).digest();
-  const parsed = new URLSearchParams(initData);
-  const hash = parsed.get("hash");
-  parsed.delete("hash");
+function base64UrlDecode(input) {
+  return Buffer.from(
+    input.replace(/-/g, "+").replace(/_/g, "/"),
+    "base64"
+  );
+}
 
-  const checkString = [...parsed.entries()]
-    .map(([k, v]) => `${k}=${v}`)
-    .sort()
-    .join("\n");
+function verifyTelegramAuth(initData, botId) {
+  const params = new URLSearchParams(initData);
+  const signature = params.get("signature");
+  if (!signature) {
+    return false
+  }
 
-  const hmac = createHmac("sha256", secret).update(checkString).digest("hex");
+  // Remove fields we don't sign
+  params.delete("hash");
+  params.delete("signature");
 
-  if (hmac !== hash) return false
-  return true
-//   return Object.fromEntries(parsed); // contains user info
+  // Sort alphabetically by key
+  const fields = [...params.entries()].sort(([a], [b]) =>
+    a.localeCompare(b)
+  );
+
+  // Build data-check-string
+  const checkString = `${botId}:WebAppData\n` +
+    fields.map(([k, v]) => `${k}=${v}`).join("\n");
+
+  // Telegram public key
+  const pubKeyHex = "e7bf03a2fa4602af4580703d88dda5bb59f32ed8b02a56c187fe7d34caed242d";
+
+  const publicKey = Buffer.from(pubKeyHex, "hex");
+
+  const sig = base64UrlDecode(signature);
+
+  return nacl.sign.detached.verify(
+    Buffer.from(checkString),
+    new Uint8Array(sig),
+    new Uint8Array(publicKey)
+  );
 }
