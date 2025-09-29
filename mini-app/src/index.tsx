@@ -22,7 +22,6 @@ if (window.location.hash.startsWith('#tgWebAppData=')) {
   window.history.replaceState(null, '', newUrl);
 }
 
-
 try {
   const launchParams = retrieveLaunchParams();
   console.log('Launch params:', launchParams);

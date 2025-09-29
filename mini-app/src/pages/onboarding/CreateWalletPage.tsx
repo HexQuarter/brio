@@ -21,8 +21,8 @@ export function CreateWalletPage() {
     }, []);
 
     return (
-        <Page back={false}>
-            <div className="flex flex-col gap-20">
+        <Page back={true}>
+            <div className="flex flex-col gap-10">
                 <div className='flex flex-col gap-5'>
                     <div className="flex flex-col gap-10">
                         <h2 className='text-4xl'>{t('walletCreate.title')}</h2>

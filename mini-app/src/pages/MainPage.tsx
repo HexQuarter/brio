@@ -22,7 +22,7 @@ export function MainPage() {
     ];
 
     return (
-        <Page back={false}>
+        <Page back={!wallet.walletExists}>
             <div className="flex flex-col h-dvh pb-10">
                 <AppList apps={apps} onChange={(app: App) => navigate(app.path)} />
                 {!wallet.walletExists &&
