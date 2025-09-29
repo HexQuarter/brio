@@ -12,6 +12,8 @@ export type WalletContextType = {
     decryptWallet: (password: string) => Promise<boolean>;
     breezSdk: BindingLiquidSdk | undefined;
     storeWallet: (password: string) => Promise<void>
+    bolt12Destination: string | null
+    btcAddress: string | null
 };
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -19,6 +21,8 @@ const WalletContext = createContext<WalletContextType | undefined>(undefined);
 const WALLET_KEY = 'wallet_cipher'
 const WALLET_UNLOCK_LAST_DATE = 'wallet_unlock_last_date'
 const SESSION_MNEMONIC_KEY = 'wallet_session_mnemonic'
+const WALLET_BOLT12_DESTINATION = 'wallet_bolt12_destination'
+const WALLET_BTC_ADDRESS = 'wallet_btc_address'
 
 const INACTIVITY_SPAN_MS = 10 * 60 * 1000; // 10 minutes
 
@@ -71,18 +75,35 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     const [walletExists, setWalletExists] = useState(!!cipher);
     const [promptForPassword, setPromptForPassword] = useState(!!cipher && requireUnlock());
     const [breezSdk, setBreezSdk] = useState<BindingLiquidSdk | undefined>(undefined);
+    const [bolt12Destination, setBolt12Destination] = useState<string | null>(localStorage.getItem(WALLET_BOLT12_DESTINATION))
+    const [btcAddress, setBtcAddress] = useState<string | null>(localStorage.getItem(WALLET_BTC_ADDRESS))
+    
 
     const loadSdk = async (mnemonic: string) => {
         const sdk = await initBreezSdk(mnemonic)
         setBreezSdk(sdk)
+        
+        if (!bolt12Destination) {
+            const bolt12 = await getBolt12Destination(sdk)
+            if (bolt12) {
+                setBolt12Destination(bolt12)
+                localStorage.setItem(WALLET_BOLT12_DESTINATION, bolt12)
+            }
+        }
+
+        if (!btcAddress) {
+            const addr = await getBtcAddress(sdk)
+            if (addr) {
+                setBtcAddress(addr)
+                localStorage.setItem(WALLET_BTC_ADDRESS, addr)
+            }
+        }
     }
 
     useEffect(() => {
         const checkWallet = () => {
             if(!walletExists) {
                 setWalletExists(true)
-            } else {
-                setWalletExists(false)
             }
         }
 
@@ -170,7 +191,9 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
                 promptForPassword,
                 decryptWallet,
                 breezSdk,
-                storeWallet
+                storeWallet,
+                bolt12Destination,
+                btcAddress
             }}
         >
             {children}
@@ -186,6 +209,41 @@ const initBreezSdk = async (mnemonic: string) => {
     const sdk = await connect({ config, mnemonic })
     console.log("Breez SDK connected")
     return sdk
+}
+
+async function getBolt12Destination(sdk: BindingLiquidSdk) {
+    const prepareResponse = await sdk.prepareReceivePayment({
+        paymentMethod: 'bolt12Offer'
+    })
+
+    if (prepareResponse) {
+        const res = await sdk.receivePayment({
+            prepareResponse
+        })
+        if (res) {
+            return res.destination
+        }
+        return null
+    }
+    return null
+}
+
+async function getBtcAddress(sdk: BindingLiquidSdk) {
+    const prepareResponse = await sdk.prepareReceivePayment({
+        paymentMethod: 'bitcoinAddress'
+    })
+
+    if (prepareResponse) {
+        const res = await sdk.receivePayment({
+            prepareResponse
+        })
+        if (res) {
+            const split = res.destination.split(':')[1].split("?")[0]
+            return split
+        }
+        return null
+    }
+    return null
 }
 
 export const useWallet = () => {
