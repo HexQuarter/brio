@@ -1,5 +1,5 @@
 import { t } from 'i18next';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Tabs, TabsList, TabsContent, TabsTrigger } from '@/components/ui/tabs';
 
 import { LuShare2, LuCopy } from "react-icons/lu";

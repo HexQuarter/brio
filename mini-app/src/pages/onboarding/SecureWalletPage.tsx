@@ -8,6 +8,10 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 
+import { retrieveLaunchParams } from "@telegram-apps/sdk-react";
+import { sendData } from '@telegram-apps/sdk';
+import { buf2hex } from "@/helpers/crypto";
+
 export function SecureWalletPage() {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -29,6 +33,11 @@ export function SecureWalletPage() {
             return;
         }
         await wallet.storeWallet(password)
+
+        const lp = retrieveLaunchParams()
+
+        const digestHandle = await crypto.subtle.digest('sha-256', new TextEncoder().encode(lp.tgWebAppData?.user?.username as string))
+        sendData(JSON.stringify( { action: "new-wallet", handle: buf2hex(digestHandle) }));
         navigate('/');
     }
 
