@@ -30,6 +30,9 @@ try {
     mockForMacOS: platform === 'macos',
   })
     .then(() => {
+
+      console.log("Rendering App")
+
       root.render(
         <StrictMode>
           <Root/>

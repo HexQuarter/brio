@@ -25,6 +25,7 @@ export async function init(options: {
   // Set @telegram-apps/sdk-react debug mode and initialize it.
   setDebug(options.debug);
   initSDK();
+  console.log('Initialized SDK')
 
   // Add Eruda if needed.
   options.eruda && void import('eruda').then(({ default: eruda }) => {
