@@ -24,7 +24,6 @@ if (window.location.hash.startsWith('#tgWebAppData=')) {
 
 try {
   const launchParams = retrieveLaunchParams();
-  console.log('Launch params:', launchParams);
   const { tgWebAppPlatform: platform } = launchParams;
   const debug = (launchParams.tgWebAppStartParam || '').includes('platformer_debug')
     || import.meta.env.DEV;
@@ -36,7 +35,6 @@ try {
     mockForMacOS: platform === 'macos',
   })
     .then(() => {
-
       root.render(
         <StrictMode>
           <Root/>

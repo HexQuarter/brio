@@ -9,8 +9,6 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 
 import { retrieveLaunchParams } from "@telegram-apps/sdk-react";
-import { sendData } from '@telegram-apps/sdk';
-import { buf2hex } from "@/helpers/crypto";
 
 export function SecureWalletPage() {
     const { t } = useTranslation();
@@ -35,12 +33,28 @@ export function SecureWalletPage() {
         await wallet.storeWallet(password)
 
         const lp = retrieveLaunchParams()
+        const walletInfo = await wallet.breezSdk?.getInfo()
 
-        const digestHandle = await crypto.subtle.digest('sha-256', new TextEncoder().encode(lp.tgWebAppData?.user?.username as string))
-        console.log('send available', sendData.isAvailable())
-        console.log('send supported', sendData.isSupported())
-        sendData(JSON.stringify( { action: "new-wallet", handle: buf2hex(digestHandle) }));
-        navigate('/');
+        const response = await fetch('http://18.206.176.159:3000/rpc', {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify({
+                operation: 'create-user',
+                payload: {
+                    publicKey: walletInfo?.walletInfo.pubkey,
+                    initData: lp.tgWebAppData
+                }
+            })
+        })
+        if (response.status == 201) {
+            navigate('/');
+        }
+        else {
+            alert(`Err: ${JSON.stringify(response.json())}`)
+        }
     }
 
     return (
