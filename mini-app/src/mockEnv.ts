@@ -37,6 +37,10 @@ if (import.meta.env.DEV) {
             is_state_stable: true,
           });
         }
+        if (e[0] === 'web_app_data_send') {
+          return emitEvent('web_app_data_send', e[1])
+          console.log('SENDING', e)
+        }
         // if (e[0] === 'web_app_request_content_safe_area') {
         //   return emitEvent('content_safe_area_changed', noInsets);
         // }
