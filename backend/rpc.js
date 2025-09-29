@@ -17,6 +17,7 @@ export const rpcHandler = async (req, res) => {
         return res.status(403).json({ error: parsingResult.error })
     }
 
+    const {operation, payload} = parsingResult.data
     const handler = handlers[operation]
 
     if (!handler) {
