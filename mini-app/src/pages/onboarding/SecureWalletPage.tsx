@@ -30,11 +30,11 @@ export function SecureWalletPage() {
             setError(t('walletSecure.emptyPassword'));
             return;
         }
-        await wallet.decryptWallet(password)
         await wallet.storeWallet(password)
+        const sdk = await wallet.decryptWallet(password)
 
         const lp = retrieveLaunchParams()
-        const walletInfo = await wallet.breezSdk?.getInfo()
+        const walletInfo = await sdk?.getInfo()
         console.log(walletInfo)
 
         console.log(JSON.stringify({

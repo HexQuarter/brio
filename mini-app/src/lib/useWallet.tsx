@@ -10,7 +10,7 @@ import init, {
 export type WalletContextType = {
     walletExists: boolean;
     promptForPassword: boolean;
-    decryptWallet: (password: string) => Promise<boolean>;
+    decryptWallet: (password: string) => Promise<BindingLiquidSdk | null>;
     breezSdk: BindingLiquidSdk | undefined;
     storeWallet: (password: string) => Promise<void>
     bolt12Destination: string | null
@@ -138,6 +138,8 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
             setBitcoinLimits(bitcoin)
             setLightningLimits(lightning)
         }
+
+        return sdk
     }
 
     useEffect(() => {
@@ -187,17 +189,16 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
 
     const decryptWallet = async (password: string) => {
         const cipher = localStorage.getItem(WALLET_KEY)
-        if (!cipher) return false;
+        if (!cipher) return null;
         const result = await decrypt(cipher, password)
         if (result) {
             setPromptForPassword(false)
             localStorage.setItem(WALLET_UNLOCK_LAST_DATE, Date.now().toString())
             sessionStorage.setItem(SESSION_MNEMONIC_KEY, result)
 
-            loadSdk(result)
-            return true
+            return loadSdk(result)
         }
-        return false
+        return null
     }
 
     const storeWallet = async (password: string) => {
