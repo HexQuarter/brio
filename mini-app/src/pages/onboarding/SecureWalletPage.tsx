@@ -8,7 +8,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 
-import { retrieveLaunchParams } from "@telegram-apps/sdk-react";
+import { retrieveRawInitData } from "@telegram-apps/sdk-react";
 
 export function SecureWalletPage() {
     const { t } = useTranslation();
@@ -33,15 +33,15 @@ export function SecureWalletPage() {
         await wallet.storeWallet(password)
         const sdk = await wallet.decryptWallet(password)
 
-        const lp = retrieveLaunchParams()
+        const lp = retrieveRawInitData()
         const walletInfo = await sdk?.getInfo()
-        console.log(walletInfo)
+        console.log(lp)
 
         console.log(JSON.stringify({
                 operation: 'create-user',
                 payload: {
                     publicKey: walletInfo?.walletInfo.pubkey,
-                    initData: lp.tgWebAppData
+                    initData: lp
                 }
             }))
 
@@ -55,7 +55,7 @@ export function SecureWalletPage() {
                 operation: 'create-user',
                 payload: {
                     publicKey: walletInfo?.walletInfo.pubkey,
-                    initData: lp.tgWebAppData
+                    initData: lp
                 }
             })
         })
