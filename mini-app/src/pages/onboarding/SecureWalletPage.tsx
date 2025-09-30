@@ -9,20 +9,18 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 
 import { retrieveRawInitData } from "@telegram-apps/sdk-react";
+import { Progress } from "@/components/ui/progress";
 
 export function SecureWalletPage() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const wallet = useWallet()
+    const [progressValue, setProgressValue] = useState(0)
+    const [progressLabel, setProgressLabel] = useState("")
 
     const [error, setError] = useState<string | null>(null);    
     const [password, setPassword] = useState<string>('');
 
-    if (!sessionStorage.getItem('wallet_mnemonic')) {
-        console.log('No mnemonic found, redirecting to setup');
-        navigate('/onboarding')
-        return;
-    }
 
     async function secureWallet() {
         setError(null);
@@ -30,20 +28,32 @@ export function SecureWalletPage() {
             setError(t('walletSecure.emptyPassword'));
             return;
         }
+       
+        setProgressValue(1)
+        setProgressLabel(t('walletSecure.progress0'))
         await wallet.storeWallet(password)
+        
         const sdk = await wallet.decryptWallet(password)
+        await new Promise(r => setTimeout(r, 2000));
+        setProgressValue(25)
 
+        setProgressLabel(t('walletSecure.progress25'))
+        
         const lp = retrieveRawInitData()
-        const walletInfo = await sdk?.getInfo()
-        console.log(lp)
+        if (!lp) {
+            alert('Cannot retrieve Telegram init data')
+            return
+        }
 
-        console.log(JSON.stringify({
-                operation: 'create-user',
-                payload: {
-                    publicKey: walletInfo?.walletInfo.pubkey,
-                    initData: lp
-                }
-            }))
+        await new Promise(r => setTimeout(r, 2000));
+        setProgressValue(50)
+
+        setProgressLabel(t('walletSecure.progress50'))
+        const walletInfo = await sdk?.getInfo()
+        await new Promise(r => setTimeout(r, 2000));
+        setProgressValue(75)
+
+        setProgressLabel(t('walletSecure.progress75'))
 
         const response = await fetch('https://dev.backend.brio.hexquarter.com/rpc', {
             method: 'POST',
@@ -59,12 +69,19 @@ export function SecureWalletPage() {
                 }
             })
         })
+
+        await new Promise(r => setTimeout(r, 2000));
+
         if (response.status == 201) {
-            navigate('/');
+            setProgressValue(100)
+            setProgressLabel(t('walletSecure.progress100'))
         }
-        else {
-            alert(`Err: ${JSON.stringify(response.json())}`)
-        }
+
+        setError(response.statusText)
+    }
+
+    function goToWallet() {
+        navigate('/');
     }
 
     return (
@@ -75,13 +92,26 @@ export function SecureWalletPage() {
                         <h2 className='text-4xl'>{t('walletSecure.title')}</h2>
                     </div>
                 </div>
-                <div className="flex flex-col gap-5">
-                    <p>{t('walletSecure.description')}</p>
-                    <Input type="password" placeholder={t('walletSecure.inputPlaceholder')} onChange={(e) => setPassword(e.target.value)} />
-                    {error && <p className="text-red-500 text-sm italic mt-2">{error}</p>}
-                </div>
-                <div className="flex justify-center">
-                    <Button className="w-40" onClick={() => secureWallet()}>{t('walletSecure.nextButton')}</Button>
+                { progressValue == 0 &&
+                    <div className="flex flex-col gap-5">
+                        <p>{t('walletSecure.description')}</p>
+                        <Input type="password" placeholder={t('walletSecure.inputPlaceholder')} onChange={(e) => setPassword(e.target.value)} />
+                    </div>
+                }
+                {error && <p className="text-red-500 text-sm italic mt-2">{error}</p>}
+                <div className="flex justify-center items-center flex-col gap-5">
+                    {progressValue > 0 &&
+                        <div className="flex flex-col gap-5 w-full text-center">
+                                <Progress value={progressValue} />
+                            <p>{progressLabel}</p>
+                        </div>
+                    }
+                    {progressValue == 100 &&
+                        <Button className="w-40" onClick={() => goToWallet()}>{t('walletSecure.goToWalletButton')}</Button>
+                    }
+                    { progressValue == 0 &&
+                        <Button className="w-40" onClick={() => secureWallet()}>{t('walletSecure.registerButton')}</Button>
+                    }
                 </div>
             </div>
         </Page>
