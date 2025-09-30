@@ -6,12 +6,11 @@ import { useState } from "react";
 
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import { useWallet } from "@/lib/useWallet";
+import { decryptWallet } from "@/lib/useWallet";
 
 export function UnlockWalletPage() {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const wallet = useWallet();
 
     const [error, setError] = useState<string | null>(null);    
     const [password, setPassword] = useState<string>('');
@@ -23,8 +22,9 @@ export function UnlockWalletPage() {
             return;
         }
 
-        if(!await wallet.decryptWallet(password)) {
+        if(!await decryptWallet(password)) {
             setError(t('walletUnlock.invalidPassword'));
+            return
         }
 
         navigate('/');
