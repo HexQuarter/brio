@@ -2,7 +2,7 @@
 import { Page } from "@/components/Page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"
-import { decryptWallet, getBtcAddress, getBolt12Destination, getMnemonic, storeWallet } from "@/lib/useWallet";
+import { getSessionMnemonic, useWallet } from "@/lib/useWallet";
 import { useState } from "react";
 
 import { useTranslation } from "react-i18next";
@@ -16,6 +16,7 @@ import * as bip32 from '@scure/bip32';
 import { buf2hex } from "@/helpers/crypto";
 
 export function SecureWalletPage() {
+    const { initWallet, storeWallet, btcAddress, bolt12Destination} = useWallet()
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [progressValue, setProgressValue] = useState(0)
@@ -23,7 +24,6 @@ export function SecureWalletPage() {
 
     const [error, setError] = useState<string | null>(null);    
     const [password, setPassword] = useState<string>('');
-
 
     async function secureWallet() {
         setError(null);
@@ -36,7 +36,7 @@ export function SecureWalletPage() {
         setProgressLabel(t('walletSecure.progress1'))
         await storeWallet(password)
         
-        const sdk = await decryptWallet(password)
+        const sdk = await initWallet(password)
         if (!sdk) {
             return
         }
@@ -56,8 +56,8 @@ export function SecureWalletPage() {
         setProgressLabel(t('walletSecure.progress66'))
         setProgressValue(66)
 
-        const mnemonic = await getMnemonic(password) as string
-        const seed = await bip39.mnemonicToSeed(mnemonic)
+        const mnemonic = getSessionMnemonic()
+        const seed = await bip39.mnemonicToSeed(mnemonic as string)
         const hdkey = bip32.HDKey.fromMasterSeed(seed)
         const child = hdkey.derive("m/86'/0'/0'/0/0")
         if (!child.publicKey) {
@@ -76,8 +76,8 @@ export function SecureWalletPage() {
                 operation: 'create-user',
                 payload: {
                     publicKey: pubHex,
-                    breezBtcAddress: await getBtcAddress(sdk),
-                    breezBolt12Destination: await getBolt12Destination(sdk),
+                    breezBtcAddress: btcAddress,
+                    breezBolt12Destination: bolt12Destination,
                     tgInitData: lp
                 }
             })

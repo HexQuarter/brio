@@ -15,9 +15,8 @@ import { WalletSend } from './wallet/WalletSend';
 import { WalletActivity } from './wallet/WalletActivity';
 
 function AppRoute({ children } : PropsWithChildren<{}>) {
-  console.log('App routing')
-  const location = useLocation()
   const wallet = useWallet()
+  const location = useLocation()
   if (!wallet.walletExists && location.search != '?visit') {
       return <Navigate to="/welcome" replace />;
   }

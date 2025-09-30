@@ -6,6 +6,7 @@ import * as bip39 from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english.js';
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { storeSessionMnemonic } from "@/lib/useWallet";
 
 export function RestoreWalletPage() {
     const { t } = useTranslation();
@@ -36,7 +37,7 @@ export function RestoreWalletPage() {
             }
 
             // Store in sessionStorage for safe transmission between pages (cleartext for now)
-            sessionStorage.setItem('wallet_mnemonic', mnenonic.join(' '));
+            storeSessionMnemonic(mnemonic.join(' '))
         };
 
         // Attach to the first input for simplicity

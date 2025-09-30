@@ -32,7 +32,7 @@
     "walletSecure.inputPlaceholder": "Enter your password",
     "walletSecure.registerButton": "Register the wallet",
     "walletSecure.goToWalletButton": "Go to my Wallet",
-    "walletSecure.progress1": "Connecting to Bitcoin...",
+    "walletSecure.progress1": "Wallet initialization...",
     "walletSecure.progress33": "Loading Telegram information...",
     "walletSecure.progress66": "User registering...",
     "walletSecure.progress100": "Congratulations. Your account have been successfully created",
