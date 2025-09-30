@@ -16,7 +16,7 @@ interface Props {
 export const TelegramSendForm: React.FC<Props> = ({ min, max, price, onSend}) => {
 
     const [handle, setHandle] = useState("")
-    const [phoneNumber, setPhoneNumber] = useState("")
+    // const [phoneNumber, setPhoneNumber] = useState("")
     const [address, _setAddress] = useState("")
     const [amount, setAmount] = useState(0)
     const [btcAmount, setBtcAmount] = useState(0)
@@ -36,10 +36,10 @@ export const TelegramSendForm: React.FC<Props> = ({ min, max, price, onSend}) =>
         }   
     }, [amount])
 
-    useEffect(() => {
-        // TODO: retrieve address from either Telegram handle or phone number using the API
-        //setAddress(address)
-    }, [handle, phoneNumber])
+    // useEffect(() => {
+    //     // TODO: retrieve address from either Telegram handle or phone number using the API
+    //     //setAddress(address)
+    // }, [handle, phoneNumber])
 
     const handleChangeAmount = (amount: number) => {
         if(Number.isNaN(amount)) {
@@ -65,10 +65,10 @@ export const TelegramSendForm: React.FC<Props> = ({ min, max, price, onSend}) =>
                 <Input id='handle' placeholder={t('wallet.telegram.handle.placeholder')} value={handle} onChange={(e) => setHandle(e.target.value)}/>
             </div>
             
-            <div>
+            {/* <div>
                 <Label htmlFor="phone" className='text-gray-400'>{t('wallet.telegram.phoneNumber')}</Label>
                 <Input id='phone' placeholder={t('wallet.telegram.phoneNumber.placeholder')} value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)}/>
-            </div>
+            </div> */}
 
             <div>
                 <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')} {loading && <Loading />}</Label>
