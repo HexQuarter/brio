@@ -1,9 +1,7 @@
 import * as z from "zod";
 
 const SearchSchema = z.object({
-    publicKey: z.string().optional(),
-    handle: z.string().optional(),
-    number: z.string().optional(),
+    handle: z.string()
 });
 export const handler = async (req, res) => {
     const parsingResult = SearchSchema.safeParse(req.body)
@@ -11,12 +9,13 @@ export const handler = async (req, res) => {
         return res.status(403).json({ error: parsingResult.error })
     }
 
-    const searchResult = await search(req.db, parsingResult.data)
-    if (!searchResult) {
+    const {handle} = parsingResult.data
+    const info = await searchByHash(req.db, handle)
+    if (!info) {
         return res.status(404).json({ error: "user not found" })
     }
-    
-    res.status(200).json({ user: searchResult })
+
+    res.status(200).json({ user: info })
 }
 
 async function search(db, searchRequest) {

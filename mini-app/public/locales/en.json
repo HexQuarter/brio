@@ -73,7 +73,7 @@
     "wallet.telegram.phoneNumber.placeholder": "(i.e. +336xxxxxxxx)",
     "wallet.amount": "Amount",
     "wallet.address": "Address",
-    "wallet.bitcoin.address.placeholder": "Enter/Paste/Scan receipient address"
-
+    "wallet.bitcoin.address.placeholder": "Enter/Paste/Scan receipient address",
+    "wallet.sendButton": "Send" 
 
 }

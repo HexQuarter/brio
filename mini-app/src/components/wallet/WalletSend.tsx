@@ -6,16 +6,18 @@ import { TelegramSendForm } from '@/components/wallet/TelegramSendForm';
 import { BitcoinSendForm } from '@/components/wallet/BitcoinSendForm';
 import { useWallet } from '@/lib/useWallet';
 import { fetchBtcPrice } from '@/lib/coingecko';
+import { PayAmount } from '@breeztech/breez-sdk-liquid/web';
 
 export const WalletSend : React.FC = () => {
 
-    const { bitcoinLimits, lightningLimits } = useWallet()
+    const { bitcoinLimits, lightningLimits, breezSdk } = useWallet()
     const [price, setPrice] = useState(0)
     
     const [minBitcoin, setMinBitcoin] = useState(bitcoinLimits.min)
     const [maxBitcoin, setMaxBitcoin] = useState(bitcoinLimits.max)
     const [minLightning, setMinLightning] = useState(lightningLimits.min)
     const [maxLightning, setMaxLigthning] = useState(lightningLimits.max)
+    const [sendLightningError, setSendLightningError] = useState<string|null>(null)
 
     useEffect(() => {
         const loadPrices = async () => {
@@ -40,8 +42,24 @@ export const WalletSend : React.FC = () => {
     const handleBtcSend = async (_address: string, _amount: number) => {
     }
 
-    const handleLightningSend = () => {
+    const handleLightningSend = async (bolt12Invoice: string, amount: number) => {
+        setSendLightningError(null)
+        const optionalAmount: PayAmount = {
+            type: 'bitcoin',
+            receiverAmountSat: Math.floor(amount * (10**8))
+        }
 
+        try {
+            const prepareResponse = await breezSdk?.prepareSendPayment({
+                destination: bolt12Invoice,
+                amount: optionalAmount
+            })
+
+            console.log(prepareResponse)
+        }
+        catch(e: any) {
+            setSendLightningError(e.message)
+        }
     }
 
     return (
@@ -52,7 +70,7 @@ export const WalletSend : React.FC = () => {
                     <TabsTrigger value="btc">{t('wallet.payBitcoin')}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="telegram">
-                    <TelegramSendForm min={minLightning} max={maxLightning} price={price} onSend={handleLightningSend}/>
+                    <TelegramSendForm min={minLightning} max={maxLightning} price={price} onSend={handleLightningSend} sendError={sendLightningError}/>
                 </TabsContent>
                 <TabsContent value="btc">
                     <BitcoinSendForm min={minBitcoin} max={maxBitcoin} price={price}  onSend={handleBtcSend}/>
