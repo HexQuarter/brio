@@ -33,7 +33,7 @@ export function SecureWalletPage() {
         }
        
         setProgressValue(1)
-        setProgressLabel(t('walletSecure.progress0'))
+        setProgressLabel(t('walletSecure.progress1'))
         await storeWallet(password)
         
         const sdk = await decryptWallet(password)
@@ -41,9 +41,9 @@ export function SecureWalletPage() {
             return
         }
         await new Promise(r => setTimeout(r, 1000));
-        setProgressValue(25)
+        setProgressValue(33)
 
-        setProgressLabel(t('walletSecure.progress25'))
+        setProgressLabel(t('walletSecure.progress33'))
         
         const lp = retrieveRawInitData()
         if (!lp) {
@@ -52,13 +52,9 @@ export function SecureWalletPage() {
         }
 
         await new Promise(r => setTimeout(r, 2000));
-        setProgressValue(50)
 
-        setProgressLabel(t('walletSecure.progress50'))
-        await new Promise(r => setTimeout(r, 2000));
-        setProgressValue(75)
-
-        setProgressLabel(t('walletSecure.progress75'))
+        setProgressLabel(t('walletSecure.progress66'))
+        setProgressValue(66)
 
         const mnemonic = await getMnemonic(password) as string
         const seed = await bip39.mnemonicToSeed(mnemonic)
@@ -92,6 +88,7 @@ export function SecureWalletPage() {
         if (response.status == 201) {
             setProgressValue(100)
             setProgressLabel(t('walletSecure.progress100'))
+            return
         }
 
         setError(response.statusText)
