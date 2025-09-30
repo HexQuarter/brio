@@ -8,7 +8,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 
-import { retrieveRawInitData } from "@telegram-apps/sdk-react";
+import { requestContactComplete, retrieveRawInitData } from "@telegram-apps/sdk-react";
 import { Progress } from "@/components/ui/progress";
 
 import * as bip39 from '@scure/bip39';
@@ -26,6 +26,9 @@ export function SecureWalletPage() {
     const [password, setPassword] = useState<string>('');
 
     async function secureWallet() {
+        const contact = await requestContactComplete.ifAvailable({rejectOnAbort: false})
+        console.log('Phone access', contact)
+
         setError(null);
         if (!password || password == '') {
             setError(t('walletSecure.emptyPassword'));
