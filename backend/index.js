@@ -15,7 +15,7 @@ const db = new Level('db', { valueEncoding: 'json' })
 const app = express()
     .use(express.json())
     .use(cors({
-        origin: 'https://master.d1rq177b3hizoj.amplifyapp.com'
+        //origin: 'https://master.d1rq177b3hizoj.amplifyapp.com'
     }))
     .use((req, res, next) => {
         req.db = db

@@ -1,11 +1,13 @@
 import * as z from "zod";
 import { getBotId } from "../bot/index.js";
-
+import { createHash } from "crypto"
 import nacl from "tweetnacl";
 
 const CreateSchema = z.object({
     publicKey: z.string(),
-    initData: z.any()
+    breezBtcAddress: z.string(),
+    breezBolt12Destination: z.string(),
+    tgInitData: z.any()
 });
 
 export const handler = async (req, res) => {
@@ -15,19 +17,21 @@ export const handler = async (req, res) => {
     }
 
     const createUserRequest = parsingResult.data
-    // await req.db.put(`p:${createUserRequest.publicKey}`, {
-    //     handle: user.handle, 
-    //     number: user.number
-    // })
 
-    if(!verifyTelegramAuth(createUserRequest.initData, getBotId())) {
+    if(!verifyTelegramAuth(createUserRequest.tgInitData, getBotId())) {
         return res.status(401).json({ message: "invalid Telegram InitData"})
     }
 
-    console.log(createUserRequest.initData)
+    const params = new URLSearchParams(createUserRequest.tgInitData);
+    const { username } = JSON.parse(params.get('user'))
+    const hashHandle = createHash('sha256').update(username).digest('hex')	
+    await req.db.put(`p:${createUserRequest.publicKey}`, {
+        handle: hashHandle, 
+	breezBtcAddress: createUserRequest.breezBtcAddress,
+	breezBolt12Destination: createUserRequest.breezBolt12Destination
+    })
 
-    // await req.db.put(`h:${createUserRequest.handle}`, publicKey)
-    // await req.db.put(`h:${createUserRequest.number}`, publicKey)
+    await req.db.put(`h:${hashHandle}`, createUserRequest.publicKey)
 
     res.status(201).json({ status: "ok" })
 }
@@ -43,10 +47,10 @@ function verifyTelegramAuth(initData, botId) {
   const params = new URLSearchParams(initData);
   const signature = params.get("signature");
   if (!signature) {
-    return false
+    return false;
   }
 
-  // Remove fields we don't sign
+  // Remove non-signed fields
   params.delete("hash");
   params.delete("signature");
 
@@ -55,15 +59,16 @@ function verifyTelegramAuth(initData, botId) {
     a.localeCompare(b)
   );
 
-  // Build data-check-string
-  const checkString = `${botId}:WebAppData\n` +
+  // ⚠️ Important: use raw values exactly as in initData (do not JSON.parse)
+  const checkString =
+    `${botId}:WebAppData\n` +
     fields.map(([k, v]) => `${k}=${v}`).join("\n");
 
-  // Telegram public key
-  const pubKeyHex = "e7bf03a2fa4602af4580703d88dda5bb59f32ed8b02a56c187fe7d34caed242d";
+  // Telegram’s production public key
+  const pubKeyHex =
+    "e7bf03a2fa4602af4580703d88dda5bb59f32ed8b02a56c187fe7d34caed242d";
 
   const publicKey = Buffer.from(pubKeyHex, "hex");
-
   const sig = base64UrlDecode(signature);
 
   return nacl.sign.detached.verify(
@@ -72,3 +77,4 @@ function verifyTelegramAuth(initData, botId) {
     new Uint8Array(publicKey)
   );
 }
+
