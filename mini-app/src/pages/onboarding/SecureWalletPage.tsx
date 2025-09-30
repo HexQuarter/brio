@@ -2,7 +2,7 @@
 import { Page } from "@/components/Page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"
-import { useWallet } from "@/lib/useWallet";
+import { decryptWallet, getBtcAddress, getBolt12Destination, getMnemonic, storeWallet } from "@/lib/useWallet";
 import { useState } from "react";
 
 import { useTranslation } from "react-i18next";
@@ -11,10 +11,13 @@ import { useNavigate } from "react-router";
 import { retrieveRawInitData } from "@telegram-apps/sdk-react";
 import { Progress } from "@/components/ui/progress";
 
+import * as bip39 from '@scure/bip39';
+import * as bip32 from '@scure/bip32';
+import { buf2hex } from "@/helpers/crypto";
+
 export function SecureWalletPage() {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const wallet = useWallet()
     const [progressValue, setProgressValue] = useState(0)
     const [progressLabel, setProgressLabel] = useState("")
 
@@ -31,10 +34,13 @@ export function SecureWalletPage() {
        
         setProgressValue(1)
         setProgressLabel(t('walletSecure.progress0'))
-        await wallet.storeWallet(password)
+        await storeWallet(password)
         
-        const sdk = await wallet.decryptWallet(password)
-        await new Promise(r => setTimeout(r, 2000));
+        const sdk = await decryptWallet(password)
+        if (!sdk) {
+            return
+        }
+        await new Promise(r => setTimeout(r, 1000));
         setProgressValue(25)
 
         setProgressLabel(t('walletSecure.progress25'))
@@ -49,11 +55,20 @@ export function SecureWalletPage() {
         setProgressValue(50)
 
         setProgressLabel(t('walletSecure.progress50'))
-        const walletInfo = await sdk?.getInfo()
         await new Promise(r => setTimeout(r, 2000));
         setProgressValue(75)
 
         setProgressLabel(t('walletSecure.progress75'))
+
+        const mnemonic = await getMnemonic(password) as string
+        const seed = await bip39.mnemonicToSeed(mnemonic)
+        const hdkey = bip32.HDKey.fromMasterSeed(seed)
+        const child = hdkey.derive("m/86'/0'/0'/0/0")
+        if (!child.publicKey) {
+            return
+        }
+        const pub = child.publicKey
+        const pubHex = buf2hex(new Uint8Array(pub).buffer)
 
         const response = await fetch('https://dev.backend.brio.hexquarter.com/rpc', {
             method: 'POST',
@@ -64,8 +79,10 @@ export function SecureWalletPage() {
             body: JSON.stringify({
                 operation: 'create-user',
                 payload: {
-                    publicKey: walletInfo?.walletInfo.pubkey,
-                    initData: lp
+                    publicKey: pubHex,
+                    breezBtcAddress: await getBtcAddress(sdk),
+                    breezBolt12Destination: await getBolt12Destination(sdk),
+                    tgInitData: lp
                 }
             })
         })

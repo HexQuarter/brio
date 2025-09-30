@@ -10,9 +10,7 @@ import init, {
 export type WalletContextType = {
     walletExists: boolean;
     promptForPassword: boolean;
-    decryptWallet: (password: string) => Promise<BindingLiquidSdk | null>;
     breezSdk: BindingLiquidSdk | undefined;
-    storeWallet: (password: string) => Promise<void>
     bolt12Destination: string | null
     btcAddress: string | null,
     bitcoinLimits: Limit,
@@ -30,7 +28,6 @@ const SESSION_MNEMONIC_KEY = 'wallet_session_mnemonic'
 const SESSION_BTC_LIMITS = 'btc_limits'
 const SESSION_LIGHTNING_LIMITS = 'lightning_limits'
 const SESSION_LIMITS_LAST_DATE = 'limits_last_date'
-
 
 const INACTIVITY_SPAN_MS = 10 * 60 * 1000; // 10 minutes
 const LIMITS_REFRESH_SPAN_MS = 5 * 60 * 1000 // 5 minutes
@@ -159,12 +156,16 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     }, [])
 
     useEffect(() => {
+        async function _loadSdk(mnemonic: string) {
+            const sdk = await loadSdk(mnemonic)
+            setBreezSdk(sdk)
+        }
+
         if (!promptForPassword) {
             const mnemonic = sessionStorage.getItem(SESSION_MNEMONIC_KEY);
             if (mnemonic) {
-                loadSdk(mnemonic)
+                _loadSdk(mnemonic)
             }
-            
         }
         
         const interval = setInterval(() => {
@@ -187,64 +188,12 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         }, 1_000)
     }, [])
 
-    const decryptWallet = async (password: string) => {
-        const cipher = localStorage.getItem(WALLET_KEY)
-        if (!cipher) return null;
-        const result = await decrypt(cipher, password)
-        if (result) {
-            setPromptForPassword(false)
-            localStorage.setItem(WALLET_UNLOCK_LAST_DATE, Date.now().toString())
-            sessionStorage.setItem(SESSION_MNEMONIC_KEY, result)
-
-            return loadSdk(result)
-        }
-        return null
-    }
-
-    const storeWallet = async (password: string) => {
-        const enc = new TextEncoder();
-        const keyMaterial =  await window.crypto.subtle.importKey(
-            "raw",
-            enc.encode(password),
-            "PBKDF2",
-            false,
-            ["deriveBits", "deriveKey"],
-        );
-
-        const salt = window.crypto.getRandomValues(new Uint8Array(16));
-        const key = await window.crypto.subtle.deriveKey(
-            {
-                name: "PBKDF2",
-                salt: salt,
-                iterations: 100000,
-                hash: "SHA-256",
-            },
-            keyMaterial,
-            { name: "AES-GCM", length: 256 },
-            true,
-            ["encrypt", "decrypt"],
-        );
-
-        const mnemonic = sessionStorage.getItem('wallet_mnemonic') as string;
-        const iv = window.crypto.getRandomValues(new Uint8Array(12));
-        const cipher = await window.crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(mnemonic));
-        localStorage.setItem('wallet_cipher', JSON.stringify({
-            cipher: Array.from(new Uint8Array(cipher)),
-            iv: Array.from(iv),
-            salt: Array.from(salt)
-        }));
-        sessionStorage.removeItem('wallet_mnemonic');
-        setWalletExists(true)
-    }
-
     return (
         <WalletContext.Provider
             value={{
                 walletExists,
                 promptForPassword,
-                decryptWallet,
                 breezSdk,
-                storeWallet,
                 bolt12Destination,
                 btcAddress,
                 bitcoinLimits,
@@ -266,7 +215,7 @@ const initBreezSdk = async (mnemonic: string) => {
     return sdk
 }
 
-async function getBolt12Destination(sdk: BindingLiquidSdk) {
+export const getBolt12Destination = async (sdk: BindingLiquidSdk) => {
     const prepareResponse = await sdk.prepareReceivePayment({
         paymentMethod: 'bolt12Offer'
     })
@@ -283,7 +232,7 @@ async function getBolt12Destination(sdk: BindingLiquidSdk) {
     return null
 }
 
-async function getBtcAddress(sdk: BindingLiquidSdk) {
+export const getBtcAddress = async (sdk: BindingLiquidSdk) => {
     const prepareResponse = await sdk.prepareReceivePayment({
         paymentMethod: 'bitcoinAddress'
     })
@@ -322,3 +271,82 @@ export const useWallet = () => {
     if (!context) throw new Error('useWallet must be used within a WalletProvider');
     return context;
 };
+
+export const storeWallet = async (password: string) => {
+    const enc = new TextEncoder();
+    const keyMaterial =  await window.crypto.subtle.importKey(
+        "raw",
+        enc.encode(password),
+        "PBKDF2",
+        false,
+        ["deriveBits", "deriveKey"],
+    );
+
+    const salt = window.crypto.getRandomValues(new Uint8Array(16));
+    const key = await window.crypto.subtle.deriveKey(
+        {
+            name: "PBKDF2",
+            salt: salt,
+            iterations: 100000,
+            hash: "SHA-256",
+        },
+        keyMaterial,
+        { name: "AES-GCM", length: 256 },
+        true,
+        ["encrypt", "decrypt"],
+    );
+
+    const mnemonic = sessionStorage.getItem('wallet_mnemonic') as string;
+    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+    const cipher = await window.crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(mnemonic));
+    localStorage.setItem('wallet_cipher', JSON.stringify({
+        cipher: Array.from(new Uint8Array(cipher)),
+        iv: Array.from(iv),
+        salt: Array.from(salt)
+    }));
+    sessionStorage.removeItem('wallet_mnemonic');
+}
+
+export const decryptWallet = async (password: string) => {
+    const cipher = localStorage.getItem(WALLET_KEY)
+    if (!cipher) return null;
+    const result = await decrypt(cipher, password)
+    if (result) {
+        localStorage.setItem(WALLET_UNLOCK_LAST_DATE, Date.now().toString())
+        sessionStorage.setItem(SESSION_MNEMONIC_KEY, result)
+
+        return loadSdk(result)
+    }
+    return null
+}
+
+ const loadSdk = async (mnemonic: string) => {
+    const sdk = await initBreezSdk(mnemonic)
+    
+    const bolt12 = await getBolt12Destination(sdk)
+    if (bolt12) {
+        localStorage.setItem(WALLET_BOLT12_DESTINATION, bolt12)
+    }
+
+    const addr = await getBtcAddress(sdk)
+    if (addr) {
+        localStorage.setItem(WALLET_BTC_ADDRESS, addr)
+    }
+
+    if (!sessionStorage.getItem(SESSION_BTC_LIMITS) || !sessionStorage.getItem(SESSION_LIGHTNING_LIMITS) || requiredReloadLimits()) {
+        console.log('loading limits')
+        await storePreloadedLimits(sdk)
+    }
+
+    return sdk
+}
+
+export const getMnemonic = async (password: string) => {
+    const cipher = localStorage.getItem(WALLET_KEY)
+    if (!cipher) return null;
+    const result = await decrypt(cipher, password)
+    if (result) {
+        return result
+    }
+    return null
+}
