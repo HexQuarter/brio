@@ -18,21 +18,23 @@ export const handler = async (req, res) => {
 
     const createUserRequest = parsingResult.data
 
-    if(!verifyTelegramAuth(createUserRequest.tgInitData, getBotId())) {
-        return res.status(401).json({ message: "invalid Telegram InitData"})
+    const prod = process.env["PROD"]
+    if (prod === true) {
+      if(!verifyTelegramAuth(createUserRequest.tgInitData, getBotId())) {
+          return res.status(401).json({ message: "invalid Telegram InitData"})
+      }
     }
 
     const params = new URLSearchParams(createUserRequest.tgInitData);
     const { username } = JSON.parse(params.get('user'))
     const hashHandle = createHash('sha256').update(username).digest('hex')	
     await req.db.put(`p:${createUserRequest.publicKey}`, {
-        handle: hashHandle, 
-	breezBtcAddress: createUserRequest.breezBtcAddress,
-	breezBolt12Destination: createUserRequest.breezBolt12Destination
+        handle: hashHandle,
+        breezBtcAddress: createUserRequest.breezBtcAddress,
+        breezBolt12Destination: createUserRequest.breezBolt12Destination
     })
 
     await req.db.put(`h:${hashHandle}`, createUserRequest.publicKey)
-
     res.status(201).json({ status: "ok" })
 }
 
@@ -59,7 +61,6 @@ function verifyTelegramAuth(initData, botId) {
     a.localeCompare(b)
   );
 
-  // ⚠️ Important: use raw values exactly as in initData (do not JSON.parse)
   const checkString =
     `${botId}:WebAppData\n` +
     fields.map(([k, v]) => `${k}=${v}`).join("\n");

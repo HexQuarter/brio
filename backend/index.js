@@ -22,20 +22,30 @@ const app = express()
         next()
     })
 
-const port = process.env.PORT || 443;
-
-// Load SSL certs
-const sslOptions = {
-  key: fs.readFileSync(process.env.SSL_KEY_PEM),
-  cert: fs.readFileSync(process.env.SSL_CERT_PEM)
-};
-
 app.post('/rpc', rpcHandler)
 
-
 app.get('/', (req, res) => res.send('ok'))
-// Create HTTPS server
-https.createServer(sslOptions, app).listen(port, '0.0.0.0', () => {
-  console.log(`HTTPS server running on port ${port}`);
-  startBot(getBotToken());
-});
+
+const prod = process.env['PROD'] || true
+if (prod === true) {
+    // Load SSL certs
+    const sslOptions = {
+        key: fs.readFileSync(process.env.SSL_KEY_PEM),
+        cert: fs.readFileSync(process.env.SSL_CERT_PEM)
+    };
+
+    const port = process.env.PORT || 443
+
+    // Create HTTPS server
+    https.createServer(sslOptions, app).listen(port, '0.0.0.0', () => {
+        console.log(`HTTPS server running on port ${port}`);
+        startBot(getBotToken());
+    });
+}
+else {
+    const port = process.env.PORT || 3000
+    app.listen(port, () => {
+        console.log(`HTTPS server running on port ${port}`);
+        startBot(getBotToken());
+    })
+}

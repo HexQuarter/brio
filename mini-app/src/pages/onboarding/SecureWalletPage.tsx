@@ -66,7 +66,9 @@ export function SecureWalletPage() {
         const pub = child.publicKey
         const pubHex = buf2hex(new Uint8Array(pub).buffer)
 
-        const response = await fetch('https://dev.backend.brio.hexquarter.com/rpc', {
+        const rpcEndpoint = import.meta.env.DEV ? 'http://localhost:3000/rpc' : 'https://dev.backend.brio.hexquarter.com/rpc'
+
+        const response = await fetch(rpcEndpoint, {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",
