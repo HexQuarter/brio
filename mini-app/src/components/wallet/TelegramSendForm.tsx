@@ -5,8 +5,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
-import { buf2hex } from "@/helpers/crypto"
 import { formatBtcAmount } from "@/helpers/number"
+import { fetchUserInfo } from "@/lib/api"
 
 interface Props {
     min: number
@@ -44,26 +44,10 @@ export const TelegramSendForm: React.FC<Props> = ({ min, max, price, onSend, sen
         setLookupError(null)
         if (handle == "") return
         const delayDebounceFn = setTimeout(async () => {
-            const rpcEndpoint = import.meta.env.DEV ? 'http://localhost:3000/rpc' : 'https://dev.backend.brio.hexquarter.com/rpc'
-
-            const digest = await crypto.subtle.digest("sha-256", new TextEncoder().encode(handle))
-            const response = await fetch(rpcEndpoint, {
-                method: 'POST',
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json"
-                },
-                body: JSON.stringify({
-                    operation: 'search-user',
-                    payload: {
-                        handle: buf2hex(digest)
-                    }
-                })
-            })
-            
+            const response = await fetchUserInfo(handle)
             if (response.status == 200) {
                 const { user: userInfo }  = await response.json()
-                setAddress(userInfo.breezBolt12Destination)
+                setAddress(userInfo.breezBolt12Offer)
                 return
             }
 

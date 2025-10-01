@@ -4,9 +4,10 @@ import { createHash } from "crypto"
 import nacl from "tweetnacl";
 
 const CreateSchema = z.object({
+    tapRootAddress: z.string(),
     publicKey: z.string(),
     breezBtcAddress: z.string(),
-    breezBolt12Destination: z.string(),
+    breezBolt12Offer: z.string(),
     tgInitData: z.any()
 });
 
@@ -28,13 +29,14 @@ export const handler = async (req, res) => {
     const params = new URLSearchParams(createUserRequest.tgInitData);
     const { username } = JSON.parse(params.get('user'))
     const hashHandle = createHash('sha256').update(username).digest('hex')	
-    await req.db.put(`p:${createUserRequest.publicKey}`, {
-        handle: hashHandle,
+    await req.db.put(`p:${createUserRequest.tapRootAddress}`, {
+        publicKey: createUserRequest.publicKey,
         breezBtcAddress: createUserRequest.breezBtcAddress,
-        breezBolt12Destination: createUserRequest.breezBolt12Destination
+        breezBolt12Offer: createUserRequest.breezBolt12Offer,
+        handle: hashHandle
     })
 
-    await req.db.put(`h:${hashHandle}`, createUserRequest.publicKey)
+    await req.db.put(`h:${hashHandle}`, createUserRequest.tapRootAddress)
     res.status(201).json({ status: "ok" })
 }
 

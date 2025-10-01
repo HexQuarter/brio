@@ -12,6 +12,11 @@
   resolved "https://registry.yarnpkg.com/@breeztech/breez-sdk-liquid/-/breez-sdk-liquid-0.11.4.tgz#1e2fb373a90268f070e5c76b523dca1be315a503"
   integrity sha512-buMXWtajHtFPsNlRxvWZ6r2Yzo0N8kd1ekro6RTQ/ah8KcF9pxkzSFme8IRpJTnTtMxp8XpaLm3bLk8SjpBF6A==
 
+"@cmdcode/tapscript@^1.5.3":
+  version "1.5.3"
+  resolved "https://registry.yarnpkg.com/@cmdcode/tapscript/-/tapscript-1.5.3.tgz#3acc4d24edf419171edee4dfecac61b19831e02c"
+  integrity sha512-WCTtZsp5aXk7IKM9DpCSkDjx9eW9WrPxfmFPyfLcYnwEqnEvd+6iAjp8A5elkVfepMZ1e69OHO2qULYlH4TUWA==
+
 "@emnapi/core@^1.4.3", "@emnapi/core@^1.4.5":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@emnapi/core/-/core-1.5.0.tgz#85cd84537ec989cebb2343606a1ee663ce4edaf0"

@@ -11,12 +11,11 @@ import { useNavigate } from "react-router";
 import { retrieveRawInitData } from "@telegram-apps/sdk-react";
 import { Progress } from "@/components/ui/progress";
 
-import * as bip39 from '@scure/bip39';
-import * as bip32 from '@scure/bip32';
-import { buf2hex } from "@/helpers/crypto";
+import { registerUser } from "@/lib/api";
+import { buf2hex, generateChildKey, generateTapRootAddress } from "@/helpers/crypto";
 
 export function SecureWalletPage() {
-    const { initWallet, storeWallet, btcAddress, bolt12Destination} = useWallet()
+    const wallet = useWallet()
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [progressValue, setProgressValue] = useState(0)
@@ -34,13 +33,25 @@ export function SecureWalletPage() {
        
         setProgressValue(1)
         setProgressLabel(t('walletSecure.progress1'))
-        await storeWallet(password)
+        await wallet.storeWallet(password)
         
-        const sdk = await initWallet(password)
+        const sdk = await wallet.initWallet(password)
         if (!sdk) {
             return
         }
+
+        const mnemonic = getSessionMnemonic() as string
+        const childKey = await generateChildKey(mnemonic)
+        if (!childKey.publicKey) {
+            return
+        }
+        const childPubkeyHex = buf2hex(new Uint8Array(childKey.publicKey).buffer)
+        const tapRootAddress = await generateTapRootAddress(childKey.publicKey)
+        if (!tapRootAddress) {
+            return
+        }
         await new Promise(r => setTimeout(r, 1000));
+
         setProgressValue(33)
 
         setProgressLabel(t('walletSecure.progress33'))
@@ -56,33 +67,12 @@ export function SecureWalletPage() {
         setProgressLabel(t('walletSecure.progress66'))
         setProgressValue(66)
 
-        const mnemonic = getSessionMnemonic()
-        const seed = await bip39.mnemonicToSeed(mnemonic as string)
-        const hdkey = bip32.HDKey.fromMasterSeed(seed)
-        const child = hdkey.derive("m/86'/0'/0'/0/0")
-        if (!child.publicKey) {
-            return
-        }
-        const pub = child.publicKey
-        const pubHex = buf2hex(new Uint8Array(pub).buffer)
-
-        const rpcEndpoint = import.meta.env.DEV ? 'http://localhost:3000/rpc' : 'https://dev.backend.brio.hexquarter.com/rpc'
-
-        const response = await fetch(rpcEndpoint, {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            },
-            body: JSON.stringify({
-                operation: 'create-user',
-                payload: {
-                    publicKey: pubHex,
-                    breezBtcAddress: btcAddress,
-                    breezBolt12Destination: bolt12Destination,
-                    tgInitData: lp
-                }
-            })
+        const response = await registerUser({
+            tapRootAddress: tapRootAddress, 
+            publicKey: childPubkeyHex, 
+            breezBtcAddress: wallet.btcAddress as string, 
+            breezBolt12Offer: wallet.bolt12Offer as string, 
+            tgInitData: lp
         })
 
         await new Promise(r => setTimeout(r, 2000));

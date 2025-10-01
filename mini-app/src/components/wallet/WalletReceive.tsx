@@ -11,15 +11,15 @@ const shorten = (data: string) => {
 }
 
 export const WalletReceive : React.FC = () => {
-    const { btcAddress, bolt12Destination } = useWallet()
+    const { btcAddress, bolt12Offer } = useWallet()
 
     const copyLightningInvoice = async () => {
         // TODO: show toast when invoice is copied
-        bolt12Destination && await navigator.clipboard.writeText(bolt12Destination)
+        bolt12Offer && await navigator.clipboard.writeText(bolt12Offer)
     }
 
     const shareLightningInvoice = async () => {
-        bolt12Destination && await navigator.share({ text: bolt12Destination })
+        bolt12Offer && await navigator.share({ text: bolt12Offer })
     }
 
     const copyBitcoinAddress = async () => {
@@ -40,11 +40,11 @@ export const WalletReceive : React.FC = () => {
                     <TabsTrigger value="btc">{t('wallet.receive.btcTitle')}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="lightning">
-                    { bolt12Destination &&
+                    { bolt12Offer &&
                         <div className='p-5 flex flex-col items-center gap-5'>
                             <small className='text-gray-500'>{t('wallet.receive.lightningInvoice')}:</small>
-                            <p>{shorten(bolt12Destination)}</p>
-                            <QRCode value={bolt12Destination} size={150} />
+                            <p>{shorten(bolt12Offer)}</p>
+                            <QRCode value={bolt12Offer} size={150} />
                             <div className='flex gap-5'>
                                 {navigator.canShare() &&
                                     <div className='border p-3 rounded-full text-gray-500' onClick={() => shareLightningInvoice()}>
