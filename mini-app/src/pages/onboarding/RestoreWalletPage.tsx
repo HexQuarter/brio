@@ -15,7 +15,6 @@ export function RestoreWalletPage() {
     const [mnemonic, setMnemonic] = useState<string[]>(["", "", "", "", "", "", "", "", "", "", "", ""]);
     const [error, setError] = useState<string | null>(null);
 
-    // catch copy paste
     useEffect(() => {
         const handlePaste = (e: ClipboardEvent) => {
             e.preventDefault();
@@ -23,21 +22,18 @@ export function RestoreWalletPage() {
             setError(null);
             const clipboardData = e.clipboardData || (window as any).clipboardData;
             const pastedText = clipboardData.getData('Text').trim();
-            const mnenonic = [...Array(12)].map(() => '');
+            const passphrase = [...Array(12)].map(() => '');
             const words = pastedText.split(/\s+/)
             words.forEach((word: string, index: number) => {
-                mnenonic[index] = word;
+                passphrase[index] = word;
             });
 
-            setMnemonic(mnenonic);
-
-            if (!bip39.validateMnemonic(mnenonic.join(' '), wordlist)) {
+            if (!bip39.validateMnemonic(passphrase.join(' '), wordlist)) {
                 setError(t('walletRestore.invalidMnemonic'));
                 return;
             }
 
-            // Store in sessionStorage for safe transmission between pages (cleartext for now)
-            storeSessionMnemonic(mnemonic.join(' '))
+            setMnemonic(passphrase);
         };
 
         // Attach to the first input for simplicity
@@ -50,6 +46,15 @@ export function RestoreWalletPage() {
                 input.removeEventListener('paste', handlePaste as any);
             }
         };
+    }, [])
+
+    useEffect(() => {
+        if (!bip39.validateMnemonic(mnemonic.join(' '), wordlist)) {
+            return;
+        }
+
+        // Store in sessionStorage for safe transmission between pages (cleartext for now)
+        storeSessionMnemonic(mnemonic.join(' '))
     }, [mnemonic]);
     
     return (

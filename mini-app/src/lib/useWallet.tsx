@@ -5,6 +5,8 @@ import init, {
     BindingLiquidSdk,
     connect,
     defaultConfig,
+    LogEntry,
+    setLogger,
 } from '@breeztech/breez-sdk-liquid/web'
 
 export type WalletContextType = {
@@ -34,7 +36,7 @@ const SESSION_LIMITS_LAST_DATE = 'limits_last_date'
 const INACTIVITY_SPAN_MS = 10 * 60 * 1000; // 10 minutes
 const LIMITS_REFRESH_SPAN_MS = 5 * 60 * 1000 // 5 minutes
 
-export const WalletProvider = ({children}: {children: ReactNode}) => {
+export const WalletProvider = ({children}: {children: ReactNode}) => {    
     const [walletExists, setWalletExists] = useState(!!localStorage.getItem(WALLET_KEY));
     const [promptForPassword, setPromptForPassword] = useState(walletExists && requireUnlock());
     const [breezSdk, setBreezSdk] = useState<BindingLiquidSdk | undefined>(undefined);
@@ -96,16 +98,20 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     }, [])
 
      const loadSdk = async (mnemonic: string) => {
-        const sdk = await initBreezSdk(mnemonic)
-        setBreezSdk(sdk)
-        
-        const bolt12 = await getBolt12Destination(sdk)
+        if (!breezSdk) {
+            const sdk = await initBreezSdk(mnemonic)
+            setBreezSdk(sdk)
+        }
+
+        const sdk = breezSdk as BindingLiquidSdk
+
+        const bolt12 = localStorage.getItem(WALLET_BOLT12_DESTINATION) || await getBolt12Destination(sdk)
         if (bolt12) {
             setBolt12Destination(bolt12)
             localStorage.setItem(WALLET_BOLT12_DESTINATION, bolt12)
         }
 
-        const addr = await getBtcAddress(sdk)
+        const addr = localStorage.getItem(WALLET_BTC_ADDRESS) || await getBtcAddress(sdk)
         if (addr) {
             setBtcAddress(addr)
             localStorage.setItem(WALLET_BTC_ADDRESS, addr)
@@ -148,7 +154,6 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
             iv: Array.from(iv),
             salt: Array.from(salt)
         }));
-        console.log('removing', SESSION_MNEMONIC_KEY)
         sessionStorage.removeItem(SESSION_MNEMONIC_KEY);
         setWalletExists(true)
     }
@@ -172,8 +177,15 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     );
 };
 
+class JsLogger {
+  log = (l: LogEntry) => {
+    console.log(`[${l.level}]: ${l.line}`)
+  }
+}
+
 const initBreezSdk = async (mnemonic: string) => {
     await init()
+    setLogger(new JsLogger())
 
     const breezApiKey = import.meta.env.VITE_BREEZ_API_KEY
     let config = defaultConfig('mainnet', breezApiKey)
@@ -210,7 +222,6 @@ export const getBolt12Destination = async (sdk: BindingLiquidSdk) => {
     const prepareResponse = await sdk.prepareReceivePayment({
         paymentMethod: 'bolt12Offer'
     })
-
     if (prepareResponse) {
         const res = await sdk.receivePayment({
             prepareResponse
