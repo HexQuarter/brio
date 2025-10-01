@@ -6,25 +6,37 @@ import { useWallet } from '@/lib/useWallet';
 
 import { useEffect, useState } from 'react';
 import { BindingLiquidSdk } from '@breeztech/breez-sdk-liquid/web';
+import { convertSatsToBtc } from '@/helpers/number';
 
 export const WalletMainPage = () => {
     const { breezSdk } = useWallet()
 
-    const [balance, setBalance] = useState(0)
+    const [btcBalance, setBtcBalance] = useState(0)
+    const [fiatBalance, setFiatBalance] = useState(0)
 
     useEffect(() => { 
-        if (breezSdk) {
-            const loadBalance = async (sdk: BindingLiquidSdk) => {
-                const walletInfo = await sdk.getInfo()
-                setBalance(walletInfo.walletInfo.balanceSat)
+
+        const loadBalance = async (breezSdk: BindingLiquidSdk) => {
+            const walletInfo = await breezSdk.getInfo()
+            const btc = convertSatsToBtc(walletInfo.walletInfo.balanceSat)
+            setBtcBalance(btc)
+
+            const fiatRates = await breezSdk.fetchFiatRates()
+            // TODO: select the currency from the settings
+            const rate = fiatRates.find(r => r.coin == 'USD')
+            if (rate) {
+                setFiatBalance(btc * rate.value)
             }
+        }
+
+        if (breezSdk) {
             loadBalance(breezSdk)
         }
     }, [breezSdk])
 
   return (
     <div className="flex flex-col gap-5 h-full pb-10">
-        <WalletBalance  balance={balance} />
+        <WalletBalance  btcBalance={btcBalance} fiatBalance={fiatBalance} />
         <div className="bg-gray-100 p-5 rounded-xl flex-1 flex flex-col">
             <div className="flex flex-col gap-20 items-center mt-5">
                 <WalletMenu />

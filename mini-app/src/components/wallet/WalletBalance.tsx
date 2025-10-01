@@ -1,39 +1,18 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import { useTranslation } from 'react-i18next';
 import { BsCurrencyBitcoin } from "react-icons/bs";
 import { FiEye, FiSettings } from 'react-icons/fi';
 import { PiCurrencyDollarBold } from "react-icons/pi";
 
-import { fetchBtcPrice } from '@/lib/coingecko';
-
 interface WalletBalanceProps {
-    balance: number
+    btcBalance: number
+    fiatBalance: number
 }
 
-export const WalletBalance: React.FC<WalletBalanceProps> = ({ balance }) => {
+export const WalletBalance: React.FC<WalletBalanceProps> = ({ btcBalance, fiatBalance }) => {
     const { t } = useTranslation();
 
     const [visibleBalance, setVisibleBalance] = useState(true)
-    const [bitcoinBalance, _setBitcoinBalance] = useState(balance)
-    const [fiatBalance, setFiatBalance] = useState(0)
-
-     useEffect(() => {
-      async function updateFiatPrice() {
-         const btcPrice = await fetchBtcPrice()
-         if (btcPrice) {
-            setFiatBalance(bitcoinBalance * btcPrice)
-         }
-      }
-
-      updateFiatPrice()
-
-      const interval = setInterval(() => {
-         updateFiatPrice()
-      }, 60_000)
-
-      return () => clearInterval(interval)
-    }, [bitcoinBalance])
-
     return (
         <div className="flex flex-col">
            <div className='flex gap-5 mb-3'>
@@ -54,7 +33,7 @@ export const WalletBalance: React.FC<WalletBalanceProps> = ({ balance }) => {
                <div className="flex gap-2 items-center">
                   <BsCurrencyBitcoin className='text-primary text-3xl'/>
                   <span className="text-3xl font-medium">
-                     {visibleBalance ? new Intl.NumberFormat("en", {maximumFractionDigits: 8}).format(bitcoinBalance) : '****'}
+                     {visibleBalance ? new Intl.NumberFormat("en", {maximumFractionDigits: 8}).format(btcBalance) : '****'}
                   </span>
                </div>
            </div>

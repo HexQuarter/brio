@@ -5,8 +5,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { TelegramSendForm } from '@/components/wallet/TelegramSendForm';
 import { BitcoinSendForm } from '@/components/wallet/BitcoinSendForm';
 import { useWallet } from '@/lib/useWallet';
-import { fetchBtcPrice } from '@/lib/coingecko';
 import { PayAmount } from '@breeztech/breez-sdk-liquid/web';
+import { convertBtcToSats } from '@/helpers/number';
 
 export const WalletSend : React.FC = () => {
 
@@ -21,17 +21,21 @@ export const WalletSend : React.FC = () => {
 
     useEffect(() => {
         const loadPrices = async () => {
-            const btcPrice = await fetchBtcPrice()
-
-            if (btcPrice) {
-                setPrice(btcPrice)
-                if (bitcoinLimits) {
-                    setMinBitcoin(bitcoinLimits.min * btcPrice)
-                    setMaxBitcoin(bitcoinLimits.max * btcPrice)
-                }
-                    if (lightningLimits) {
-                    setMinLightning(lightningLimits.min * btcPrice)
-                    setMaxLigthning(lightningLimits.max * btcPrice)
+            const fiatRates = await breezSdk?.fetchFiatRates()
+            if (fiatRates) {
+                // TODO: select the currency from the settings
+                const rate = fiatRates.find(r => r.coin == 'USD')
+                if (rate) {
+                    const btcPrice = rate.value
+                    setPrice(btcPrice)
+                    if (bitcoinLimits) {
+                        setMinBitcoin(bitcoinLimits.min * btcPrice)
+                        setMaxBitcoin(bitcoinLimits.max * btcPrice)
+                    }
+                        if (lightningLimits) {
+                        setMinLightning(lightningLimits.min * btcPrice)
+                        setMaxLigthning(lightningLimits.max * btcPrice)
+                    }
                 }
             }
         }
@@ -46,7 +50,7 @@ export const WalletSend : React.FC = () => {
         setSendLightningError(null)
         const optionalAmount: PayAmount = {
             type: 'bitcoin',
-            receiverAmountSat: Math.floor(amount * (10**8))
+            receiverAmountSat: convertBtcToSats(amount)
         }
 
         try {

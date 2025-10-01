@@ -8,6 +8,7 @@ import init, {
     LogEntry,
     setLogger,
 } from '@breeztech/breez-sdk-liquid/web'
+import { convertSatsToBtc } from '@/helpers/number';
 
 export type WalletContextType = {
     walletExists: boolean;
@@ -258,12 +259,12 @@ async function preloadLimits(sdk: BindingLiquidSdk) {
 
     return {
         bitcoin: { 
-            min: bitcoinLimits ? bitcoinLimits.send.minSat / (10**8) : 0,
-            max: bitcoinLimits ? bitcoinLimits.send.maxSat / (10**8) : 0
+            min: bitcoinLimits ? convertSatsToBtc(bitcoinLimits.send.minSat) : 0,
+            max: bitcoinLimits ? convertSatsToBtc(bitcoinLimits.send.maxSat) : 0
         },
         lightning: { 
-            min: lightningLimits ? lightningLimits.send.minSat / (10**8) : 0,
-            max: lightningLimits ? lightningLimits.send.maxSat / (10**8) : 0
+            min: lightningLimits ? convertSatsToBtc(lightningLimits.send.minSat) : 0,
+            max: lightningLimits ? convertSatsToBtc(lightningLimits.send.maxSat) : 0
         }
     }
 }
