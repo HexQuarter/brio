@@ -12,8 +12,8 @@ type RegisterParams = {
     tgInitData: string
 }
 
-export const webHookUrl = () => {
-    return new URL("/webhook", rpcEndpoint()).toString()
+export const webHookUrl = (userId: number) => {
+    return new URL(`/webhook/${userId}`, rpcEndpoint()).toString()
 }
 
 export const registerUser = async (params: RegisterParams) => {

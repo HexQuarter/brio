@@ -11,6 +11,7 @@ import init, {
 } from '@breeztech/breez-sdk-liquid/web'
 import { convertSatsToBtc } from '@/helpers/number';
 import { webHookUrl } from './api';
+import { retrieveLaunchParams } from '@telegram-apps/sdk-react';
 
 export type WalletContextType = {
     walletExists: boolean;
@@ -147,7 +148,11 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
             sdkInitRef.current = true;
             sdk = await initBreezSdk(mnemonic)
             if (!import.meta.env.DEV) {
-                await sdk.registerWebhook(webHookUrl())
+                const params = await retrieveLaunchParams()
+                const userId = params.tgWebAppData?.user?.id
+                if (userId) {
+                    await sdk.registerWebhook(webHookUrl(userId))
+                }
             }
             setBreezSdk(sdk)
         }
