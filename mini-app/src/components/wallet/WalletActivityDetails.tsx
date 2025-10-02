@@ -10,7 +10,7 @@ import { ArrowLeft } from 'lucide-react';
 
 export const WalletActivityDetails : React.FC = () => {
 
-    const { breezSdk} = useWallet()
+    const { breezSdk, currency} = useWallet()
     const { txid } = useParams()
     const navigate = useNavigate()
 
@@ -21,8 +21,7 @@ export const WalletActivityDetails : React.FC = () => {
         const loadingPayments = async () => {
             if (breezSdk) {
                 const fiatRates = await breezSdk.fetchFiatRates()
-                // TODO: select the currency from the settings
-                const rate = fiatRates.find(r => r.coin == 'USD')
+                const rate = fiatRates.find(r => r.coin.toLowerCase() == currency.toLowerCase())
                 if (rate) {
                     setPrice(rate.value)
                     const payment = await breezSdk.getPayment({
@@ -66,7 +65,7 @@ export const WalletActivityDetails : React.FC = () => {
                             <span className='text-gray-400'>Fees</span>
                             <span className='items-center'>
                                 {formatBtcAmount(convertSatsToBtc(payment.feesSat))} BTC 
-                                <span className='text-xs'> / {formatFiatAmount(price*convertSatsToBtc(payment.feesSat))} USD</span>
+                                <span className='text-xs'> / {formatFiatAmount(price*convertSatsToBtc(payment.feesSat))} {currency}</span>
                             </span>
                         </div>
                         <div className='flex justify-between'>
@@ -77,7 +76,7 @@ export const WalletActivityDetails : React.FC = () => {
                             <span className='text-gray-400'>Amount</span>
                             <div className={`flex flex-col gap-1 text-${payment.paymentType == 'send' ? 'red' : 'green'}-800`}>
                                 <span>{payment.paymentType == 'send' ? '-' : '+'}{formatBtcAmount(convertSatsToBtc(payment.feesSat))} BTC</span>
-                                <span>{payment.paymentType == 'send' ? '-' : '+'}{formatFiatAmount(price*convertSatsToBtc(payment.feesSat))} USD</span>
+                                <span>{payment.paymentType == 'send' ? '-' : '+'}{formatFiatAmount(price*convertSatsToBtc(payment.feesSat))} {currency}</span>
                             </div>
                         </div>
                     </div>

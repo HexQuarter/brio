@@ -13,10 +13,11 @@ interface Props {
     max: number
     price: number
     onSend: (address: string, amount: number) => void
-    sendError: string | null
+    sendError: string | null,
+    currency: string
 }
 
-export const TelegramSendForm: React.FC<Props> = ({ min, max, price, onSend, sendError}) => {
+export const TelegramSendForm: React.FC<Props> = ({ min, max, price, onSend, sendError, currency}) => {
 
     const [handle, setHandle] = useState("")
     // const [phoneNumber, setPhoneNumber] = useState("")
@@ -95,7 +96,7 @@ export const TelegramSendForm: React.FC<Props> = ({ min, max, price, onSend, sen
             <div>
                 <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')} {loading && <Loading />}</Label>
                 {!loading && 
-                    <Slider min={min} max={max} onValueChange={handleChangeAmount} value={amount} price={price} />
+                    <Slider min={min} max={max} onValueChange={handleChangeAmount} value={amount} price={price} currency={currency}/>
                 }
                 
             </div>

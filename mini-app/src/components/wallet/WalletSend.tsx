@@ -10,7 +10,7 @@ import { convertBtcToSats } from '@/helpers/number';
 
 export const WalletSend : React.FC = () => {
 
-    const { getLimits, breezSdk } = useWallet()
+    const { getLimits, breezSdk, currency } = useWallet()
     const [price, setPrice] = useState(0)
     
     const [minBitcoin, setMinBitcoin] = useState(0)
@@ -27,8 +27,7 @@ export const WalletSend : React.FC = () => {
 
             const fiatRates = await breezSdk.fetchFiatRates()
             if (fiatRates) {
-                // TODO: select the currency from the settings
-                const rate = fiatRates.find(r => r.coin == 'USD')
+                const rate = fiatRates.find(r => r.coin.toLowerCase() == currency.toLowerCase())
                 if (rate) {
                     const { bitcoin: bitcoinLimits, lightning: lightningLimits} = await getLimits(breezSdk)
                     const btcPrice = rate.value
@@ -79,10 +78,10 @@ export const WalletSend : React.FC = () => {
                     <TabsTrigger value="btc">{t('wallet.payBitcoin')}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="telegram">
-                    <TelegramSendForm min={minLightning} max={maxLightning} price={price} onSend={handleLightningSend} sendError={sendLightningError}/>
+                    <TelegramSendForm min={minLightning} max={maxLightning} price={price} onSend={handleLightningSend} sendError={sendLightningError} currency={currency}/>
                 </TabsContent>
                 <TabsContent value="btc">
-                    <BitcoinSendForm min={minBitcoin} max={maxBitcoin} price={price}  onSend={handleBtcSend}/>
+                    <BitcoinSendForm min={minBitcoin} max={maxBitcoin} price={price}  onSend={handleBtcSend} currency={currency}/>
                 </TabsContent>
             </Tabs>
             

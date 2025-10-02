@@ -76,6 +76,15 @@
     "wallet.amount": "Amount",
     "wallet.address": "Address",
     "wallet.bitcoin.address.placeholder": "Enter/Paste/Scan receipient address",
-    "wallet.sendButton": "Send" 
+    "wallet.sendButton": "Send",
 
+    "wallet.settings": "Settings",
+    "wallet.settings.currency": "Currency",
+    "wallet.settings.backup": "Backup wallet",
+
+    "walletBackup.title": "Backup Your Wallet",
+    "walletBackup.subtitle": "Write this down or store it safely.",
+    "walletBackup.warning": "Do not share it. No one can help if you lose this.",
+    "walletBackup.nextButton": "Copied. Back to the wallet",
+    "walletBackup.copyToast": "Your passphrase have been copied into the clipboard"
 }

@@ -14,6 +14,8 @@ import { WalletReceive } from './wallet/WalletReceive';
 import { WalletSend } from './wallet/WalletSend';
 import { WalletActivity } from './wallet/WalletActivity';
 import { WalletActivityDetails } from './wallet/WalletActivityDetails';
+import { WalletSettings } from './wallet/WalletSettings';
+import { BackupWalletPage } from '@/pages/wallet/BackupWalletPage';
 
 function AppRoute({ children } : PropsWithChildren<{}>) {
   const wallet = useWallet()
@@ -41,6 +43,8 @@ export function App() {
               <Route path="send" element={<WalletSend />} />
               <Route path="activity" element={<WalletActivity />} />
               <Route path="activity/:txid" element={<WalletActivityDetails />} />
+              <Route path="settings" element={<WalletSettings />} />
+              <Route path="backup" element={<BackupWalletPage />} />
             </Route>
           </Route>
           <Route path="/welcome" Component={WelcomePage} />

@@ -10,11 +10,12 @@ interface SliderProps {
   min: number
   max: number
   price: number
+  currency: string,
   className?: string,
   onValueChange: (amount: number) => void
 }
 
-export const Slider: React.FC<SliderProps> = ({ value, min, max, price, onValueChange, className, ...props }) => {
+export const Slider: React.FC<SliderProps> = ({ value, min, max, price, currency, onValueChange, className, ...props }) => {
   return (
     <div className='flex flex-col items-center gap-5 mt-5'>
       <div className="flex flex-col gap-2">
@@ -26,7 +27,7 @@ export const Slider: React.FC<SliderProps> = ({ value, min, max, price, onValueC
             value={value} 
             onChange={(e) => onValueChange(parseFloat(e.target.value)) }
             inputMode="decimal" />
-          <span className="">USD</span>
+          <span className="">{currency.toUpperCase()}</span>
         </div>
         <p className='text-xs text-gray-400 text-center'>{formatBtcAmount(value / price)} BTC</p>
       </div>
@@ -63,8 +64,8 @@ export const Slider: React.FC<SliderProps> = ({ value, min, max, price, onValueC
         />
       </SliderPrimitive.Root>
       <div className="flex w-full justify-between">
-        <span className="text-xs text-gray-400">{formatFiatAmount(min)} USD</span>
-        <span className="text-xs text-gray-400">{formatFiatAmount(max)} USD</span>
+        <span className="text-xs text-gray-400">{formatFiatAmount(min)} {currency.toUpperCase()}</span>
+        <span className="text-xs text-gray-400">{formatFiatAmount(max)} {currency.toUpperCase()}</span>
       </div>
     </div>
   )

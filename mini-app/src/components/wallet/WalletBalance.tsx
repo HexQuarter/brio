@@ -1,16 +1,30 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import { useTranslation } from 'react-i18next';
 import { BsCurrencyBitcoin } from "react-icons/bs";
 import { FiEye, FiSettings } from 'react-icons/fi';
-import { PiCurrencyDollarBold } from "react-icons/pi";
+import { PiCurrencyDollarBold, PiCurrencyEurBold } from "react-icons/pi";
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface WalletBalanceProps {
     btcBalance: number
-    fiatBalance: number
+    fiatBalance: number,
+    currency: string
 }
 
-export const WalletBalance: React.FC<WalletBalanceProps> = ({ btcBalance, fiatBalance }) => {
+export const WalletBalance: React.FC<WalletBalanceProps> = ({ btcBalance, fiatBalance, currency }) => {
     const { t } = useTranslation();
+   const location = useLocation()
+    
+    const navigate = useNavigate()
+    const [hideSettings, setHideSettings] = useState(false)
+
+    useEffect(() => {
+      if (location.pathname == '/wallet/settings') {
+         setHideSettings(true)
+      } else {
+         setHideSettings(false)
+      }
+    }, [location])
 
     const [visibleBalance, setVisibleBalance] = useState(true)
     return (
@@ -19,12 +33,13 @@ export const WalletBalance: React.FC<WalletBalanceProps> = ({ btcBalance, fiatBa
                <p className='text-gray-400'>{t('wallet.totalBalance')}</p>
                <div className='flex gap-4 items-center'>
                   <FiEye className='text-gray-400' onClick={() => setVisibleBalance(!visibleBalance)}/>
-                  <FiSettings className='text-gray-400' />
+                  {!hideSettings && <FiSettings className='text-gray-400' onClick={() => navigate('/wallet/settings')}/>}
                </div>
             </div>
            <div className='flex gap-5'>
                <div className="flex gap-2 items-center">
-                  <PiCurrencyDollarBold className='text-primary text-3xl'/>
+                  { currency == 'usd' && <PiCurrencyDollarBold className='text-primary text-3xl'/>}
+                  { currency == 'eur' && <PiCurrencyEurBold className='text-primary text-3xl'/>}
                   <span className="text-3xl font-medium">
                      {visibleBalance ? new Intl.NumberFormat("en", {maximumFractionDigits: 4}).format(fiatBalance) : '****'}
                   </span>

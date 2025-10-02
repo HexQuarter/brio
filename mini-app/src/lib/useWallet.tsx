@@ -16,11 +16,14 @@ export type WalletContextType = {
     walletExists: boolean;
     promptForPassword: boolean;
     initWallet: (mnemonic: string) => Promise<BindingLiquidSdk | null>
+    decryptWallet: (password: string) => Promise<string | null>
     storeWallet: (password: string) => Promise<void>
     breezSdk: BindingLiquidSdk | undefined;
     getBolt12Offer: (breezSdk: BindingLiquidSdk) => Promise<string | null>
     getBtcAddress: (breezSdk: BindingLiquidSdk) => Promise<string | null>,
-    getLimits: (breezSdk: BindingLiquidSdk) => Promise<Limits>
+    getLimits: (breezSdk: BindingLiquidSdk) => Promise<Limits>,
+    currency: string,
+    changeCurrency: (currency: string) => void
 };
 
 type Limit = {
@@ -39,6 +42,7 @@ const WALLET_KEY = 'wallet_cipher'
 const WALLET_UNLOCK_LAST_DATE = 'wallet_unlock_last_date'
 const WALLET_BOLT12_OFFER = 'wallet_bolt12_offer'
 const WALLET_BTC_ADDRESS = 'wallet_btc_address'
+const WALLET_CURRENCY = 'wallet_currency'
 
 const SESSION_MNEMONIC_KEY = 'wallet_session_mnemonic'
 const SESSION_BTC_LIMITS = 'btc_limits'
@@ -60,6 +64,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     const [btcAddress, setBtcAddress] = useState<string | null>(null)
     const [bitcoinLimits, setBitcoinLimits] = useState<Limit | null>(null)
     const [lightningLimits, setLightningLimits] = useState<Limit | null>(null)
+    const [currency, setCurrency] = useState(localStorage.getItem(WALLET_CURRENCY) || 'usd')
 
     // Ref to prevent duplicate SDK init
     const sdkInitRef = useRef(false);
@@ -112,6 +117,11 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         }, 1_000)
     }, [])
 
+    const changeCurrency = (value: string) => {
+        localStorage.setItem(WALLET_CURRENCY, value)
+        setCurrency(value)
+    }
+
     const loadSdk = async (mnemonic: string) => {
         // If already initialized, just return the existing SDK
         if (sdkInitRef.current) return null;
@@ -136,9 +146,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     }
 
     const initWallet = async (password: string) => {
-        const cipher = localStorage.getItem(WALLET_KEY)
-        if (!cipher) return null;
-        const result = await decrypt(cipher, password)
+        const result = await decryptWallet(password)
         if (result) {
             setPromptForPassword(false)
             localStorage.setItem(WALLET_UNLOCK_LAST_DATE, Date.now().toString())
@@ -147,6 +155,12 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
             return await loadSdk(result)
         }
         return null
+    }
+
+    const decryptWallet = async (password: string) => {
+        const cipher = localStorage.getItem(WALLET_KEY)
+        if (!cipher) return null;
+        return await decrypt(cipher, password)
     }
 
     const storePreloadedLimits = async (breezSdk: BindingLiquidSdk) => {
@@ -250,9 +264,12 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     return (
         <WalletContext.Provider
             value={{
+                currency,
+                changeCurrency,
                 walletExists,
                 promptForPassword,
                 initWallet,
+                decryptWallet,
                 storeWallet,
                 breezSdk,
                 getBolt12Offer,

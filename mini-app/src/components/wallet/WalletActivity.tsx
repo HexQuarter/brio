@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 
 export const WalletActivity : React.FC = () => {
 
-    const { breezSdk} = useWallet()
+    const { breezSdk, currency} = useWallet()
     const navigate = useNavigate()
 
     const [payments, setPayments] = useState<any[]>([])
@@ -18,8 +18,7 @@ export const WalletActivity : React.FC = () => {
             console.log(breezSdk)
             if (breezSdk) {
                 const fiatRates = await breezSdk.fetchFiatRates()
-                // TODO: select the currency from the settings
-                const rate = fiatRates.find(r => r.coin == 'USD')
+                const rate = fiatRates.find(r => r.coin.toLowerCase() == currency.toLocaleLowerCase())
                 if (rate) {
                     const price = rate.value
                     const payments = await breezSdk.listPayments({})
@@ -64,7 +63,7 @@ export const WalletActivity : React.FC = () => {
                                 <div className='flex flex-col'>
                                     <span>{payment.amount} BTC</span>
                                     <div className='flex text-left text-xs text-gray-400'>
-                                        <span>{payment.fiatAmount} USD - {timeAgo(payment.timestamp * 1000)}</span>
+                                        <span>{payment.fiatAmount} {currency} - {timeAgo(payment.timestamp * 1000)}</span>
                                     </div>
                                     <div className=''>
                                         {payment.status == 'pending' &&

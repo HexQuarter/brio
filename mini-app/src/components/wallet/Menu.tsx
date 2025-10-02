@@ -40,7 +40,7 @@ export const WalletMenu: React.FC = () => {
         }))
 
         setMenuItems(updatedMenuItems)
-    }, [])
+    }, [location])
 
     function handleMenuItemClicked(index: number) {
         let { path } = menuItems[index]

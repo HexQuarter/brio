@@ -11,10 +11,11 @@ interface Props {
     min: number
     max: number
     price: number
+    currency: string
     onSend: (address: string, amount: number) => void
 }
 
-export const BitcoinSendForm: React.FC<Props> = ({ min, max, price, onSend}) => {
+export const BitcoinSendForm: React.FC<Props> = ({ min, max, price, currency, onSend}) => {
     const [address, setAddress] = useState("")
     const [amount, setAmount] = useState(0)
     const [btcAmount, setBtcAmount] = useState(0)
@@ -83,7 +84,7 @@ export const BitcoinSendForm: React.FC<Props> = ({ min, max, price, onSend}) => 
                 <div>
                     <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')}</Label>
                     {!loading && 
-                        <Slider min={min} max={max} onValueChange={handleChangeAmount} value={amount} price={price} />
+                        <Slider min={min} max={max} onValueChange={handleChangeAmount} value={amount} price={price} currency={currency}/>
                     }
                 </div>
             }
