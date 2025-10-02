@@ -2,7 +2,7 @@ import { t } from "i18next"
 import { IconType } from "react-icons";
 import { GoDownload, GoHistory, GoUpload } from "react-icons/go"
 import { useLocation, useNavigate } from "react-router-dom"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 export const WalletMenu: React.FC = () => {
     const navigate = useNavigate()
@@ -31,10 +31,16 @@ export const WalletMenu: React.FC = () => {
             icon: GoHistory,
             path: '/wallet/activity',
         }
-    ].map(item => ({
-        ...item,
-        selected: location.pathname === item.path
-    })))
+    ])
+
+    useEffect(() => {
+        const updatedMenuItems = menuItems.map(item => ({
+            ...item,
+            selected: location.pathname === item.path
+        }))
+
+        setMenuItems(updatedMenuItems)
+    }, [])
 
     function handleMenuItemClicked(index: number) {
         let { path } = menuItems[index]
