@@ -5,7 +5,9 @@ import init, {
     BindingLiquidSdk,
     connect,
     defaultConfig,
+    setLogger,
     SdkEvent,
+    LogEntry,
 } from '@breeztech/breez-sdk-liquid/web'
 import { convertSatsToBtc } from '@/helpers/number';
 
@@ -255,9 +257,15 @@ class JsEventListener {
   }
 }
 
+class JsLogger {
+  log = (l: LogEntry) => {
+    console.log(`[${l.level}]: ${l.line}`)
+  }
+}
+
 const initBreezSdk = async (mnemonic: string) => {
     await init()
-    // setLogger(new JsLogger())
+    setLogger(new JsLogger())
 
     const breezApiKey = import.meta.env.VITE_BREEZ_API_KEY
     let config = defaultConfig('mainnet', breezApiKey)
