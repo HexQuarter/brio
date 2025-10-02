@@ -51,7 +51,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     const [walletExists, setWalletExists] = useState(!!localStorage.getItem(WALLET_KEY));
     const [promptForPassword, setPromptForPassword] = useState(
         walletExists && (
-            !localStorage.getItem(SESSION_MNEMONIC_KEY) || requireUnlock()
+            !sessionStorage.getItem(SESSION_MNEMONIC_KEY) || requireUnlock()
         )
     );
     const [breezSdk, setBreezSdk] = useState<BindingLiquidSdk | undefined>(undefined);
@@ -62,12 +62,12 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
 
     useEffect(() => {
         const checkWallet = () => {
-            if(!walletExists) {
-                setWalletExists(true)
-            }
-            else {
+            if(!localStorage.getItem(WALLET_KEY)) {
                 setWalletExists(false)
-             }
+            }
+            if (!sessionStorage.getItem(SESSION_MNEMONIC_KEY)) {
+                setPromptForPassword(true)
+            }
         }
 
         // Listen for other tabs / external changes
