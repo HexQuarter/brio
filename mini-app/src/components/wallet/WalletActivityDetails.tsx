@@ -64,9 +64,10 @@ export const WalletActivityDetails : React.FC = () => {
                         }
                         <div className='flex justify-between'>
                             <span className='text-gray-400'>Fees</span>
-                            <span>
-                                {formatFiatAmount(price*convertSatsToBtc(payment.feesSat))} USD - 
-                                {formatBtcAmount(convertSatsToBtc(payment.feesSat))} BTC</span>
+                            <span className='items-center'>
+                                {formatBtcAmount(convertSatsToBtc(payment.feesSat))} BTC 
+                                <span className='text-xs'> / {formatFiatAmount(price*convertSatsToBtc(payment.feesSat))} USD</span>
+                            </span>
                         </div>
                         <div className='flex justify-between'>
                             <span className='text-gray-400'>Date</span>
@@ -74,7 +75,7 @@ export const WalletActivityDetails : React.FC = () => {
                         </div>
                          <div className='flex justify-between'>
                             <span className='text-gray-400'>Amount</span>
-                            <div className={`flex flex-col gap-1 text-${payment.paymentType == 'send' ? 'red' : 'green'}-600`}>
+                            <div className={`flex flex-col gap-1 text-${payment.paymentType == 'send' ? 'red' : 'green'}-800`}>
                                 <span>{payment.paymentType == 'send' ? '-' : '+'}{formatBtcAmount(convertSatsToBtc(payment.feesSat))} BTC</span>
                                 <span>{payment.paymentType == 'send' ? '-' : '+'}{formatFiatAmount(price*convertSatsToBtc(payment.feesSat))} USD</span>
                             </div>

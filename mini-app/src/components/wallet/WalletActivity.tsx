@@ -1,5 +1,5 @@
 // import { t } from 'i18next';
-import { convertSatsToBtc, formatBtcAmount, formatFiatAmount } from '@/helpers/number';
+import { convertSatsToBtc, formatBtcAmount, formatFiatAmount, timeAgo } from '@/helpers/number';
 import { useWallet } from '@/lib/useWallet';
 import { Payment } from '@breeztech/breez-sdk-liquid/web';
 import { InfoIcon } from 'lucide-react';
@@ -15,6 +15,7 @@ export const WalletActivity : React.FC = () => {
 
     useEffect(() => {
         const loadingPayments = async () => {
+            console.log(breezSdk)
             if (breezSdk) {
                 const fiatRates = await breezSdk.fetchFiatRates()
                 // TODO: select the currency from the settings
@@ -26,11 +27,12 @@ export const WalletActivity : React.FC = () => {
                         const rawBtcAmount = convertSatsToBtc(payment.amountSat)
                         return {
                             type: payment.paymentType,
+                            status: payment.status,
                             amount: formatBtcAmount(rawBtcAmount),
                             fiatAmount: formatFiatAmount(rawBtcAmount * price),
-                            status: payment.status,
                             txid: payment.txId,
-                            hash: ((payment.details) as any).paymentHash
+                            hash: ((payment.details) as any).paymentHash,
+                            timestamp: payment.timestamp
                         }
                     }))
                 }
@@ -48,20 +50,31 @@ export const WalletActivity : React.FC = () => {
     }, [breezSdk])
 
     return (
-        <div className="flex flex-col gap-10 text-center w-full h-full  bg-white p-5 rounded-sm">
-            <h3 className="text-2xl font-medium">WalletActivity</h3>
-
-            <div className='flex flex-col gap-5 h-full '>
+        <div className="flex flex-col gap-5 text-center w-full h-full rounded-sm">
+            <h3 className="text-2xl font-medium">Wallet Activity</h3>
+            <div className='flex flex-col p-2 gap-2'>
                 {payments.map((payment: any) => (
-                    <div className='flex items-center justify-between gap-5 text-left bg-gray-100 p-2 rounded-sm' key={payment.txid}>
-                        <div className='flex gap-5'>
-                            <span>
-                                { payment.type == 'receive' && 'Received'}
-                                { payment.type == 'send' && 'Sent'}
-                            </span>
-                            <span>{payment.amount} BTC</span>
+                    <div className='border-b-1 border-gray-100 flex flex-col p-3 bg-white rounded-sm shadow-xs' key={payment.hash}>
+                        <div className='flex items-center justify-between text-left' key={payment.txid}>
+                            <div className={`flex gap-2 text-${payment.type == 'send' ? 'red' : 'green'}-800`}>
+                                <span>
+                                    { payment.type == 'receive' && 'Received'}
+                                    { payment.type == 'send' && 'Sent'}
+                                </span>
+                                <div className='flex flex-col'>
+                                    <span>{payment.amount} BTC</span>
+                                    <div className='flex text-left text-xs text-gray-400'>
+                                        <span>{payment.fiatAmount} USD - {timeAgo(payment.timestamp * 1000)}</span>
+                                    </div>
+                                    <div className=''>
+                                        {payment.status == 'pending' &&
+                                            <span className='text-xs text-orange-300'>Pending</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <InfoIcon className='text-gray-400' onClick={() => navigate(`${payment.hash}`)}/>
                         </div>
-                        <InfoIcon className='text-gray-400' onClick={() => navigate(`${payment.hash}`)}/>
                     </div>
                 ))}
             </div>
