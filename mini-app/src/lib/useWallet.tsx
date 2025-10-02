@@ -10,6 +10,7 @@ import init, {
     LogEntry,
 } from '@breeztech/breez-sdk-liquid/web'
 import { convertSatsToBtc } from '@/helpers/number';
+import { webHookUrl } from './api';
 
 export type WalletContextType = {
     walletExists: boolean;
@@ -119,6 +120,9 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         if (!sdk) {
             sdkInitRef.current = true;
             sdk = await initBreezSdk(mnemonic)
+            if (!import.meta.env.DEV) {
+                await sdk.registerWebhook(webHookUrl())
+            }
             setBreezSdk(sdk)
         }
 

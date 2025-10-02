@@ -13,6 +13,7 @@ import { WelcomeWallet } from './wallet/Welcome';
 import { WalletReceive } from './wallet/WalletReceive';
 import { WalletSend } from './wallet/WalletSend';
 import { WalletActivity } from './wallet/WalletActivity';
+import { WalletActivityDetails } from './wallet/WalletActivityDetails';
 
 function AppRoute({ children } : PropsWithChildren<{}>) {
   const wallet = useWallet()
@@ -39,6 +40,7 @@ export function App() {
               <Route path="receive" element={<WalletReceive />} />
               <Route path="send" element={<WalletSend />} />
               <Route path="activity" element={<WalletActivity />} />
+              <Route path="activity/:txid" element={<WalletActivityDetails />} />
             </Route>
           </Route>
           <Route path="/welcome" Component={WelcomePage} />

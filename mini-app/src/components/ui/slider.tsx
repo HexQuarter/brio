@@ -28,7 +28,7 @@ export const Slider: React.FC<SliderProps> = ({ value, min, max, price, onValueC
             inputMode="decimal" />
           <span className="">USD</span>
         </div>
-        <p className='text-xs text-gray-400 text-center'>{formatBtcAmount(value , price)} BTC</p>
+        <p className='text-xs text-gray-400 text-center'>{formatBtcAmount(value / price)} BTC</p>
       </div>
       <SliderPrimitive.Root
         data-slot="slider"

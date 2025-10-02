@@ -18,7 +18,6 @@ export const WalletMainPage = () => {
 
         const loadBalance = async (breezSdk: BindingLiquidSdk) => {
             const walletInfo = await breezSdk.getInfo()
-            console.log(walletInfo)
             const btc = convertSatsToBtc(walletInfo.walletInfo.balanceSat)
             setBtcBalance(btc)
 

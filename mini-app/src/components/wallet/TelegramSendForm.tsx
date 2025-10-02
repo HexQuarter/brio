@@ -35,9 +35,7 @@ export const TelegramSendForm: React.FC<Props> = ({ min, max, price, onSend, sen
     }, [price, max, min])
 
     useEffect(() => {
-        if (price) {
-            setBtcAmount(parseFloat(formatBtcAmount(amount, price) as string))
-        }   
+        setBtcAmount(parseFloat(formatBtcAmount(amount / amount) as string))
     }, [amount])
 
     useEffect(() => {
