@@ -24,6 +24,10 @@ const app = express()
 
 app.post('/rpc', rpcHandler)
 
+app.post('/webhook', (req, res) => {
+    console.log('webhook', req.body)
+})
+
 app.get('/', (req, res) => res.send('ok'))
 
 const prod = process.env['PROD'] || true

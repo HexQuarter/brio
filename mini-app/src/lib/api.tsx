@@ -1,7 +1,7 @@
 import { buf2hex } from "@/helpers/crypto"
 
-function rpcEndpoint() {
-    return import.meta.env.DEV ? 'http://localhost:3000/rpc' : 'https://dev.backend.brio.hexquarter.com/rpc'
+export const rpcEndpoint = () => {
+    return import.meta.env.DEV ? 'http://localhost:3000' : 'https://dev.backend.brio.hexquarter.com'
 }
 
 type RegisterParams = {
@@ -12,11 +12,12 @@ type RegisterParams = {
     tgInitData: string
 }
 
+export const webHookUrl = () => {
+    return new URL("/webhook", rpcEndpoint()).toString()
+}
+
 export const registerUser = async (params: RegisterParams) => {
-
-    console.log(params)
-
-    return await fetch(rpcEndpoint(), {
+    return await fetch(new URL("/rpc", rpcEndpoint()), {
         method: 'POST',
         headers: {
             "Content-Type": "application/json",
@@ -37,7 +38,7 @@ export const registerUser = async (params: RegisterParams) => {
 
 export const fetchUserInfo = async (handle: string) => {
     const digest = await crypto.subtle.digest("sha-256", new TextEncoder().encode(handle))
-    return await fetch(rpcEndpoint(), {
+    return await fetch(new URL("/rpc", rpcEndpoint()), {
         method: 'POST',
         headers: {
             "Content-Type": "application/json",

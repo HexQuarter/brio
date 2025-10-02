@@ -11,7 +11,7 @@ import { useNavigate } from "react-router";
 import { retrieveRawInitData } from "@telegram-apps/sdk-react";
 import { Progress } from "@/components/ui/progress";
 
-import { registerUser } from "@/lib/api";
+import { registerUser, webHookUrl } from "@/lib/api";
 import { buf2hex, generateChildKey, generateTapRootAddress } from "@/helpers/crypto";
 
 export function SecureWalletPage() {
@@ -78,6 +78,10 @@ export function SecureWalletPage() {
         await new Promise(r => setTimeout(r, 2000));
 
         if (response.status == 201) {
+            if (!import.meta.env.DEV) {
+                await sdk.registerWebhook(webHookUrl())
+            }
+
             setProgressValue(100)
             setProgressLabel(t('walletSecure.progress100'))
             return
