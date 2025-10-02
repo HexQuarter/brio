@@ -4,18 +4,18 @@ import { useWallet } from '@/lib/useWallet';
 import { Payment } from '@breeztech/breez-sdk-liquid/web';
 import { InfoIcon } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 export const WalletActivity : React.FC = () => {
-
+    const { t } = useTranslation()
     const { breezSdk, currency} = useWallet()
     const navigate = useNavigate()
-
+    const [loading, setLoading] = useState(true)
     const [payments, setPayments] = useState<any[]>([])
 
     useEffect(() => {
         const loadingPayments = async () => {
-            console.log(breezSdk)
             if (breezSdk) {
                 const fiatRates = await breezSdk.fetchFiatRates()
                 const rate = fiatRates.find(r => r.coin.toLowerCase() == currency.toLocaleLowerCase())
@@ -34,6 +34,7 @@ export const WalletActivity : React.FC = () => {
                             timestamp: payment.timestamp
                         }
                     }))
+                    setLoading(false)
                 }
             }
         }
@@ -42,7 +43,7 @@ export const WalletActivity : React.FC = () => {
 
         const interval = setInterval(() => {
             loadingPayments()
-        }, 1000);
+        }, 5000);
         
         return () => clearInterval(interval);
 
@@ -50,9 +51,10 @@ export const WalletActivity : React.FC = () => {
 
     return (
         <div className="flex flex-col gap-5 text-center w-full h-full rounded-sm">
-            <h3 className="text-2xl font-medium">Wallet Activity</h3>
+            <h3 className="text-2xl font-medium">{t('walletActivity.title')}</h3>
             <div className='flex flex-col p-2 gap-2'>
-                {payments.map((payment: any) => (
+                {loading && <p>{t('walletActivity.loading')}</p>}
+                {!loading && payments.map((payment: any) => (
                     <div className='border-b-1 border-gray-100 flex flex-col p-3 bg-white rounded-sm shadow-xs' key={payment.hash}>
                         <div className='flex items-center justify-between text-left' key={payment.txid}>
                             <div className={`flex gap-2 text-${payment.type == 'send' ? 'red' : 'green'}-800`}>
@@ -67,7 +69,7 @@ export const WalletActivity : React.FC = () => {
                                     </div>
                                     <div className=''>
                                         {payment.status == 'pending' &&
-                                            <span className='text-xs text-orange-300'>Pending</span>
+                                            <span className='text-xs text-orange-300'>{t('walletActivity.pending')}</span>
                                         }
                                     </div>
                                 </div>

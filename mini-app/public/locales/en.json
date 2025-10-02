@@ -91,5 +91,23 @@
     "walletBackup.subtitle": "Write this down or store it safely.",
     "walletBackup.warning": "Do not share it. No one can help if you lose this.",
     "walletBackup.nextButton": "Copied. Back to the wallet",
-    "walletBackup.copyToast": "Your passphrase have been copied into the clipboard"
+    "walletBackup.copyToast": "Your passphrase have been copied into the clipboard",
+
+    "walletActivity.title": "Wallet activities",
+    "walletActivity.pending": "Pending",
+    "walletActivity.loading": "Loading...",
+    "walletActivity.spendBtcTitle": "You spent Bitcoin",
+    "walletActivity.receiveBtcTitle": "You spent Bitcoin",
+    "walletActivity.destination": "To",
+    "walletActivity.fees": "Fees",
+    "walletActivity.date": "Date",
+    "walletActivity.amount": "Amount",
+    "walletActivity.status.pending": "Pending",
+    "walletActivity.status.complete": "Confirmed",
+    "walletActivity.status.failed": "Failed",
+    "walletActivity.status.created": "Created",
+    "walletActivity.status.timedOut": "Timed-out",
+    "walletActivity.status.refundable": "Refundable",
+    "walletActivity.status.refundPending": "Refund pending",
+    "walletActivity.status.waitingFeeAcceptance": "Waiting fee acceptance"
 }
