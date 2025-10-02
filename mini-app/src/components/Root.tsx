@@ -1,6 +1,7 @@
 import { App } from '@/components/App.tsx';
 import { ErrorBoundary } from '@/components/ErrorBoundary.tsx';
 import { WalletProvider } from '@/lib/useWallet';
+import { Toaster } from '@/components/ui/sonner';
 
 function ErrorBoundaryError({ error }: { error: unknown }) {
   return (
@@ -24,6 +25,7 @@ export function Root() {
     <ErrorBoundary fallback={ErrorBoundaryError}>
       <WalletProvider>
         <App />
+        <Toaster />
       </WalletProvider>
     </ErrorBoundary>
   );

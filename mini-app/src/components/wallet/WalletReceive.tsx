@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsContent, TabsTrigger } from '@/components/ui/tabs';
 import { LuShare2, LuCopy } from "react-icons/lu";
 import QRCode from "react-qr-code";
 import { useWallet } from '@/lib/useWallet';
+import { toast } from "sonner"
 
 const shorten = (data: string) => {
     return `${data.slice(0, 6)}...${data.slice(data.length-6, data.length)}`
@@ -35,8 +36,9 @@ export const WalletReceive : React.FC = () => {
     }, [breezSdk])
 
 const copyLightningInvoice = async () => {
-        // TODO: show toast when invoice is copied
         bolt12Offer && await navigator.clipboard.writeText(bolt12Offer)
+        const toastId = toast.info(t('wallet.receive.copyLnToast'))
+        setTimeout(() => toast.dismiss(toastId), 2000)
     }
 
     const shareLightningInvoice = async () => {
@@ -44,8 +46,9 @@ const copyLightningInvoice = async () => {
     }
 
     const copyBitcoinAddress = async () => {
-        // TODO: show toast when invoice is copied
         btcAddress && await navigator.clipboard.writeText(btcAddress)
+        const toastId = toast.info(t('wallet.receive.copyBtcToast'))
+        setTimeout(() => toast.dismiss(toastId), 2000)
     }
 
     const shareBitcoinAddress = async () => {
@@ -72,7 +75,7 @@ const copyLightningInvoice = async () => {
                                         <LuShare2 className='w-5 h-5' />
                                     </div>
                                 }
-                                <div className='border p-3 rounded-full text-gray-500' onClick={() => copyLightningInvoice()}>
+                                <div className='border p-3 rounded-full text-gray-500 active:text-white active:bg-primary' onClick={() => copyLightningInvoice()}>
                                     <LuCopy className='w-5 h-5' />
                                 </div>
                             </div>
