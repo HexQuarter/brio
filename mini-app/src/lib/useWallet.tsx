@@ -49,7 +49,11 @@ const LIMITS_REFRESH_SPAN_MS = 5 * 60 * 1000 // 5 minutes
 
 export const WalletProvider = ({children}: {children: ReactNode}) => {    
     const [walletExists, setWalletExists] = useState(!!localStorage.getItem(WALLET_KEY));
-    const [promptForPassword, setPromptForPassword] = useState(walletExists && requireUnlock());
+    const [promptForPassword, setPromptForPassword] = useState(
+        walletExists && (
+            !localStorage.getItem(SESSION_MNEMONIC_KEY) || requireUnlock()
+        )
+    );
     const [breezSdk, setBreezSdk] = useState<BindingLiquidSdk | undefined>(undefined);
     const [bolt12Offer, setBolt12Offer] = useState<string | null>(null)
     const [btcAddress, setBtcAddress] = useState<string | null>(null)
@@ -108,7 +112,6 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         let sdk = breezSdk
         if (!sdk) {
             sdk = await initBreezSdk(mnemonic)
-            setBreezSdk(sdk)
         }
 
         await getBolt12Offer(sdk)
@@ -118,6 +121,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
             await storePreloadedLimits(sdk)
         }
 
+        setBreezSdk(sdk)
         return sdk
     }
 
