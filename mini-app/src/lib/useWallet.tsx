@@ -23,7 +23,8 @@ export type WalletContextType = {
     getBtcAddress: (breezSdk: BindingLiquidSdk) => Promise<string | null>,
     getLimits: (breezSdk: BindingLiquidSdk) => Promise<Limits>,
     currency: string,
-    changeCurrency: (currency: string) => void
+    changeCurrency: (currency: string) => void,
+    resetWallet: () => void
 };
 
 type Limit = {
@@ -116,6 +117,21 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
             }
         }, 1_000)
     }, [])
+
+    const resetWallet = () => {
+        localStorage.removeItem(WALLET_KEY)
+        localStorage.removeItem(WALLET_UNLOCK_LAST_DATE )
+        localStorage.removeItem(WALLET_BOLT12_OFFER)
+        localStorage.removeItem(WALLET_BTC_ADDRESS)
+        localStorage.removeItem(WALLET_CURRENCY)
+
+        sessionStorage.removeItem(SESSION_MNEMONIC_KEY)
+        sessionStorage.removeItem(SESSION_BTC_LIMITS)
+        sessionStorage.removeItem(SESSION_LIGHTNING_LIMITS)
+        sessionStorage.removeItem(SESSION_LIMITS_LAST_DATE)
+
+        setWalletExists(false)
+    }
 
     const changeCurrency = (value: string) => {
         localStorage.setItem(WALLET_CURRENCY, value)
@@ -264,6 +280,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     return (
         <WalletContext.Provider
             value={{
+                resetWallet,
                 currency,
                 changeCurrency,
                 walletExists,

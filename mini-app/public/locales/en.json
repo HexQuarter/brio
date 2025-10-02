@@ -81,6 +81,11 @@
     "wallet.settings": "Settings",
     "wallet.settings.currency": "Currency",
     "wallet.settings.backup": "Backup wallet",
+    "wallet.settings.reset": "Reset your wallet",
+    "wallet.settings.resetWarning": "This action cannot be undone. This will permanently delete the wallet from the app. Please make sure your backup your wallet, otherwise the funds will be lost.",
+    "wallet.settings.resetQuestion": "Are you sure ?",
+    "wallet.settings.resetCancel": "Cancel",
+    "wallet.settings.resetConfirmation": "Confirm",
 
     "walletBackup.title": "Backup Your Wallet",
     "walletBackup.subtitle": "Write this down or store it safely.",
