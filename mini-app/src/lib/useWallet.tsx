@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 
 import init, {
     BindingLiquidSdk,
@@ -60,6 +60,9 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     const [bitcoinLimits, setBitcoinLimits] = useState<Limit | null>(null)
     const [lightningLimits, setLightningLimits] = useState<Limit | null>(null)
 
+    // Ref to prevent duplicate SDK init
+    const sdkInitRef = useRef(false);
+
     useEffect(() => {
         const checkWallet = () => {
             if(!localStorage.getItem(WALLET_KEY)) {
@@ -109,9 +112,14 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     }, [])
 
     const loadSdk = async (mnemonic: string) => {
+        // If already initialized, just return the existing SDK
+        if (sdkInitRef.current) return null;
+
         let sdk = breezSdk
         if (!sdk) {
+            sdkInitRef.current = true;
             sdk = await initBreezSdk(mnemonic)
+            setBreezSdk(sdk)
         }
 
         await getBolt12Offer(sdk)
@@ -120,8 +128,6 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         if (!sessionStorage.getItem(SESSION_BTC_LIMITS) || !sessionStorage.getItem(SESSION_LIGHTNING_LIMITS) || requiredReloadLimits()) {
             await storePreloadedLimits(sdk)
         }
-
-        setBreezSdk(sdk)
         return sdk
     }
 
