@@ -70,8 +70,8 @@ export function SecureWalletPage() {
         const response = await registerUser({
             tapRootAddress: tapRootAddress, 
             publicKey: childPubkeyHex, 
-            breezBtcAddress: wallet.btcAddress as string, 
-            breezBolt12Offer: wallet.bolt12Offer as string, 
+            breezBtcAddress: await wallet.getBtcAddress(sdk) as string, 
+            breezBolt12Offer: await wallet.getBolt12Offer(sdk) as string, 
             tgInitData: lp
         })
 

@@ -1,5 +1,5 @@
 import { t } from 'i18next';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Tabs, TabsList, TabsContent, TabsTrigger } from '@/components/ui/tabs';
 
 import { LuShare2, LuCopy } from "react-icons/lu";
@@ -11,9 +11,30 @@ const shorten = (data: string) => {
 }
 
 export const WalletReceive : React.FC = () => {
-    const { btcAddress, bolt12Offer } = useWallet()
+    const { getBtcAddress, getBolt12Offer, breezSdk } = useWallet()
 
-    const copyLightningInvoice = async () => {
+    const [btcAddress, setBtcAddress] = useState<string | undefined>(undefined)
+    const [bolt12Offer, setBolt12Offer] = useState<string | undefined>(undefined)
+
+    useEffect(() => {
+        if (!breezSdk) {
+            return
+        }
+        const loadOfferAndAddress = async () => {
+            const bolt12Offer = await getBolt12Offer(breezSdk)
+            if (bolt12Offer) {
+                setBolt12Offer(bolt12Offer)
+            }
+
+            const btcAddress = await getBtcAddress(breezSdk)
+            if (btcAddress) {
+                setBtcAddress(btcAddress)
+            }
+        }
+        loadOfferAndAddress()
+    }, [breezSdk])
+
+const copyLightningInvoice = async () => {
         // TODO: show toast when invoice is copied
         bolt12Offer && await navigator.clipboard.writeText(bolt12Offer)
     }

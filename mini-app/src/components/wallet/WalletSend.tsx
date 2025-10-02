@@ -10,22 +10,27 @@ import { convertBtcToSats } from '@/helpers/number';
 
 export const WalletSend : React.FC = () => {
 
-    const { bitcoinLimits, lightningLimits, breezSdk } = useWallet()
+    const { getLimits, breezSdk } = useWallet()
     const [price, setPrice] = useState(0)
     
-    const [minBitcoin, setMinBitcoin] = useState(bitcoinLimits.min)
-    const [maxBitcoin, setMaxBitcoin] = useState(bitcoinLimits.max)
-    const [minLightning, setMinLightning] = useState(lightningLimits.min)
-    const [maxLightning, setMaxLigthning] = useState(lightningLimits.max)
+    const [minBitcoin, setMinBitcoin] = useState(0)
+    const [maxBitcoin, setMaxBitcoin] = useState(0)
+    const [minLightning, setMinLightning] = useState(0)
+    const [maxLightning, setMaxLigthning] = useState(0)
     const [sendLightningError, setSendLightningError] = useState<string|null>(null)
 
     useEffect(() => {
         const loadPrices = async () => {
-            const fiatRates = await breezSdk?.fetchFiatRates()
+            if (!breezSdk) {
+                return
+            }
+
+            const fiatRates = await breezSdk.fetchFiatRates()
             if (fiatRates) {
                 // TODO: select the currency from the settings
                 const rate = fiatRates.find(r => r.coin == 'USD')
                 if (rate) {
+                    const { bitcoin: bitcoinLimits, lightning: lightningLimits} = await getLimits(breezSdk)
                     const btcPrice = rate.value
                     setPrice(btcPrice)
                     if (bitcoinLimits) {
@@ -41,7 +46,7 @@ export const WalletSend : React.FC = () => {
         }
 
         loadPrices()
-    }, [])
+    }, [breezSdk])
 
     const handleBtcSend = async (_address: string, _amount: number) => {
     }
