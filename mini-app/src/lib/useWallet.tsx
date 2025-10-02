@@ -148,9 +148,10 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
             sdkInitRef.current = true;
             sdk = await initBreezSdk(mnemonic)
             if (!import.meta.env.DEV) {
-                const params = await retrieveLaunchParams()
+                const params = retrieveLaunchParams()
                 const userId = params.tgWebAppData?.user?.id
                 if (userId) {
+                    await sdk.unregisterWebhook()
                     await sdk.registerWebhook(webHookUrl(userId))
                 }
             }
