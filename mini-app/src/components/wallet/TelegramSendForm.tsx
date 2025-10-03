@@ -8,6 +8,7 @@ import { Slider } from "@/components/ui/slider"
 import { formatBtcAmount } from "@/helpers/number"
 import { fetchUserInfo } from "@/lib/api"
 import { toast } from "sonner"
+import { Spinner } from "@telegram-apps/telegram-ui"
 
 interface Props {
     min: number
@@ -99,7 +100,7 @@ export const TelegramSendForm: React.FC<Props> = ({ min, max, price, onSend, sen
             </div> */}
 
             <div>
-                <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')} {loading && <Loading />}</Label>
+                <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')} {loading && <Spinner size='s'/>}</Label>
                 {!loading && 
                     <Slider min={min} max={max} onValueChange={handleChangeAmount} value={amount} price={price} currency={currency}/>
                 }
@@ -116,8 +117,4 @@ export const TelegramSendForm: React.FC<Props> = ({ min, max, price, onSend, sen
             }
         </div>
     )
-}
-
-function Loading() {
-  return <span className="text-xs">(loading...)</span>;
 }

@@ -95,7 +95,6 @@
 
     "walletActivity.title": "Wallet activities",
     "walletActivity.pending": "Pending",
-    "walletActivity.loading": "Loading...",
     "walletActivity.spendBtcTitle": "You spent Bitcoin",
     "walletActivity.receiveBtcTitle": "You spent Bitcoin",
     "walletActivity.destination": "To",

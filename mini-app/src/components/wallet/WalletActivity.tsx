@@ -2,6 +2,7 @@
 import { convertSatsToBtc, formatBtcAmount, formatFiatAmount, timeAgo } from '@/helpers/number';
 import { useWallet } from '@/lib/useWallet';
 import { Payment } from '@breeztech/breez-sdk-liquid/web';
+import { Spinner } from '@telegram-apps/telegram-ui';
 import { InfoIcon } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -53,7 +54,7 @@ export const WalletActivity : React.FC = () => {
         <div className="flex flex-col gap-5 text-center w-full h-full rounded-sm">
             <h3 className="text-2xl font-medium">{t('walletActivity.title')}</h3>
             <div className='flex flex-col p-2 gap-2'>
-                {loading && <p>{t('walletActivity.loading')}</p>}
+                {loading && <Spinner size='s'/>}
                 {!loading && payments.map((payment: any) => (
                     <div className='border-b-1 border-gray-100 flex flex-col p-3 bg-white rounded-sm shadow-xs' key={payment.hash}>
                         <div className='flex items-center justify-between text-left' key={payment.txid}>

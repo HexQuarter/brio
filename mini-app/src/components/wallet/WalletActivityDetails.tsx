@@ -8,6 +8,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Spinner } from '@telegram-apps/telegram-ui';
 
 export const WalletActivityDetails : React.FC = () => {
     const {t} = useTranslation()
@@ -47,7 +48,7 @@ export const WalletActivityDetails : React.FC = () => {
                 <h3 className="text-2xl font-medium">Transfer info</h3>
             </div>
 
-            { loading && <p>{t('walletActivity.loading')}.</p>}
+            { loading && <Spinner size='s'/>}
             { !loading && payment &&
                 <div className='flex flex-col gap-5 h-full text-left bg-white p-5 rounded-sm'>
                     <div className='flex justify-between'>

@@ -12,7 +12,7 @@ interface WalletBalanceProps {
 }
 
 export const WalletBalance: React.FC<WalletBalanceProps> = ({ btcBalance, fiatBalance, currency }) => {
-    const { t } = useTranslation();
+   const { t } = useTranslation();
    const location = useLocation()
     
     const navigate = useNavigate()
@@ -40,14 +40,14 @@ export const WalletBalance: React.FC<WalletBalanceProps> = ({ btcBalance, fiatBa
                <div className="flex gap-2 items-center">
                   { currency == 'usd' && <PiCurrencyDollarBold className='text-primary text-3xl'/>}
                   { currency == 'eur' && <PiCurrencyEurBold className='text-primary text-3xl'/>}
-                  <span className="text-3xl font-medium">
+                  <span className="text-2xl font-medium">
                      {visibleBalance ? new Intl.NumberFormat("en", {maximumFractionDigits: 4}).format(fiatBalance) : '****'}
                   </span>
                </div>
                <div className="w-1 border-r-3 border-primary mt-2 mb-2"></div>
                <div className="flex gap-2 items-center">
                   <BsCurrencyBitcoin className='text-primary text-3xl'/>
-                  <span className="text-3xl font-medium">
+                  <span className="text-2xl font-medium">
                      {visibleBalance ? new Intl.NumberFormat("en", {maximumFractionDigits: 8}).format(btcBalance) : '****'}
                   </span>
                </div>
