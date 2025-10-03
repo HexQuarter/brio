@@ -3,7 +3,7 @@ import * as SliderPrimitive from "@radix-ui/react-slider"
 
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
-import { formatBtcAmount, formatFiatAmount } from "@/helpers/number"
+import { convertBtcToSats, convertSatsToBtc, formatBtcAmount, formatFiatAmount } from "@/helpers/number"
 
 interface SliderProps {
   value: number
@@ -12,37 +12,51 @@ interface SliderProps {
   price: number
   currency: string,
   className?: string,
-  onValueChange: (amount: number) => void
+  onValueChanged: (amount: number) => void,
+  error: string | null
 }
 
-export const Slider: React.FC<SliderProps> = ({ value, min, max, price, currency, onValueChange, className, ...props }) => {
+export const Slider: React.FC<SliderProps> = ({ value, min, max, price, currency, onValueChanged, error, className, ...props }) => {
+  const btcAmount = parseFloat(formatBtcAmount(convertSatsToBtc(value)))
+  const fiatAmount = formatFiatAmount(btcAmount * price)
+
+  const onInputChange = (fiatAmount: number) => {
+    if (Number.isNaN(fiatAmount)) {
+      onValueChanged(0)
+      return
+    }
+
+    const sats = convertBtcToSats(fiatAmount / price)
+    onValueChanged(sats)
+  }
+
   return (
     <div className='flex flex-col items-center gap-5 mt-5'>
       <div className="flex flex-col gap-2">
         <div className="flex items-center text-primary justify-center w-40">
           <Input 
             type="number"
-            step={0.1}
+            step={0.01}
             className="w-[5] text-2xl border-primary border-b-1 text-center" 
-            value={value} 
-            onChange={(e) => onValueChange(parseFloat(e.target.value)) }
+            value={fiatAmount} 
+            onChange={(e) => onInputChange(parseFloat(e.target.value)) }
             inputMode="decimal" />
           <span className="">{currency.toUpperCase()}</span>
         </div>
-        <p className='text-xs text-gray-400 text-center'>{formatBtcAmount(value / price)} BTC</p>
+        <p className='text-xs text-gray-400 text-center'>{formatBtcAmount(btcAmount)} BTC</p>
       </div>
       <SliderPrimitive.Root
         data-slot="slider"
         value={[value]}
         min={min}
         max={max}
-        step={0.1}
+        step={1}
         minStepsBetweenThumbs={1}
         className={cn(
           "relative flex w-full touch-none items-center select-none data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col",
           className
         )}
-        onValueChange={(values) => onValueChange(values[0])}
+        onValueChange={(values) => onValueChanged(values[0])}
         {...props}
       >
         <SliderPrimitive.Track
@@ -64,9 +78,10 @@ export const Slider: React.FC<SliderProps> = ({ value, min, max, price, currency
         />
       </SliderPrimitive.Root>
       <div className="flex w-full justify-between">
-        <span className="text-xs text-gray-400">{formatFiatAmount(min)} {currency.toUpperCase()}</span>
-        <span className="text-xs text-gray-400">{formatFiatAmount(max)} {currency.toUpperCase()}</span>
+        <span className="text-xs text-gray-400">{formatFiatAmount(convertSatsToBtc(min) * price)} {currency.toUpperCase()}</span>
+        <span className="text-xs text-gray-400">{formatFiatAmount(convertSatsToBtc(max) * price)} {currency.toUpperCase()}</span>
       </div>
+      {error && <p className="text-red-500 text-sm italic mt-2">{error}</p>}
     </div>
   )
 }

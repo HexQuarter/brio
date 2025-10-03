@@ -9,7 +9,6 @@ import init, {
     SdkEvent,
     LogEntry,
 } from '@breeztech/breez-sdk-liquid/web'
-import { convertSatsToBtc } from '@/helpers/number';
 import { webHookUrl } from './api';
 import { retrieveLaunchParams } from '@telegram-apps/sdk-react';
 
@@ -22,21 +21,10 @@ export type WalletContextType = {
     breezSdk: BindingLiquidSdk | undefined;
     getBolt12Offer: (breezSdk: BindingLiquidSdk) => Promise<string | null>
     getBtcAddress: (breezSdk: BindingLiquidSdk) => Promise<string | null>,
-    getLimits: (breezSdk: BindingLiquidSdk) => Promise<Limits>,
     currency: string,
     changeCurrency: (currency: string) => void,
     resetWallet: () => void
 };
-
-type Limit = {
-    min: number
-    max: number
-}
-
-type Limits = {
-    bitcoin: Limit
-    lightning: Limit
-}
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
@@ -47,12 +35,8 @@ const WALLET_BTC_ADDRESS = 'wallet_btc_address'
 const WALLET_CURRENCY = 'wallet_currency'
 
 const SESSION_MNEMONIC_KEY = 'wallet_session_mnemonic'
-const SESSION_BTC_LIMITS = 'btc_limits'
-const SESSION_LIGHTNING_LIMITS = 'lightning_limits'
-const SESSION_LIMITS_LAST_DATE = 'limits_last_date'
 
 const INACTIVITY_SPAN_MS = 10 * 60 * 1000; // 10 minutes
-const LIMITS_REFRESH_SPAN_MS = 5 * 60 * 1000 // 5 minutes
 
 export const WalletProvider = ({children}: {children: ReactNode}) => {    
     const [walletExists, setWalletExists] = useState(!!localStorage.getItem(WALLET_KEY));
@@ -64,8 +48,6 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     const [breezSdk, setBreezSdk] = useState<BindingLiquidSdk | undefined>(undefined);
     const [bolt12Offer, setBolt12Offer] = useState<string | null>(null)
     const [btcAddress, setBtcAddress] = useState<string | null>(null)
-    const [bitcoinLimits, setBitcoinLimits] = useState<Limit | null>(null)
-    const [lightningLimits, setLightningLimits] = useState<Limit | null>(null)
     const [currency, setCurrency] = useState(localStorage.getItem(WALLET_CURRENCY) || 'usd')
 
     // Ref to prevent duplicate SDK init
@@ -111,14 +93,6 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         return () => clearInterval(interval);
     }, [promptForPassword])
 
-    useEffect(() => {
-        setInterval(() => {
-            if (requiredReloadLimits()) {
-                breezSdk && storePreloadedLimits(breezSdk)
-            }
-        }, 1_000)
-    }, [])
-
     const resetWallet = () => {
         localStorage.removeItem(WALLET_KEY)
         localStorage.removeItem(WALLET_UNLOCK_LAST_DATE )
@@ -127,9 +101,6 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         localStorage.removeItem(WALLET_CURRENCY)
 
         sessionStorage.removeItem(SESSION_MNEMONIC_KEY)
-        sessionStorage.removeItem(SESSION_BTC_LIMITS)
-        sessionStorage.removeItem(SESSION_LIGHTNING_LIMITS)
-        sessionStorage.removeItem(SESSION_LIMITS_LAST_DATE)
 
         setWalletExists(false)
     }
@@ -161,9 +132,6 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         await getBolt12Offer(sdk)
         await getBtcAddress(sdk)
 
-        if (!sessionStorage.getItem(SESSION_BTC_LIMITS) || !sessionStorage.getItem(SESSION_LIGHTNING_LIMITS) || requiredReloadLimits()) {
-            await storePreloadedLimits(sdk)
-        }
         return sdk
     }
 
@@ -184,19 +152,6 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         if (!cipher) return null;
         return await decrypt(cipher, password)
     }
-
-    const storePreloadedLimits = async (breezSdk: BindingLiquidSdk) => {
-        if (!breezSdk) {
-            return
-        }
-        const { bitcoin, lightning} = await preloadLimits(breezSdk)
-        sessionStorage.setItem(SESSION_BTC_LIMITS, JSON.stringify(bitcoin))
-        sessionStorage.setItem(SESSION_LIGHTNING_LIMITS, JSON.stringify(lightning))
-        sessionStorage.setItem(SESSION_LIMITS_LAST_DATE, Date.now().toString())
-        setBitcoinLimits(bitcoin)
-        setLightningLimits(lightning)
-        return { bitcoin, lightning}
-    }   
 
     const storeWallet = async (password: string) => {
         const mnemonic = getSessionMnemonic()
@@ -260,29 +215,6 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         return null
     }
 
-    const getLimits = async (breezSdk: BindingLiquidSdk): Promise<Limits> => {
-        const requireReload = requiredReloadLimits() 
-        if (bitcoinLimits && lightningLimits && !requireReload) {
-            return { bitcoin: bitcoinLimits, lightning: lightningLimits }
-        }
-
-        const cachedBtcLimits = sessionStorage.getItem(SESSION_BTC_LIMITS)
-        const cachedLightningLimits = sessionStorage.getItem(SESSION_LIGHTNING_LIMITS)
-        if (cachedBtcLimits && cachedLightningLimits && !requireReload) {
-            return { bitcoin: JSON.parse(cachedBtcLimits), lightning: JSON.parse(cachedLightningLimits) }
-        }
-
-        if (!breezSdk) {
-            return { bitcoin: { min: 0, max: 0}, lightning: { min: 0, max: 0} }
-        }
-
-        const limits = await storePreloadedLimits(breezSdk)
-        if (limits) {
-            return limits
-        }
-        return { bitcoin: { min: 0, max: 0}, lightning: { min: 0, max: 0} }
-    }
-
     return (
         <WalletContext.Provider
             value={{
@@ -296,8 +228,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
                 storeWallet,
                 breezSdk,
                 getBolt12Offer,
-                getBtcAddress,
-                getLimits
+                getBtcAddress
             }}
         >
             {children}
@@ -335,12 +266,6 @@ const requireUnlock = () => {
     return lastUnlockDate ? Date.now() - parseInt(lastUnlockDate) > INACTIVITY_SPAN_MS : true
 }
 
-const requiredReloadLimits = () => {
-    return sessionStorage.getItem(SESSION_LIMITS_LAST_DATE)
-        ? Date.now() - parseInt(sessionStorage.getItem(SESSION_LIMITS_LAST_DATE) as string) > LIMITS_REFRESH_SPAN_MS
-        : false
-}
-
 export const fetchBolt12Offer = async (sdk: BindingLiquidSdk) => {
     const prepareResponse = await sdk.prepareReceivePayment({
         paymentMethod: 'bolt12Offer'
@@ -374,22 +299,6 @@ export const fetchBtcAddress = async (sdk: BindingLiquidSdk) => {
         return null
     }
     return null
-}
-
-async function preloadLimits(sdk: BindingLiquidSdk) {
-    const bitcoinLimits = await sdk.fetchOnchainLimits()
-    const lightningLimits = await sdk.fetchLightningLimits()
-
-    return {
-        bitcoin: { 
-            min: bitcoinLimits ? convertSatsToBtc(bitcoinLimits.send.minSat) : 0,
-            max: bitcoinLimits ? convertSatsToBtc(bitcoinLimits.send.maxSat) : 0
-        },
-        lightning: { 
-            min: lightningLimits ? convertSatsToBtc(lightningLimits.send.minSat) : 0,
-            max: lightningLimits ? convertSatsToBtc(lightningLimits.send.maxSat) : 0
-        }
-    }
 }
 
 export const useWallet = () => {
