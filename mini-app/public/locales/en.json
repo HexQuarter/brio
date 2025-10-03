@@ -113,7 +113,10 @@
     "walletActivity.pending": "Pending",
     "walletActivity.spendBtcTitle": "You spent Bitcoin",
     "walletActivity.receiveBtcTitle": "You spent Bitcoin",
-    "walletActivity.destination": "To",
+    "walletActivity.address": "Address",
+    "walletActivity.publicKey": "PublicKey",
+    "walletActivity.transaction": "Transaction",
+    "walletActivity.offer": "Offer",
     "walletActivity.fees": "Fees",
     "walletActivity.date": "Date",
     "walletActivity.amount": "Amount",
@@ -124,5 +127,6 @@
     "walletActivity.status.timedOut": "Timed-out",
     "walletActivity.status.refundable": "Refundable",
     "walletActivity.status.refundPending": "Refund pending",
-    "walletActivity.status.waitingFeeAcceptance": "Waiting fee acceptance"
+    "walletActivity.status.waitingFeeAcceptance": "Waiting fee acceptance",
+    "walletActivity.copyToast": "Copied into the clipboard"
 }

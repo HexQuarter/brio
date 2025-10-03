@@ -8,6 +8,13 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
+export type FormattedPayment = {
+        fiatAmount: string
+        btcAmount: string
+        btcFee: string
+        fiatFee: string
+    } & Payment
+
 export const WalletActivity : React.FC = () => {
     const { t } = useTranslation()
     const { breezSdk, currency} = useWallet()
@@ -24,16 +31,15 @@ export const WalletActivity : React.FC = () => {
                     const price = rate.value
                     const payments = await breezSdk.listPayments({})
                     setPayments(payments.map((payment: Payment) => {
+                        console.log(payment)
                         const rawBtcAmount = convertSatsToBtc(payment.amountSat)
-                        return {
-                            type: payment.paymentType,
-                            status: payment.status,
-                            amount: formatBtcAmount(rawBtcAmount),
-                            fiatAmount: formatFiatAmount(rawBtcAmount * price),
-                            txid: payment.txId,
-                            hash: ((payment.details) as any).paymentHash,
-                            timestamp: payment.timestamp
-                        }
+                        const feeBtcAmount = convertSatsToBtc(payment.feesSat)
+                        const formattedPayment = payment as FormattedPayment
+                        formattedPayment.fiatAmount = formatFiatAmount(rawBtcAmount * price)
+                        formattedPayment.btcAmount = formatBtcAmount(rawBtcAmount)
+                        formattedPayment.fiatFee = formatFiatAmount(feeBtcAmount * price)
+                        formattedPayment.btcFee = formatBtcAmount(feeBtcAmount)
+                        return formattedPayment
                     }))
                     setLoading(false)
                 }
@@ -55,27 +61,30 @@ export const WalletActivity : React.FC = () => {
             <h3 className="text-2xl font-medium">{t('walletActivity.title')}</h3>
             <div className='flex flex-col p-2 gap-2'>
                 {loading && <Spinner size='s'/>}
-                {!loading && payments.map((payment: any) => (
-                    <div className='border-b-1 border-gray-100 flex flex-col p-3 bg-white rounded-sm shadow-xs' key={payment.hash}>
-                        <div className='flex items-center justify-between text-left' key={payment.txid}>
-                            <div className={`flex gap-2 text-${payment.type == 'send' ? 'red' : 'green'}-800`}>
+                {!loading && payments.map((payment: FormattedPayment) => (
+                    <div className='border-b-1 border-gray-100 flex flex-col p-3 bg-white rounded-sm shadow-xs' key={(payment.details as any).swapId}>
+                        <div className='flex items-center justify-between text-left' >
+                            <div className={`flex gap-2 text-${payment.paymentType == 'send' ? 'red' : 'green'}-800`}>
                                 <span>
-                                    { payment.type == 'receive' && 'Received'}
-                                    { payment.type == 'send' && 'Sent'}
+                                    { payment.paymentType == 'receive' && 'Received'}
+                                    { payment.paymentType == 'send' && 'Sent'}
                                 </span>
                                 <div className='flex flex-col'>
-                                    <span>{payment.amount} BTC</span>
+                                    <span>{payment.btcAmount} BTC</span>
                                     <div className='flex text-left text-xs text-gray-400'>
                                         <span>{payment.fiatAmount} {currency} - {timeAgo(payment.timestamp * 1000)}</span>
                                     </div>
                                     <div className=''>
                                         {payment.status == 'pending' &&
-                                            <span className='text-xs text-orange-300'>{t('walletActivity.pending')}</span>
+                                            <span className='text-xs text-orange-300'>{t('walletActivity.status.pending')}</span>
+                                        }
+                                        {payment.status == 'refundable' &&
+                                            <span className='text-xs text-orange-300'>{t('walletActivity.status.refundable')}</span>
                                         }
                                     </div>
                                 </div>
                             </div>
-                            <InfoIcon className='text-gray-400' onClick={() => navigate(`${payment.hash}`)}/>
+                        <InfoIcon className='text-gray-400' onClick={() => navigate(`${ (payment.details as any).swapId}?payment=${JSON.stringify(payment)}`)}/>
                         </div>
                     </div>
                 ))}
