@@ -6,6 +6,7 @@ import { IDetectedBarcode, Scanner } from '@yudiel/react-qr-scanner';
 import { t } from "i18next";
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider";
+import { toast } from "sonner";
 
 interface Props {
     min: number
@@ -51,16 +52,20 @@ export const BitcoinSendForm: React.FC<Props> = ({ min, max, price, currency, on
 
    const handleChangeAmount = (amount: number) => {
         if(Number.isNaN(amount)) {
+            setAmount(0.0)
+            toast.info(`Minimum is ${min} ${currency}`)
             return
         }
 
         if (amount < min) {
-            setAmount(min)
+            setAmount(amount)
+            toast.info(`Minimum is ${min} ${currency}`)
             return 
         }
 
         if (amount > max) {
-            setAmount(max)
+            setAmount(amount)
+            toast.info(`Maximum is ${max} ${currency}`)
             return 
         }
         setAmount(amount)

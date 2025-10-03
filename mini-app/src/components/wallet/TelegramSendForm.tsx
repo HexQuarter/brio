@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { formatBtcAmount } from "@/helpers/number"
 import { fetchUserInfo } from "@/lib/api"
+import { toast } from "sonner"
 
 interface Props {
     min: number
@@ -36,7 +37,7 @@ export const TelegramSendForm: React.FC<Props> = ({ min, max, price, onSend, sen
     }, [price, max, min])
 
     useEffect(() => {
-        setBtcAmount(parseFloat(formatBtcAmount(amount / amount) as string))
+        setBtcAmount(parseFloat(formatBtcAmount(amount) as string))
     }, [amount])
 
     useEffect(() => {
@@ -63,16 +64,20 @@ export const TelegramSendForm: React.FC<Props> = ({ min, max, price, onSend, sen
 
     const handleChangeAmount = (amount: number) => {
         if(Number.isNaN(amount)) {
+            setAmount(0.0)
+            toast.info(`Minimum is ${min} ${currency}`)
             return
         }
 
-          if (amount < min) {
-            setAmount(min)
+        if (amount < min) {
+            setAmount(amount)
+            toast.info(`Minimum is ${min} ${currency}`)
             return 
         }
 
         if (amount > max) {
-            setAmount(max)
+            setAmount(amount)
+            toast.info(`Maximum is ${max} ${currency}`)
             return 
         }
         setAmount(amount)

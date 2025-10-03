@@ -22,7 +22,7 @@ export const Slider: React.FC<SliderProps> = ({ value, min, max, price, currency
         <div className="flex items-center text-primary justify-center w-40">
           <Input 
             type="number"
-            step={1}
+            step={0.1}
             className="w-[5] text-2xl border-primary border-b-1 text-center" 
             value={value} 
             onChange={(e) => onValueChange(parseFloat(e.target.value)) }
@@ -36,7 +36,7 @@ export const Slider: React.FC<SliderProps> = ({ value, min, max, price, currency
         value={[value]}
         min={min}
         max={max}
-        step={1}
+        step={0.1}
         minStepsBetweenThumbs={1}
         className={cn(
           "relative flex w-full touch-none items-center select-none data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col",

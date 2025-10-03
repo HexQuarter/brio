@@ -9,8 +9,8 @@ import { BindingLiquidSdk } from '@breeztech/breez-sdk-liquid/web';
 import { convertSatsToBtc } from '@/helpers/number';
 
 export const WalletMainPage = () => {
-    const { breezSdk, currency } = useWallet()
-
+    const { breezSdk, currency } = useWallet()    
+    
     const [btcBalance, setBtcBalance] = useState(0)
     const [fiatBalance, setFiatBalance] = useState(0)
 
@@ -29,6 +29,9 @@ export const WalletMainPage = () => {
 
         if (breezSdk) {
             loadBalance(breezSdk)
+
+            const interval = setInterval(async () => await loadBalance(breezSdk), 1000)
+            return () => clearInterval(interval)
         }
     }, [breezSdk, currency])
 

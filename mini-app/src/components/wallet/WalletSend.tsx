@@ -52,12 +52,12 @@ export const WalletSend : React.FC = () => {
 
     const handleLightningSend = async (bolt12Invoice: string, amount: number) => {
         setSendLightningError(null)
-        const optionalAmount: PayAmount = {
-            type: 'bitcoin',
-            receiverAmountSat: convertBtcToSats(amount)
-        }
 
         try {
+            const optionalAmount: PayAmount = {
+                type: 'bitcoin',
+                receiverAmountSat: convertBtcToSats((amount / price))
+            }
             const prepareResponse = await breezSdk?.prepareSendPayment({
                 destination: bolt12Invoice,
                 amount: optionalAmount
