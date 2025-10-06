@@ -70,6 +70,7 @@ if (import.meta.env.DEV) {
           ['hash', 'some-hash'],
           ['signature', 'some-signature'],
           ['user', JSON.stringify({ id: 1, first_name: 'Vladislav', username: 'vlad' })],
+          ['start_param', 'offer=lno1pqpsrp4qpgqppyszm9h2m63a0qqsg3y6efwfx3suue7p2e8zu8tnyf06vlwnhxt6vqvq8legkjuzyz64yc7ghdll37w6dtpgl2uezt9t03s9h80yug387axvqypfrxqjyxvct68jch7gkafw0d3n2cdk2lg25urnhq7p6tu50xm2yasq9n95hn7vdyeufz7kkphp8s244rwx5khqt033pwt80zcj82znnya87tz8dsj6z8sz823myj72zcssxy47eqncdfcu0w34lntc58s64pfre9dt834t76kex9juct8meftx&invoiceRequest=00205bb8a72369bbc39cfa04f8da1097ebfc062fb99142e9726252afbe6469a7c4a108030186a00a00109202d96eadea3d780104449aca5c93461ce67c1564e2e1d73225fa67dd3b997a601803ff28b4b8220b55263c8bb7ff8f9da6ac28fab9912cab7c605b9de4e2227f74cc0102919812219985e8f2c5fc8b752e7b633561b657d0aa7073b83c1d2f9479b6a276002ccb4bcfcc6933c48bd6b06e13c155a8dc6a5ae05be310b96778b123a853993a7f2c476c25a11e023aa3b24bca16210312bec82786a71c7ba35fcd78a1e1aa8523c95ab3c6abf6ad93165cc2cfbca56650206fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d619000000000052030186a054030200005821037a6fbbfe93e0e5a915fed79ebbf0bac1c6e81f4300f2e600d35caade99b96269f040d9e7e6f3b8946e69e8c1b7759800f5922eadd54f7aaed087b720cd47e116ebd9a5e55ea297f0e4b1fd0c79be81ea7c9aa7b905f67c49c47b5ef569428ecf3824']
         ]).toString()],
         ['tgWebAppVersion', '8.4'],
         ['tgWebAppPlatform', 'tdesktop'],

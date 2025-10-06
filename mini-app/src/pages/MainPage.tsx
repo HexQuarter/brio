@@ -8,6 +8,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { UnlockWalletPage } from "./wallet/UnlockWalletPage";
 import { useEffect, useState } from "react";
 import { BackupWalletPage } from "./wallet/BackupWalletPage";
+import { retrieveLaunchParams } from "@telegram-apps/sdk-react";
 
 export function MainPage() {
     const wallet = useWallet(); 
@@ -17,6 +18,30 @@ export function MainPage() {
 
     const [backup, setBackup] = useState(false)
     useEffect(() => {
+
+        const loadInvoiceRequest = async () => {
+            const {tgWebAppData: data} = await retrieveLaunchParams()
+            if (data?.start_param) {
+                const startParam = new URLSearchParams(data.start_param)
+                const invoiceRequest = startParam.get('invoiceRequest')
+                const offer = startParam.get('offer')
+                if (invoiceRequest && offer) {
+                    try {
+                        const invoice = await wallet.breezSdk?.createBolt12Invoice({
+                            invoiceRequest: invoiceRequest,
+                            offer: offer
+                        })
+                        console.log('Bolt12 Invoice', invoice)
+                    }
+                    catch(e) {
+                        console.error(e)
+                    }
+                }
+            }
+        }
+
+        loadInvoiceRequest()
+
         setBackup(location.pathname == '/wallet/backup')
     }, [location])
 
