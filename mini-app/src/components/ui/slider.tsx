@@ -43,7 +43,7 @@ export const Slider: React.FC<SliderProps> = ({ value, min, max, price, currency
             value={fiatAmount} 
             onChange={(e) => onInputChange(parseFloat(e.target.value)) }
             inputMode="decimal" />
-          <span className="">{currency.toUpperCase()}</span>
+          <span className="">{currency}</span>
         </div>
         <p className='text-xs text-gray-400 text-center'>{formatBtcAmount(btcAmount)} BTC</p>
       </div>
@@ -80,8 +80,8 @@ export const Slider: React.FC<SliderProps> = ({ value, min, max, price, currency
         />
       </SliderPrimitive.Root>
       <div className="flex w-full justify-between">
-        <span className="text-xs text-gray-400">{formatFiatAmount(convertSatsToBtc(min) * price)} {currency.toUpperCase()}</span>
-        <span className="text-xs text-gray-400">{formatFiatAmount(convertSatsToBtc(max) * price)} {currency.toUpperCase()}</span>
+        <span className="text-xs text-gray-400">{formatFiatAmount(convertSatsToBtc(min) * price)} {currency}</span>
+        <span className="text-xs text-gray-400">{formatFiatAmount(convertSatsToBtc(max) * price)} {currency}</span>
       </div>
       {error && <p className="text-red-500 text-sm italic mt-2">{error}</p>}
     </div>

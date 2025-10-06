@@ -58,6 +58,7 @@ export const TelegramSendForm = () => {
 
     useEffect(() => {
             setAmountError(null)
+            setSendError(null)
             if(Number.isNaN(amount)) {
                 setAmountError(`${t('wallet.minIs')} ${formatFiatAmount(convertSatsToBtc(min) * price)} ${currency}`)
                 return
@@ -114,12 +115,6 @@ export const TelegramSendForm = () => {
             class EventListener {
                 onEvent = (event: SdkEvent) => {
                     switch(event.type) {
-                        case "paymentWaitingConfirmation":
-                            setLoadingPayment(true)
-                            break
-                        case "paymentWaitingFeeAcceptance":
-                            setLoadingPayment(true)
-                            break
                         case "paymentPending":
                             setLoadingPayment(true)
                             break
@@ -177,7 +172,7 @@ export const TelegramSendForm = () => {
             {!amountError && address != '' && !lookupError && 
                 <div className="flex flex-col items-center">
                     {!loadingPayment && !sendError && 
-                        <div className="text-center flex flex-col gap-2">
+                        <div className="text-center flex flex-col gap-2 items-center">
                             <Button className="w-40" onClick={() => handleSend()}>Send</Button>
                             {fees > 0 && <p className="text-xs">Fees: {formatBtcAmount(convertSatsToBtc(fees))} BTC / {formatFiatAmount(convertSatsToBtc(fees) * price)} {currency}</p>}
                         </div>}

@@ -95,7 +95,7 @@ export const WalletActivityDetails : React.FC = () => {
                             <span className='text-gray-400'>{t('walletActivity.fees')}</span>
                             <span className='items-center'>
                                 {payment.btcFee} BTC 
-                                <span className='text-xs'> / {payment.fiatFee} {currency.toUpperCase()}</span>
+                                <span className='text-xs'> / {payment.fiatFee} {currency}</span>
                             </span>
                         </div>
                         <div className='flex justify-between'>
@@ -106,7 +106,7 @@ export const WalletActivityDetails : React.FC = () => {
                             <span className='text-gray-400'>{t('walletActivity.amount')}</span>
                             <div className={`flex flex-col gap-1 ${payment.paymentType == 'send' ? 'text-red-600' : 'text-green-600'}`}>
                                 <span>{payment.paymentType == 'send' ? '-' : '+'}{payment.btcAmount} BTC</span>
-                                <span>{payment.paymentType == 'send' ? '-' : '+'}{payment.fiatAmount} {currency.toUpperCase()}</span>
+                                <span>{payment.paymentType == 'send' ? '-' : '+'}{payment.fiatAmount} {currency}</span>
                             </div>
                         </div>
                     </div>

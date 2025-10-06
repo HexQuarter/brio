@@ -50,7 +50,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     const [breezSdk, setBreezSdk] = useState<BindingLiquidSdk | undefined>(undefined);
     const [bolt12Offer, setBolt12Offer] = useState<string | null>(null)
     const [btcAddress, setBtcAddress] = useState<string | null>(null)
-    const [currency, setCurrency] = useState(localStorage.getItem(WALLET_CURRENCY) || 'usd')
+    const [currency, setCurrency] = useState(localStorage.getItem(WALLET_CURRENCY)?.toUpperCase() || 'USD')
 
     // Ref to prevent duplicate SDK init
     const sdkInitRef = useRef(false);
@@ -240,6 +240,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
 
 class JsEventListener {
   onEvent = (event: SdkEvent) => {
+     console.log(event)
      switch(event.type) {
         case "paymentWaitingConfirmation":
             toast.info(t('wallet.paymentWaitingConfirmation'))

@@ -44,8 +44,8 @@ export const WalletSettings : React.FC = () => {
                                 <SelectValue placeholder={currency} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="usd">USD</SelectItem>
-                                <SelectItem value="eur">EUR</SelectItem>
+                                <SelectItem value="USD">USD</SelectItem>
+                                <SelectItem value="EUR">EUR</SelectItem>
                             </SelectContent>
                         </Select>
                     </span>

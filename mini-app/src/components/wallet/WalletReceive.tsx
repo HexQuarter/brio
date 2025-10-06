@@ -8,18 +8,25 @@ import { useWallet } from '@/lib/useWallet';
 import { toast } from "sonner"
 import { Switch } from '@/components/ui/switch';
 import { Bolt11Form } from './Bolt11Form';
+import { convertSatsToBtc, formatFiatAmount } from '@/helpers/number';
 
 const shorten = (data: string) => {
     return `${data.slice(0, 6)}...${data.slice(data.length-6, data.length)}`
 }
 
 export const WalletReceive : React.FC = () => {
-    const { getBtcAddress, getBolt12Offer, breezSdk } = useWallet()
+    const { getBtcAddress, getBolt12Offer, breezSdk, currency  } = useWallet()
 
     const [btcAddress, setBtcAddress] = useState<string | undefined>(undefined)
     const [bolt12Offer, setBolt12Offer] = useState<string | undefined>(undefined)
     const [generateBolt11, setGenerateBolt11] = useState(false)
     const [bolt11Invoice, setBolt11Invoice] = useState<string | undefined>(undefined)
+    const [minLn, setMinLn] = useState(0)
+    const [maxLn, setMaxLn] = useState(0)
+    const [minBtc, setMinBtc] = useState(0)
+    const [maxBtc, setMaxBtc] = useState(0)
+    const [price, setPrice] = useState(0)
+
     useEffect(() => {
         if (!breezSdk) {
             return
@@ -28,11 +35,27 @@ export const WalletReceive : React.FC = () => {
         const loadOfferAndAddress = async () => {
             const bolt12Offer = await getBolt12Offer(breezSdk)
             if (bolt12Offer) {
+                const fiatRates = await breezSdk.fetchFiatRates()
+                if (!fiatRates) return
+                const rate = fiatRates.find(r => r.coin.toLowerCase() == currency.toLowerCase())
+                if (!rate) return
+                setPrice(rate.value)
+                const currentLimits = await breezSdk.fetchLightningLimits()
+                setMinLn(currentLimits.receive.minSat)
+                setMaxLn(currentLimits.receive.maxSat)
                 setBolt12Offer(bolt12Offer)
             }
 
             const btcAddress = await getBtcAddress(breezSdk)
             if (btcAddress) {
+                const fiatRates = await breezSdk.fetchFiatRates()
+                if (!fiatRates) return
+                const rate = fiatRates.find(r => r.coin.toLowerCase() == currency.toLowerCase())
+                if (!rate) return
+                setPrice(rate.value)
+                const currentLimits = await breezSdk.fetchOnchainLimits()
+                setMinBtc(currentLimits.receive.minSat)
+                setMaxBtc(currentLimits.receive.maxSat)
                 setBtcAddress(btcAddress)
             }
         }
@@ -74,11 +97,7 @@ export const WalletReceive : React.FC = () => {
                 <TabsContent value="lightning">
                     { bolt12Offer &&
                         <div className='flex flex-col items-center gap-5'>
-                            <small className='text-gray-500 flex gap-2'>
-                                <Switch checked={generateBolt11} onCheckedChange={setGenerateBolt11}/>
-                                <span>Single use invoice</span>
-                            </small>
-
+                        
                             { generateBolt11 &&
                                 <>
                                     <Bolt11Form onGeneratedInvoice={setBolt11Invoice} onLoading={handleBolt11Loading}/>
@@ -103,7 +122,9 @@ export const WalletReceive : React.FC = () => {
                            
                             { !generateBolt11 && 
                                 <div className='flex flex-col items-center gap-5'>
+                                    <small className='text-gray-500'>{t('wallet.receive.lightningOffer')}:</small>
                                     <p>{shorten(bolt12Offer)}</p>
+                                    <p className='text-xs'>Between {convertSatsToBtc(minLn)} - {convertSatsToBtc(maxLn)} BTC <br />({formatFiatAmount(convertSatsToBtc(minLn) * price)} - {formatFiatAmount(convertSatsToBtc(maxLn) * price)} {currency})</p>
                                     <QRCode value={bolt12Offer} size={150} />
                                     <div className='flex gap-5'>
                                         {navigator.canShare() &&
@@ -115,6 +136,10 @@ export const WalletReceive : React.FC = () => {
                                             <LuCopy className='w-5 h-5' />
                                         </div>
                                     </div>
+                                    <small className='text-gray-500 flex gap-2'>
+                                        <Switch checked={generateBolt11} onCheckedChange={setGenerateBolt11}/>
+                                        <span>Single use invoice</span>
+                                    </small>
                                 </div>
                             }
                             
@@ -125,9 +150,9 @@ export const WalletReceive : React.FC = () => {
                 <TabsContent value="btc">
                     { btcAddress &&
                         <div className='p-5 flex flex-col items-center gap-5'>
-                            
                             <small className='text-gray-500'>{t('wallet.receive.btcAddress')}:</small>
                             <p>{shorten(btcAddress)}</p>
+                            <p className='text-xs'>Between {convertSatsToBtc(minBtc)} - {convertSatsToBtc(maxBtc)} BTC <br />({ formatFiatAmount(convertSatsToBtc(minBtc) * price)} - {formatFiatAmount(convertSatsToBtc(maxBtc) * price)} {currency})</p>
                             <QRCode value={btcAddress} size={150} />
                             <div className='flex gap-5'>
                                 <div className='flex gap-5'>

@@ -31,7 +31,6 @@ export const WalletActivity : React.FC = () => {
                     const price = rate.value
                     const payments = await breezSdk.listPayments({})
                     setPayments(payments.map((payment: Payment) => {
-                        console.log(payment)
                         const rawBtcAmount = convertSatsToBtc(payment.amountSat)
                         const feeBtcAmount = convertSatsToBtc(payment.feesSat)
                         const formattedPayment = payment as FormattedPayment
