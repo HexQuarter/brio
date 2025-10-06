@@ -27,7 +27,7 @@ export function MainPage() {
             console.log('init data', data)
             if (data?.start_param) {
                 const startParam = new URLSearchParams(data.start_param)
-                console.log('start param', startParam)
+                console.log('start param', startParam.toString())
                 const invoiceRequest = startParam.get('invoiceRequest')
                 const offer = startParam.get('offer')
                 if (invoiceRequest && offer) {
