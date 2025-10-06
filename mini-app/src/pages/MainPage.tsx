@@ -25,7 +25,6 @@ export function MainPage() {
     useEffect(() => {
          const loadInvoiceRequest = async () => {
             const {tgWebAppData: data} = retrieveLaunchParams()
-            console.log('init data', data)
             if (data?.start_param) {
                 const params = new URLSearchParams(data.start_param)
                 const offer = params.get('offer')
