@@ -52,3 +52,19 @@ export const fetchUserInfo = async (handle: string) => {
         })
     })
 }
+
+export const fetchInvoiceRequest = async (offer: string) => {
+    return await fetch(new URL("/rpc", rpcEndpoint()), {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify({
+            operation: 'search-invoice-request',
+            payload: {
+                offer: offer
+            }
+        })
+    })
+}

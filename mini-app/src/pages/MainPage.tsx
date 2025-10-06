@@ -9,6 +9,7 @@ import { UnlockWalletPage } from "./wallet/UnlockWalletPage";
 import { useEffect, useState } from "react";
 import { BackupWalletPage } from "./wallet/BackupWalletPage";
 import { retrieveLaunchParams } from "@telegram-apps/sdk-react";
+import { fetchInvoiceRequest } from "@/lib/api";
 
 export function MainPage() {
     const wallet = useWallet(); 
@@ -26,12 +27,12 @@ export function MainPage() {
             const {tgWebAppData: data} = retrieveLaunchParams()
             console.log('init data', data)
             if (data?.start_param) {
-                const startParam = new URLSearchParams(data.start_param)
-                console.log('start param', startParam.toString())
-                const invoiceRequest = startParam.get('invoiceRequest')
-                const offer = startParam.get('offer')
-                if (invoiceRequest && offer) {
+                const params = new URLSearchParams(data.start_param)
+                const offer = params.get('offer')
+                if (offer) {
                     try {
+                        const res = await fetchInvoiceRequest(offer)
+                        const { invoiceRequest } = await res.json()
                         const invoice = await wallet.breezSdk?.createBolt12Invoice({
                             invoiceRequest: invoiceRequest,
                             offer: offer
