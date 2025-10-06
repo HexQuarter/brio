@@ -18,8 +18,11 @@ export function MainPage() {
 
     const [backup, setBackup] = useState(false)
     useEffect(() => {
+        setBackup(location.pathname == '/wallet/backup')
+    }, [location])
 
-        const loadInvoiceRequest = async () => {
+    useEffect(() => {
+         const loadInvoiceRequest = async () => {
             const {tgWebAppData: data} = await retrieveLaunchParams()
             if (data?.start_param) {
                 const startParam = new URLSearchParams(data.start_param)
@@ -41,9 +44,7 @@ export function MainPage() {
         }
 
         loadInvoiceRequest()
-
-        setBackup(location.pathname == '/wallet/backup')
-    }, [location])
+    }, [])
 
     const apps = [
         { 
