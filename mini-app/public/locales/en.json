@@ -63,6 +63,7 @@
     "wallet.receive.lightningTitle": "On Lightning",
     "wallet.receive.btcTitle": "On Native Bitcoin",
     "wallet.receive.lightningInvoice": "Lightning invoice",
+    "wallet.receive.lightningOffer": "Lightning offer",
     "wallet.receive.btcAddress": "Bitcoin address",
     "wallet.receive.copyLnToast": "The lightning offer have been copied into the clipboard",
     "wallet.receive.copybtcToast": "The bitcoin address have been copied into the clipboard",

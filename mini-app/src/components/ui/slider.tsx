@@ -4,6 +4,7 @@ import * as SliderPrimitive from "@radix-ui/react-slider"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { convertBtcToSats, convertSatsToBtc, formatBtcAmount, formatFiatAmount } from "@/helpers/number"
+import { useTranslation } from "react-i18next"
 
 interface SliderProps {
   value: number
@@ -19,6 +20,7 @@ interface SliderProps {
 export const Slider: React.FC<SliderProps> = ({ value, min, max, price, currency, onValueChanged, error, className, ...props }) => {
   const btcAmount = parseFloat(formatBtcAmount(convertSatsToBtc(value)))
   const fiatAmount = formatFiatAmount(btcAmount * price)
+  const {t} = useTranslation()
 
   const onInputChange = (fiatAmount: number) => {
     if (Number.isNaN(fiatAmount)) {
@@ -31,7 +33,7 @@ export const Slider: React.FC<SliderProps> = ({ value, min, max, price, currency
   }
 
   return (
-    <div className='flex flex-col items-center gap-5 mt-5'>
+    <div className='flex flex-col items-center gap-10 mt-5'>
       <div className="flex flex-col gap-2">
         <div className="flex items-center text-primary justify-center w-40">
           <Input 
@@ -74,7 +76,7 @@ export const Slider: React.FC<SliderProps> = ({ value, min, max, price, currency
         </SliderPrimitive.Track>
         <SliderPrimitive.Thumb
           data-slot="slider-thumb"
-          className="mt-10 bg-transparent border-b-primary border-b-8 border-x-transparent border-x-8 border-t-0 ring-ring/50 block size-4 shrink-0 transition-[color,box-shadow] hover:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
+          className="mt-10 bg-transparent border-b-primary border-b-8 border-x-transparent border-x-8 border-t-0 ring-ring/50 block size-4 shrink-0 transition-[color,box-shadow] hover:cursor-pointer focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
         />
       </SliderPrimitive.Root>
       <div className="flex w-full justify-between">

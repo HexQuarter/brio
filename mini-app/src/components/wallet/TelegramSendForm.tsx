@@ -46,8 +46,6 @@ export const TelegramSendForm = () => {
                 const limits = await breezSdk.fetchLightningLimits()
                 setMin(limits.send.minSat)
                 setMax(limits.send.maxSat)
-                const defaultValue = (limits.send.maxSat-limits.send.minSat) / 2
-                setAmount(Math.round(defaultValue))
 
                 return
             }
@@ -118,25 +116,20 @@ export const TelegramSendForm = () => {
                     switch(event.type) {
                         case "paymentWaitingConfirmation":
                             setLoadingPayment(true)
-                            toast.info(t('wallet.paymentWaitingConfirmation'))
                             break
                         case "paymentWaitingFeeAcceptance":
                             setLoadingPayment(true)
-                            toast.info(t('wallet.paymentWaitingFeeAcceptance'))
                             break
                         case "paymentPending":
                             setLoadingPayment(true)
-                            toast.info(t('wallet.paymentPending'))
                             break
                         case "paymentSucceeded":
                             setLoadingPayment(false)
-                            toast.success(t('wallet.paymentSucceeded'))
                             breezSdk?.removeEventListener(listenerId as string)
                             navigate('/wallet/activity')
                             break
                         case "paymentFailed":
                             setLoadingPayment(false)
-                            toast.error(t('wallet.paymentFailed'))
                             breezSdk?.removeEventListener(listenerId as string)
                             break
                         default:

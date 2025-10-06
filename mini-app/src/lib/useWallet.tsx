@@ -11,6 +11,8 @@ import init, {
 } from '@breeztech/breez-sdk-liquid/web'
 import { webHookUrl } from './api';
 import { retrieveLaunchParams } from '@telegram-apps/sdk-react';
+import { toast } from 'sonner';
+import { t } from 'i18next';
 
 export type WalletContextType = {
     walletExists: boolean;
@@ -238,7 +240,25 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
 
 class JsEventListener {
   onEvent = (event: SdkEvent) => {
-    console.log(`Received event: ${JSON.stringify(event)}`)
+     switch(event.type) {
+        case "paymentWaitingConfirmation":
+            toast.info(t('wallet.paymentWaitingConfirmation'))
+            break
+        case "paymentWaitingFeeAcceptance":
+            toast.info(t('wallet.paymentWaitingFeeAcceptance'))
+            break
+        case "paymentPending":
+            toast.info(t('wallet.paymentPending'))
+            break
+        case "paymentSucceeded":
+            toast.success(t('wallet.paymentSucceeded'))
+            break
+        case "paymentFailed":
+            toast.error(t('wallet.paymentFailed'))
+            break
+        default:
+            console.log('event', JSON.stringify(event))
+    }
   }
 }
 
@@ -250,7 +270,7 @@ class JsLogger {
 
 const initBreezSdk = async (mnemonic: string) => {
     await init()
-    setLogger(new JsLogger())
+    // setLogger(new JsLogger())
 
     const breezApiKey = import.meta.env.VITE_BREEZ_API_KEY
     let config = defaultConfig('mainnet', breezApiKey)

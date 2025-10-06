@@ -6,6 +6,8 @@ import { LuShare2, LuCopy } from "react-icons/lu";
 import QRCode from "react-qr-code";
 import { useWallet } from '@/lib/useWallet';
 import { toast } from "sonner"
+import { Switch } from '@/components/ui/switch';
+import { Bolt11Form } from './Bolt11Form';
 
 const shorten = (data: string) => {
     return `${data.slice(0, 6)}...${data.slice(data.length-6, data.length)}`
@@ -16,11 +18,13 @@ export const WalletReceive : React.FC = () => {
 
     const [btcAddress, setBtcAddress] = useState<string | undefined>(undefined)
     const [bolt12Offer, setBolt12Offer] = useState<string | undefined>(undefined)
-
+    const [generateBolt11, setGenerateBolt11] = useState(false)
+    const [bolt11Invoice, setBolt11Invoice] = useState<string | undefined>(undefined)
     useEffect(() => {
         if (!breezSdk) {
             return
         }
+
         const loadOfferAndAddress = async () => {
             const bolt12Offer = await getBolt12Offer(breezSdk)
             if (bolt12Offer) {
@@ -35,7 +39,7 @@ export const WalletReceive : React.FC = () => {
         loadOfferAndAddress()
     }, [breezSdk])
 
-const copyLightningInvoice = async () => {
+    const copyLightningInvoice = async () => {
         bolt12Offer && await navigator.clipboard.writeText(bolt12Offer)
         const toastId = toast.info(t('wallet.receive.copyLnToast'))
         setTimeout(() => toast.dismiss(toastId), 2000)
@@ -55,6 +59,10 @@ const copyLightningInvoice = async () => {
         btcAddress && await navigator.share({ text: btcAddress })
     }
 
+    const handleBolt11Loading = async () => {
+        setBolt11Invoice(undefined)
+    }
+
     return (
         <div className="flex flex-col gap-10 text-center">
             <p className="text-primary">{t('wallet.receiveTitle')}</p>
@@ -65,20 +73,52 @@ const copyLightningInvoice = async () => {
                 </TabsList>
                 <TabsContent value="lightning">
                     { bolt12Offer &&
-                        <div className='p-5 flex flex-col items-center gap-5'>
-                            <small className='text-gray-500'>{t('wallet.receive.lightningInvoice')}:</small>
-                            <p>{shorten(bolt12Offer)}</p>
-                            <QRCode value={bolt12Offer} size={150} />
-                            <div className='flex gap-5'>
-                                {navigator.canShare() &&
-                                    <div className='border p-3 rounded-full text-gray-500' onClick={() => shareLightningInvoice()}>
-                                        <LuShare2 className='w-5 h-5' />
+                        <div className='flex flex-col items-center gap-5'>
+                            <small className='text-gray-500 flex gap-2'>
+                                <Switch checked={generateBolt11} onCheckedChange={setGenerateBolt11}/>
+                                <span>Single use invoice</span>
+                            </small>
+
+                            { generateBolt11 &&
+                                <>
+                                    <Bolt11Form onGeneratedInvoice={setBolt11Invoice} onLoading={handleBolt11Loading}/>
+                                    {bolt11Invoice && 
+                                        <div className='flex flex-col items-center gap-5'>
+                                            <p>{shorten(bolt11Invoice)}</p>
+                                            <QRCode value={bolt11Invoice} size={150} />
+                                            <div className='flex gap-5'>
+                                                {navigator.canShare() &&
+                                                    <div className='border p-3 rounded-full text-gray-500' onClick={() => shareLightningInvoice()}>
+                                                        <LuShare2 className='w-5 h-5' />
+                                                    </div>
+                                                }
+                                                <div className='border p-3 rounded-full text-gray-500 active:text-white active:bg-primary' onClick={() => copyLightningInvoice()}>
+                                                    <LuCopy className='w-5 h-5' />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </>
+                            }
+                           
+                            { !generateBolt11 && 
+                                <div className='flex flex-col items-center gap-5'>
+                                    <p>{shorten(bolt12Offer)}</p>
+                                    <QRCode value={bolt12Offer} size={150} />
+                                    <div className='flex gap-5'>
+                                        {navigator.canShare() &&
+                                            <div className='border p-3 rounded-full text-gray-500' onClick={() => shareLightningInvoice()}>
+                                                <LuShare2 className='w-5 h-5' />
+                                            </div>
+                                        }
+                                        <div className='border p-3 rounded-full text-gray-500 active:text-white active:bg-primary' onClick={() => copyLightningInvoice()}>
+                                            <LuCopy className='w-5 h-5' />
+                                        </div>
                                     </div>
-                                }
-                                <div className='border p-3 rounded-full text-gray-500 active:text-white active:bg-primary' onClick={() => copyLightningInvoice()}>
-                                    <LuCopy className='w-5 h-5' />
                                 </div>
-                            </div>
+                            }
+                            
+                           
                         </div>
                     }
                 </TabsContent>
