@@ -23,9 +23,11 @@ export function MainPage() {
 
     useEffect(() => {
          const loadInvoiceRequest = async () => {
-            const {tgWebAppData: data} = await retrieveLaunchParams()
+            const {tgWebAppData: data} = retrieveLaunchParams()
+            console.log('init data', data)
             if (data?.start_param) {
                 const startParam = new URLSearchParams(data.start_param)
+                console.log('start param', startParam)
                 const invoiceRequest = startParam.get('invoiceRequest')
                 const offer = startParam.get('offer')
                 if (invoiceRequest && offer) {

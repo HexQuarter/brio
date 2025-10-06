@@ -238,28 +238,33 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
 };
 
 class JsEventListener {
-  onEvent = (event: SdkEvent) => {
-     console.log(event)
-     switch(event.type) {
-        case "paymentWaitingConfirmation":
-            toast.info(t('wallet.paymentWaitingConfirmation'))
-            break
-        case "paymentWaitingFeeAcceptance":
-            toast.info(t('wallet.paymentWaitingFeeAcceptance'))
-            break
-        case "paymentPending":
-            toast.info(t('wallet.paymentPending'))
-            break
-        case "paymentSucceeded":
-            toast.success(t('wallet.paymentSucceeded'))
-            break
-        case "paymentFailed":
-            toast.error(t('wallet.paymentFailed'))
-            break
-        default:
-            console.log('event', JSON.stringify(event))
+
+    private handledEvents = new Set<string>()
+
+    onEvent = (event: SdkEvent) => {
+        switch(event.type) {
+            case "paymentWaitingConfirmation":
+                toast.info(t('wallet.paymentWaitingConfirmation'))
+                break
+            case "paymentWaitingFeeAcceptance":
+                toast.info(t('wallet.paymentWaitingFeeAcceptance'))
+                break
+            case "paymentPending":
+                if(event.details.txId && this.handledEvents.has(event.details.txId)) {
+                    this.handledEvents.add(event.details.txId)
+                    toast.info(t('wallet.paymentPending'))
+                }
+                break
+            case "paymentSucceeded":
+                toast.success(t('wallet.paymentSucceeded'))
+                break
+            case "paymentFailed":
+                toast.error(t('wallet.paymentFailed'))
+                break
+            default:
+                console.log('event', JSON.stringify(event))
+        }
     }
-  }
 }
 
 // class JsLogger {
