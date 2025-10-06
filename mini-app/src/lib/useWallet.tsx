@@ -5,9 +5,7 @@ import init, {
     BindingLiquidSdk,
     connect,
     defaultConfig,
-    setLogger,
     SdkEvent,
-    LogEntry,
 } from '@breeztech/breez-sdk-liquid/web'
 import { webHookUrl } from './api';
 import { retrieveLaunchParams } from '@telegram-apps/sdk-react';
@@ -263,11 +261,11 @@ class JsEventListener {
   }
 }
 
-class JsLogger {
-  log = (l: LogEntry) => {
-    console.log(`[${l.level}]: ${l.line}`)
-  }
-}
+// class JsLogger {
+//   log = (l: LogEntry) => {
+//     console.log(`[${l.level}]: ${l.line}`)
+//   }
+// }
 
 const initBreezSdk = async (mnemonic: string) => {
     await init()

@@ -9,7 +9,6 @@ import { Slider } from "@/components/ui/slider";
 import { convertSatsToBtc, formatBtcAmount, formatFiatAmount } from "@/helpers/number";
 import { useWallet } from "@/lib/useWallet";
 import { InputType, PayAmount, SdkEvent } from "@breeztech/breez-sdk-liquid/web";
-import { toast } from "sonner";
 import { Spinner } from "@telegram-apps/telegram-ui";
 import { useNavigate } from "react-router-dom";
 

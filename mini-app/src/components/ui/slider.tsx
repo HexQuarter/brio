@@ -4,7 +4,6 @@ import * as SliderPrimitive from "@radix-ui/react-slider"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { convertBtcToSats, convertSatsToBtc, formatBtcAmount, formatFiatAmount } from "@/helpers/number"
-import { useTranslation } from "react-i18next"
 
 interface SliderProps {
   value: number
@@ -20,7 +19,6 @@ interface SliderProps {
 export const Slider: React.FC<SliderProps> = ({ value, min, max, price, currency, onValueChanged, error, className, ...props }) => {
   const btcAmount = parseFloat(formatBtcAmount(convertSatsToBtc(value)))
   const fiatAmount = formatFiatAmount(btcAmount * price)
-  const {t} = useTranslation()
 
   const onInputChange = (fiatAmount: number) => {
     if (Number.isNaN(fiatAmount)) {

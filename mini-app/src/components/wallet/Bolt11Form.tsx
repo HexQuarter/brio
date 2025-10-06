@@ -1,7 +1,6 @@
 import { useWallet } from "@/lib/useWallet"
 import { useEffect, useState } from "react"
 import { Slider } from "@/components/ui/slider"
-import { Button } from "@/components/ui/button"
 import { useTranslation } from "react-i18next"
 import { convertSatsToBtc, formatFiatAmount } from "@/helpers/number"
 import { ReceiveAmount } from "@breeztech/breez-sdk-liquid/web"
