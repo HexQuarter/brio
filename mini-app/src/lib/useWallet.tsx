@@ -111,9 +111,9 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     }
 
     const loadSdk = async (mnemonic: string) => {
-        // If already initialized, just return the existing SDK
         if (sdkInitRef.current) return null;
 
+        // If already initialized, just return the existing SDK
         let sdk = breezSdk
         if (!sdk) {
             sdkInitRef.current = true;
@@ -124,13 +124,14 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
                 if (userId) {
                     await sdk.unregisterWebhook()
                     await sdk.registerWebhook(webHookUrl(userId))
+                    console.log(`Register webhook for ${webHookUrl(userId)}`)
                 }
             }
             setBreezSdk(sdk)
         }
 
-        await getBolt12Offer(sdk)
-        await getBtcAddress(sdk)
+        // await getBolt12Offer(sdk)
+        // await getBtcAddress(sdk)
 
         return sdk
     }
@@ -144,7 +145,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
 
             return await loadSdk(result)
         }
-        return null
+        throw new Error('Cannot decrypt the wallet')
     }
 
     const decryptWallet = async (password: string) => {

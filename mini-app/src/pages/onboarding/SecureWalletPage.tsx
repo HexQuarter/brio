@@ -30,60 +30,66 @@ export function SecureWalletPage() {
             setError(t('walletSecure.emptyPassword'));
             return;
         }
-       
-        setProgressValue(1)
-        setProgressLabel(t('walletSecure.progress1'))
-        await wallet.storeWallet(password)
-        
-        const sdk = await wallet.initWallet(password)
-        if (!sdk) {
-            return
+
+        try {
+            setProgressValue(1)
+            setProgressLabel(t('walletSecure.progress1'))
+            await wallet.storeWallet(password)
+            
+            const sdk = await wallet.initWallet(password)
+            if (!sdk) {
+                setError("Cannot load the sdk")
+                return 
+            }
+    
+            const mnemonic = getSessionMnemonic() as string
+            const childKey = await generateChildKey(mnemonic)
+            if (!childKey.publicKey) {
+                return
+            }
+            const childPubkeyHex = buf2hex(new Uint8Array(childKey.publicKey).buffer)
+            const tapRootAddress = await generateTapRootAddress(childKey.publicKey)
+            if (!tapRootAddress) {
+                return
+            }
+            await new Promise(r => setTimeout(r, 1000));
+    
+            setProgressValue(33)
+    
+            setProgressLabel(t('walletSecure.progress33'))
+            
+            const lp = retrieveRawInitData()
+            if (!lp) {
+                alert('Cannot retrieve Telegram init data')
+                return
+            }
+    
+            await new Promise(r => setTimeout(r, 2000));
+    
+            setProgressLabel(t('walletSecure.progress66'))
+            setProgressValue(66)
+    
+            const response = await registerUser({
+                tapRootAddress: tapRootAddress, 
+                publicKey: childPubkeyHex, 
+                breezBtcAddress: await wallet.getBtcAddress(sdk) as string, 
+                breezBolt12Offer: await wallet.getBolt12Offer(sdk) as string, 
+                tgInitData: lp
+            })
+    
+            await new Promise(r => setTimeout(r, 2000));
+    
+            if (response.status == 201) {
+                setProgressValue(100)
+                setProgressLabel(t('walletSecure.progress100'))
+                return
+            }
+    
+            setError(response.statusText)
         }
-
-        const mnemonic = getSessionMnemonic() as string
-        const childKey = await generateChildKey(mnemonic)
-        if (!childKey.publicKey) {
-            return
+        catch (e) {
+             setError((e as Error).message)
         }
-        const childPubkeyHex = buf2hex(new Uint8Array(childKey.publicKey).buffer)
-        const tapRootAddress = await generateTapRootAddress(childKey.publicKey)
-        if (!tapRootAddress) {
-            return
-        }
-        await new Promise(r => setTimeout(r, 1000));
-
-        setProgressValue(33)
-
-        setProgressLabel(t('walletSecure.progress33'))
-        
-        const lp = retrieveRawInitData()
-        if (!lp) {
-            alert('Cannot retrieve Telegram init data')
-            return
-        }
-
-        await new Promise(r => setTimeout(r, 2000));
-
-        setProgressLabel(t('walletSecure.progress66'))
-        setProgressValue(66)
-
-        const response = await registerUser({
-            tapRootAddress: tapRootAddress, 
-            publicKey: childPubkeyHex, 
-            breezBtcAddress: await wallet.getBtcAddress(sdk) as string, 
-            breezBolt12Offer: await wallet.getBolt12Offer(sdk) as string, 
-            tgInitData: lp
-        })
-
-        await new Promise(r => setTimeout(r, 2000));
-
-        if (response.status == 201) {
-            setProgressValue(100)
-            setProgressLabel(t('walletSecure.progress100'))
-            return
-        }
-
-        setError(response.statusText)
     }
 
     function goToWallet() {
