@@ -9,7 +9,6 @@ import cors from 'cors'
 import { rpcHandler } from './rpc.js'
 import { startBot, getBotToken } from './bot/index.js'
 
-
 const db = new Level('db', { valueEncoding: 'json' })
 
 const app = express()
@@ -44,13 +43,13 @@ if (prod === true) {
     // Create HTTPS server
     https.createServer(sslOptions, app).listen(port, '0.0.0.0', () => {
         console.log(`HTTPS server running on port ${port}`);
-        startBot(getBotToken());
+        startBot(getBotToken(), db);
     });
 }
 else {
     const port = process.env.PORT || 3000
     app.listen(port, () => {
         console.log(`HTTPS server running on port ${port}`);
-        startBot(getBotToken());
+        startBot(getBotToken(), db);
     })
 }

@@ -27,7 +27,7 @@ export const handler = async (req, res) => {
     }
 
     const params = new URLSearchParams(createUserRequest.tgInitData);
-    const { username } = JSON.parse(params.get('user'))
+    const { username, id } = JSON.parse(params.get('user'))
     const hashHandle = createHash('sha256').update(username).digest('hex')	
     await req.db.put(`p:${createUserRequest.tapRootAddress}`, {
         publicKey: createUserRequest.publicKey,
