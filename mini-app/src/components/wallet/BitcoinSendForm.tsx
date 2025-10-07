@@ -5,27 +5,31 @@ import { useState, useEffect} from "react";
 import { IDetectedBarcode, Scanner } from '@yudiel/react-qr-scanner';
 import { t } from "i18next";
 import { Button } from "@/components/ui/button"
-import { Slider } from "@/components/ui/slider";
-import { convertSatsToBtc, formatBtcAmount, formatFiatAmount } from "@/helpers/number";
-import { useWallet } from "@/lib/useWallet";
-import { InputType, PayAmount, SdkEvent } from "@breeztech/breez-sdk-liquid/web";
+import { convertSatsToBtc, convertBtcToSats, formatBtcAmount, formatFiatAmount } from "@/helpers/number";
+import { useWallet } from "@/lib/walletContext";
+import { InputType, PrepareLnurlPayResponse, PrepareSendPaymentResponse, SendPaymentOptions } from "@breeztech/breez-sdk-spark";
 import { Spinner } from "@telegram-apps/telegram-ui";
 import { useNavigate } from "react-router-dom";
+import { parse } from "@breeztech/breez-sdk-spark/web";
 
 
 export const BitcoinSendForm  = () => {
     const navigate = useNavigate()
     const { breezSdk, currency } = useWallet()
     const [address, setAddress] = useState("")
-    const [amount, setAmount] = useState(0)
+    const [price, setPrice] = useState(0)
+    const [fiatAmount, setFiatAmount] = useState(0)
+    const [btcAmount, setBtcAmount] = useState(0)
+    const [prepareResponse, setPrepareResponse] = useState<
+        PrepareLnurlPayResponse | 
+        PrepareSendPaymentResponse | 
+        undefined
+    >(undefined) 
+
     const [scanner, setScanner] = useState(false)
     const [parseAddressError, setParseAddressError] = useState<string|null>(null)
     const [sendError, setSendError] = useState<string|null>(null)
     const [inputType, setInputType] = useState<InputType | null>(null)
-    const [amountError, setAmountError] = useState<string | null>(null)
-    const [min, setMin] = useState(0)
-    const [max, setMax] = useState(0)
-    const [price, setPrice] = useState(0)
     const [fees, setFees] = useState(0)
     const [loadingPayment, setLoadingPayment] = useState(false)
 
@@ -46,217 +50,175 @@ export const BitcoinSendForm  = () => {
         const handleAddressChange = async (address: string) => {
             setParseAddressError(null)
             try {
-                const inputType = await breezSdk?.parse(address)
-                if (!inputType) {
-                    setParseAddressError(t('wallet.invalidAddress'))
-                    return
-                }
-                if (inputType.type != "bitcoinAddress" && inputType.type != 'bolt11' && inputType.type != 'bolt12Offer') {
+                const inputType = await parse(address)
+                if (inputType.type != 'bitcoinAddress' && 
+                    inputType.type != 'lightningAddress' && 
+                    inputType.type != 'lnurlPay' && 
+                    inputType.type != 'bolt11Invoice') {
                     setParseAddressError(t('wallet.addressUnknown'))
                     return
                 }
-                if (!breezSdk) return
-
                 setInputType(inputType)
                
-                const fiatRates = await breezSdk.fetchFiatRates()
-
-                if (!fiatRates) return
-
-                const rate = fiatRates.find(r => r.coin.toLowerCase() == currency.toLowerCase())
+                const fiatRates = await breezSdk?.listFiatRates()
+                const rate = fiatRates?.rates.find(r => r.coin.toLowerCase() == currency.toLowerCase())
                 if (!rate) return
                 setPrice(rate.value)
 
-                if (inputType.type == 'bitcoinAddress') {
-                    const limits = await breezSdk.fetchOnchainLimits()
-                    setMin(limits.send.minSat)
-                    setMax(limits.send.maxSat)
-                }
-                else {
-                    const limits = await breezSdk.fetchLightningLimits()
-                    setMin(limits.send.minSat)
-                    setMax(limits.send.maxSat)
+                if (inputType.type == 'bolt11Invoice'){
+                    if (inputType.amountMsat) {
+                        handleAmountChange(inputType.amountMsat * 0.00000000001 * price)
+                    }
                 }
             }
             catch(e) {
                 setParseAddressError((e as Error).message)
             }
         }   
-        if (address != '') {
+        if (breezSdk && address != '') {
             handleAddressChange(address)
         }
 
-    }, [address])
+    }, [breezSdk, address])
 
-    useEffect(() => {
-        setAmountError(null)
+    const handleAmountChange = async (amount: number) => {
+        if (amount == 0 && price > 0) return
         setSendError(null)
-        if(Number.isNaN(amount)) {
-            setAmountError(`${t('wallet.minIs')} ${formatFiatAmount(convertSatsToBtc(min) * price)} ${currency}`)
+        if (Number.isNaN(amount)) {
+            setFiatAmount(0)
             return
         }
 
-        if (amount < min) {
-            setAmountError(`${t('wallet.minIs')} ${formatFiatAmount(convertSatsToBtc(min) * price)} ${currency}`)
-            return 
-        }
+        setFiatAmount(amount)
+        const btc = amount / price
+        setBtcAmount(btc)
 
-        if (amount > max) {
-            setAmountError(`${t('wallet.maxIs')} ${formatFiatAmount(convertSatsToBtc(max) * price)} ${currency}`)
-            return 
-        }
+        const delayDebounceFn = setTimeout(async () => {
+            setLoadingPayment(true)
 
-        const loadFee = async (amount: number) => {
-            if (!inputType) return
             try {
+                if (!inputType) return
                 switch(inputType.type) {
-                    case "bitcoinAddress":
-                        const prepareResponse = await breezSdk?.preparePayOnchain({
-                            amount: {
-                                type: 'bitcoin',
-                                receiverAmountSat: amount
-                            }
+                    case "lnurlPay":
+                        {const prepareResponse = await breezSdk?.prepareLnurlPay({
+                            amountSats: convertBtcToSats(btcAmount),
+                            payRequest: inputType,
+                        })
+                        setLoadingPayment(false)
+                        if (!prepareResponse) {
+                            throw new Error('Unable to prepare LNURL payment')
+                        }
+                        const feeSats = prepareResponse.feeSats
+                        setFees(feeSats)
+                        setPrepareResponse(prepareResponse)}
+                        break
+                    case "lightningAddress":
+                        {const prepareResponse = await breezSdk?.prepareLnurlPay({
+                            amountSats: convertBtcToSats(btcAmount),
+                            payRequest: inputType.payRequest,
                         })
 
-                        if (!prepareResponse) return
-                        setFees(prepareResponse.totalFeesSat)
+                        if (!prepareResponse) {
+                            throw new Error('Unable to prepare lightning payment')
+                        }
+                        const feeSats = prepareResponse.feeSats
+                        setFees(feeSats)
+                        setPrepareResponse(prepareResponse)}
                         break
-                    case "bolt11":
-                        {
-                            const prepareResponse = await breezSdk?.prepareSendPayment({
-                                destination: address,
-                            })
-                            if (!prepareResponse || !prepareResponse.feesSat) return
-                            setFees(prepareResponse.feesSat)
-                            break
+                    case "bitcoinAddress":
+                        {const prepareResponse = await breezSdk?.prepareSendPayment({
+                            paymentRequest: inputType.address,
+                            amountSats: convertBtcToSats(btcAmount)
+                        })
+                         if (!prepareResponse) {
+                            throw new Error('Unable to prepare Bitcoin payment')
                         }
-                    case "bolt12Offer":
-                        {
-                            const payAmount: PayAmount = {
-                                type: 'bitcoin',
-                                receiverAmountSat: amount
-                            }
-                            const prepareResponse = await breezSdk?.prepareSendPayment({
-                                destination: address,
-                                amount: payAmount
-                            })
-                            if (!prepareResponse || !prepareResponse.feesSat) return
-                            setFees(prepareResponse.feesSat)
-                            break
+                        if (prepareResponse.paymentMethod.type === 'bitcoinAddress') {
+                            const feeQuote = prepareResponse.paymentMethod.feeQuote
+                            const fastFeeSats = feeQuote.speedFast.userFeeSat + feeQuote.speedFast.l1BroadcastFeeSat
+                            setFees(fastFeeSats)
+                            setPrepareResponse(prepareResponse)
+                            setLoadingPayment(false)
                         }
+                        }
+                        break
+                    case "bolt11Invoice":
+                        const prepareResponse = await breezSdk?.prepareSendPayment({
+                            paymentRequest: inputType.invoice.bolt11,
+                            amountSats: inputType.amountMsat ? undefined : convertBtcToSats(btcAmount)
+                        })
+                         if (!prepareResponse) {
+                            throw new Error('Unable to prepare Bolt11 payment')
+                        }
+                        setPrepareResponse(prepareResponse)
                 }
             }
             catch(e) {
+                console.log(e)
+                setLoadingPayment(false)
                 setSendError((e as Error).message)
             }
-        }
+            finally {
+                setLoadingPayment(false)
+            }
+        }, 500)
 
-        loadFee(amount)
-
-    }, [amount])
+        return () => clearTimeout(delayDebounceFn)
+    }
 
     const handleSend = async () => {
         setSendError(null)
+        setLoadingPayment(true)
         try {
-            if (!inputType) return
-            switch(inputType.type) {
+            if (!inputType && !prepareResponse) return
+            switch(inputType?.type) {
+                case "lnurlPay":
+                    await breezSdk?.lnurlPay({
+                        prepareResponse: prepareResponse as PrepareLnurlPayResponse
+                    })
+                    setLoadingPayment(false)
+                    navigate('/wallet/activity')
+                    break
+                case "lightningAddress":
+                    await breezSdk?.lnurlPay({
+                        prepareResponse: prepareResponse as PrepareLnurlPayResponse
+                    })
+                    navigate('/wallet/activity')
+                    break
                 case "bitcoinAddress":
-                    const prepareResponse = await breezSdk?.preparePayOnchain({
-                        amount: {
-                            type: 'bitcoin',
-                            receiverAmountSat: amount
-                        }
-                    })
-                    if (!prepareResponse) {
-                        setSendError(t('wallet.unablePrepareBitcoin'))
-                        return 
-                    }
-                    const payOnchainRes = await breezSdk?.payOnchain({
-                        address: address,
-                        prepareResponse
-                    })
-                    if (!payOnchainRes) {
-                        setSendError(t('wallet.unableSendBitcoin'))
-                        return 
-                    }
-                    console.log("fees", payOnchainRes.payment.feesSat)
-                    break;
-                case "bolt11":
                     {
-                        const prepareResponse = await breezSdk?.prepareSendPayment({
-                            destination: address,
-                        })
-                        if (!prepareResponse) {
-                             setSendError(t('wallet.unablePrepareBolt11'))
-                            return 
+                        const options: SendPaymentOptions = {
+                            type: 'bitcoinAddress',
+                            confirmationSpeed: 'fast'
                         }
-                        const sendResponse = await breezSdk?.sendPayment({
-                            prepareResponse
+                        await breezSdk?.sendPayment({
+                            prepareResponse: prepareResponse as PrepareSendPaymentResponse,
+                            options
                         })
-                        if (!sendResponse) {
-                            setSendError(t('wallet.unableSendBolt11'))
-                            return 
-                        }
-                        console.log("fees", sendResponse.payment.feesSat)
-                        console.log(sendResponse)
+                        navigate('/wallet/activity')
                     }
-                    break;
-                case "bolt12Offer":
+                    break
+                case "bolt11Invoice":
                     {
-                        const payAmount: PayAmount = {
-                            type: 'bitcoin',
-                            receiverAmountSat: amount
+                        const options: SendPaymentOptions = {
+                            type: 'bolt11Invoice',
+                            preferSpark: false,
+                            completionTimeoutSecs: 10
                         }
-                        const prepareResponse = await breezSdk?.prepareSendPayment({
-                            destination: address,
-                            amount: payAmount
+                        await breezSdk?.sendPayment({
+                            prepareResponse: prepareResponse as PrepareSendPaymentResponse,
+                            options
                         })
-                        if (!prepareResponse) {
-                            setSendError(t('wallet.unablePrepareBolt12'))
-                            return 
-                        }
-
-                        let listenerId: string | undefined
-                        class EventListener {
-                            onEvent = (event: SdkEvent) => {
-                                switch(event.type) {
-                                    case "paymentPending":
-                                        setLoadingPayment(true)
-                                        break
-                                    case "paymentSucceeded":
-                                        setLoadingPayment(false)
-                                        breezSdk?.removeEventListener(listenerId as string)
-                                        navigate('/wallet/activity')
-                                        break
-                                    case "paymentFailed":
-                                        setLoadingPayment(false)
-                                        breezSdk?.removeEventListener(listenerId as string)
-                                        break
-                                    default:
-                                        console.error('Unhandle event', event.type)
-                                }
-                            }
-                        }
-
-                        listenerId = await breezSdk?.addEventListener(new EventListener())
-
-                        breezSdk?.addEventListener(new EventListener())
-
-                        const sendResponse = await breezSdk?.sendPayment({
-                            prepareResponse
-                        })
-                        if (!sendResponse) {
-                            setSendError(t('wallet.unableSendBolt12'))
-                            return 
-                        }
+                        navigate('/wallet/activity')
                     }
-                    break;
-                default:
-                    setSendError(t('wallet.addressUnknown'))
             }
         }
         catch(e) {
+            setLoadingPayment(false)
             setSendError((e as Error).message)
+        }
+        finally{
+            setLoadingPayment(false)
         }
     }
 
@@ -279,23 +241,27 @@ export const BitcoinSendForm  = () => {
             
             { inputType && price > 0 && 
                 <div>
-                    <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')}</Label>
-                    <Slider min={min} max={max} onValueChanged={setAmount} value={amount} price={price} currency={currency} error={amountError}/>
+                    <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')} ({currency})</Label>
+                    <Input 
+                        type="number" 
+                        min={0} 
+                        step={0.001} 
+                        value={fiatAmount} 
+                        onChange={(e) => handleAmountChange(parseFloat(e.target.value))} /> 
+                    <small>{formatBtcAmount(btcAmount)} BTC</small>
                 </div>
             }
-            {!amountError &&
-                <div className="flex flex-col items-center">
-                    {!loadingPayment && !sendError && 
-                        <div className="text-center flex flex-col gap-2 items-center">
-                            <Button className="w-40" onClick={() => handleSend()}>Send</Button>
-                            {fees > 0 && <p className="text-xs">Fees: {formatBtcAmount(convertSatsToBtc(fees))} BTC / {formatFiatAmount(convertSatsToBtc(fees) * price)} {currency}</p>}
-                        </div>}
-                    {loadingPayment && <Spinner size="s"/>}
-                    { sendError &&
-                        <p className="text-red-500 text-sm italic mt-2">{sendError}</p>
-                    }
-                </div>
-            }
+            <div className="flex flex-col items-center">
+                {!loadingPayment && !sendError && 
+                    <div className="text-center flex flex-col gap-2 items-center">
+                        <Button className="w-40" onClick={() => handleSend()}>Send</Button>
+                        {fees > 0 && <p className="text-xs">Fees: {formatBtcAmount(convertSatsToBtc(fees))} BTC / {formatFiatAmount(convertSatsToBtc(fees) * price)} {currency}</p>}
+                    </div>}
+                {loadingPayment && <Spinner size="s"/>}
+                { sendError &&
+                    <p className="text-red-500 text-sm italic mt-2">{sendError}</p>
+                }
+            </div>
         </div>
     )
 }

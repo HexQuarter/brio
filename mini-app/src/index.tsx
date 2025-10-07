@@ -12,6 +12,7 @@ import './index.css';
 import './mockEnv.ts';
 
 import './i18n';
+import { initWasm } from './lib/wasmLoader.tsx';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 
@@ -27,6 +28,9 @@ try {
   const { tgWebAppPlatform: platform } = launchParams;
   const debug = (launchParams.tgWebAppStartParam || '').includes('platformer_debug')
     || import.meta.env.DEV;
+
+  // Initialize WASM module
+  await initWasm()
 
   // Configure all application dependencies.
   await init({

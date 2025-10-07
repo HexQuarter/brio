@@ -11,12 +11,12 @@ export const WalletSend : React.FC = () => {
             <Tabs defaultValue="telegram">
                 <TabsList>
                     <TabsTrigger value="telegram">{t('wallet.sendTelegram')}</TabsTrigger>
-                    <TabsTrigger value="btc">{t('wallet.payBitcoin')}</TabsTrigger>
+                    <TabsTrigger value="pay">{t('wallet.payBitcoin')}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="telegram">
                     <TelegramSendForm />
                 </TabsContent>
-                <TabsContent value="btc">
+                <TabsContent value="pay">
                     <BitcoinSendForm />
                 </TabsContent>
             </Tabs>

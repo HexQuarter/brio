@@ -49,7 +49,7 @@ export default defineConfig({
   assetsInclude: ['**/*.wasm'],
   // prevent prebundle that breaks `new URL(..., import.meta.url)` in deps
   optimizeDeps: {
-    exclude: ['@breeztech/breez-sdk-liquid'],
+    exclude: ['@breeztech/breez-sdk-spark'],
   },
 });
 

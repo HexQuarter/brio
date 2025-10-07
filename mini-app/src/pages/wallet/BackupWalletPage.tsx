@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { useState } from "react";
 
 import { useTranslation } from "react-i18next";
-import { useWallet } from "@/lib/useWallet";
+import { useWallet } from "@/lib/walletContext";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { LuCopy } from "react-icons/lu";

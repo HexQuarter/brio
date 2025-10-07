@@ -3,7 +3,7 @@ export const formatBtcAmount = (amount: number) => {
 }
 
 export const formatFiatAmount = (amount: number) => new Intl.NumberFormat("en", {
-  maximumFractionDigits: 2,
+  maximumFractionDigits: 3,
   useGrouping: false
 }).format(amount)
 

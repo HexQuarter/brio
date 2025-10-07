@@ -1,28 +1,29 @@
 
-import { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-import init, {
-    BindingLiquidSdk,
+import {
+    BreezSdk,
     connect,
     defaultConfig,
     LogEntry,
     SdkEvent,
-    setLogger,
-} from '@breeztech/breez-sdk-liquid/web'
-import { webHookUrl } from './api';
-import { retrieveLaunchParams } from '@telegram-apps/sdk-react';
+    initLogging,
+    Seed
+} from '@breeztech/breez-sdk-spark/web'
+// import { webHookUrl } from './api';
+// import { retrieveLaunchParams } from '@telegram-apps/sdk-react';
 import { toast } from 'sonner';
 import { t } from 'i18next';
 
 export type WalletContextType = {
     walletExists: boolean;
     promptForPassword: boolean;
-    initWallet: (mnemonic: string) => Promise<BindingLiquidSdk | null>
+    initWallet: (mnemonic: string) => Promise<BreezSdk | null>
     decryptWallet: (password: string) => Promise<string | null>
     storeWallet: (password: string) => Promise<void>
-    breezSdk: BindingLiquidSdk | undefined;
-    getBolt12Offer: (breezSdk: BindingLiquidSdk) => Promise<string | null>
-    getBtcAddress: (breezSdk: BindingLiquidSdk) => Promise<string | null>,
+    breezSdk: BreezSdk | undefined;
+    getLnUrl: (breezSdk: BreezSdk) => Promise<string | null>
+    getBtcAddress: (breezSdk: BreezSdk) => Promise<string | null>,
     currency: string,
     changeCurrency: (currency: string) => void,
     resetWallet: () => void
@@ -32,13 +33,49 @@ const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
 const WALLET_KEY = 'wallet_cipher'
 const WALLET_UNLOCK_LAST_DATE = 'wallet_unlock_last_date'
-const WALLET_BOLT12_OFFER = 'wallet_bolt12_offer'
+const WALLET_LN_URL = 'wallet_ln_url'
 const WALLET_BTC_ADDRESS = 'wallet_btc_address'
 const WALLET_CURRENCY = 'wallet_currency'
 
 const SESSION_MNEMONIC_KEY = 'wallet_session_mnemonic'
 
 const INACTIVITY_SPAN_MS = 10 * 60 * 1000; // 10 minutes
+
+const notifications = new Set<string>()
+
+class JsEventListener {
+    onEvent = (event: SdkEvent) => {
+        switch(event.type) {
+            case "paymentSucceeded": 
+                if (event.payment.status == 'pending') {
+                    if (notifications.has(event.payment.id)) {
+                        return
+                    }
+                    if (event.payment.paymentType == 'receive' && event.payment.status == 'pending') {
+                        toast.success(t('wallet.receivePaymentPending'))
+                    }
+                    notifications.add(event.payment.id)
+                }
+                break
+            case "paymentFailed":
+                toast.error(t('wallet.paymentFailed'))
+                break
+            case "claimDepositsSucceeded":
+                toast.info("claim deposit succeeed")
+                break
+            default:
+                console.log('event', event)
+        }
+    }
+}
+
+class WebLogger {
+  log = (l: LogEntry) => {
+    console.log(`[${l.level}]: ${l.line}`)
+  }
+}
+
+let logger: WebLogger | null = null;
 
 export const WalletProvider = ({children}: {children: ReactNode}) => {    
     const [walletExists, setWalletExists] = useState(!!localStorage.getItem(WALLET_KEY));
@@ -47,13 +84,10 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
             !sessionStorage.getItem(SESSION_MNEMONIC_KEY) || requireUnlock()
         )
     );
-    const [breezSdk, setBreezSdk] = useState<BindingLiquidSdk | undefined>(undefined);
-    const [bolt12Offer, setBolt12Offer] = useState<string | null>(null)
+    const [breezSdk, setBreezSdk] = useState<BreezSdk | undefined>(undefined);
+    const [lnUrl, setLnUrl] = useState<string | null>(null)
     const [btcAddress, setBtcAddress] = useState<string | null>(null)
     const [currency, setCurrency] = useState(localStorage.getItem(WALLET_CURRENCY)?.toUpperCase() || 'USD')
-
-    // Ref to prevent duplicate SDK init
-    const sdkInitRef = useRef(false);
 
     useEffect(() => {
         const checkWallet = () => {
@@ -98,7 +132,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     const resetWallet = () => {
         localStorage.removeItem(WALLET_KEY)
         localStorage.removeItem(WALLET_UNLOCK_LAST_DATE )
-        localStorage.removeItem(WALLET_BOLT12_OFFER)
+        localStorage.removeItem(WALLET_LN_URL)
         localStorage.removeItem(WALLET_BTC_ADDRESS)
         localStorage.removeItem(WALLET_CURRENCY)
 
@@ -113,27 +147,12 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     }
 
     const loadSdk = async (mnemonic: string) => {
-        if (sdkInitRef.current) return null;
-
         // If already initialized, just return the existing SDK
         let sdk = breezSdk
         if (!sdk) {
-            sdkInitRef.current = true;
             sdk = await initBreezSdk(mnemonic)
-            if (!import.meta.env.DEV) {
-                const params = retrieveLaunchParams()
-                const userId = params.tgWebAppData?.user?.id
-                if (userId) {
-                    await sdk.unregisterWebhook()
-                    await sdk.registerWebhook(webHookUrl(userId))
-                    console.log(`Register webhook for ${webHookUrl(userId)}`)
-                }
-            }
             setBreezSdk(sdk)
         }
-
-        // await getBolt12Offer(sdk)
-        // await getBtcAddress(sdk)
 
         return sdk
     }
@@ -174,28 +193,28 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         setWalletExists(true)
     }
 
-    const getBolt12Offer = async (breezSdk: BindingLiquidSdk) => {
-        if (bolt12Offer) {
-            return bolt12Offer
+    const getLnUrl = async (breezSdk: BreezSdk) => {
+        if (lnUrl) {
+            return lnUrl
         }
         if (!breezSdk) {
             return  null
         }
 
-        const cachedBolt12Offer = localStorage.getItem(WALLET_BOLT12_OFFER)
-        if (cachedBolt12Offer) {
-            return cachedBolt12Offer
+        const cachedLnUrl = localStorage.getItem(WALLET_LN_URL)
+        if (cachedLnUrl) {
+            return cachedLnUrl
         }
-        const offer = await fetchBolt12Offer(breezSdk)
-        if (offer) {
-            setBolt12Offer(offer)
-            localStorage.setItem(WALLET_BOLT12_OFFER, offer)
-            return offer
+        const info = await breezSdk?.getLightningAddress()
+        if (info) {
+            setLnUrl(info.lnurl)
+            localStorage.setItem(WALLET_LN_URL, info.lnurl)
+            return info.lnurl
         }
         return null
     }
 
-     const getBtcAddress = async (breezSdk: BindingLiquidSdk) => {
+     const getBtcAddress = async (breezSdk: BreezSdk) => {
         if (btcAddress) {
             return btcAddress
         }
@@ -230,7 +249,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
                 decryptWallet,
                 storeWallet,
                 breezSdk,
-                getBolt12Offer,
+                getLnUrl,
                 getBtcAddress
             }}
         >
@@ -239,53 +258,32 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     );
 };
 
-class JsEventListener {
-
-    private handledEvents = new Set<string>()
-
-    onEvent = (event: SdkEvent) => {
-        switch(event.type) {
-            case "paymentWaitingConfirmation":
-                toast.info(t('wallet.paymentWaitingConfirmation'))
-                break
-            case "paymentWaitingFeeAcceptance":
-                toast.info(t('wallet.paymentWaitingFeeAcceptance'))
-                break
-            case "paymentPending":
-                if(event.details.txId && this.handledEvents.has(event.details.txId)) {
-                    this.handledEvents.add(event.details.txId)
-                    toast.info(t('wallet.paymentPending'))
-                }
-                break
-            case "paymentSucceeded":
-                toast.success(t('wallet.paymentSucceeded'))
-                break
-            case "paymentFailed":
-                toast.error(t('wallet.paymentFailed'))
-                break
-            default:
-                console.log('event', JSON.stringify(event))
-        }
-    }
-}
-
-class JsLogger {
-  log = (l: LogEntry) => {
-    console.log(`[${l.level}]: ${l.line}`)
-  }
-}
-
 const initBreezSdk = async (mnemonic: string) => {
-    await init()
-    setLogger(new JsLogger())
+     if (!logger) {
+      logger = new WebLogger();
+      initLogging(logger);
+    }
 
-    const breezApiKey = import.meta.env.VITE_BREEZ_API_KEY
-    let config = defaultConfig('mainnet', breezApiKey)
-    const sdk = await connect({ config, mnemonic })
-    await sdk.addEventListener(new JsEventListener())
-
-    console.log("Breez SDK connected")
-    return sdk
+    try {
+        const breezApiKey = import.meta.env.VITE_BREEZ_API_KEY
+        let config = defaultConfig('mainnet')
+        config.apiKey = breezApiKey
+        // config.lnurlDomain = 'dev_brio.com'
+    
+        const seed: Seed = { type: 'mnemonic', mnemonic}
+        
+        const sdk = await connect({ config, seed, storageDir: "brio" })
+        console.log('Wallet initialized successfully');
+    
+       const listener = await sdk.addEventListener(new JsEventListener())
+       console.log(listener)
+    
+        return sdk
+    }
+    catch (e) {
+        console.error('Failed to initialize wallet:', e);
+        throw e;
+    }
 }
 
 const requireUnlock = () => {
@@ -293,37 +291,13 @@ const requireUnlock = () => {
     return lastUnlockDate ? Date.now() - parseInt(lastUnlockDate) > INACTIVITY_SPAN_MS : true
 }
 
-export const fetchBolt12Offer = async (sdk: BindingLiquidSdk) => {
-    const prepareResponse = await sdk.prepareReceivePayment({
-        paymentMethod: 'bolt12Offer'
-    })
-    if (prepareResponse) {
-        const res = await sdk.receivePayment({
-            prepareResponse
-        })
-        if (res) {
-            return res.destination
-        }
-        return null
-    }
-    return null
-}
-
-export const fetchBtcAddress = async (sdk: BindingLiquidSdk) => {
-    const prepareResponse = await sdk.prepareReceivePayment({
-        paymentMethod: 'bitcoinAddress'
+export const fetchBtcAddress = async (sdk: BreezSdk) => {
+    const res = await sdk.receivePayment({
+        paymentMethod: { type: 'bitcoinAddress' }
     })
 
-    if (prepareResponse) {
-        const res = await sdk.receivePayment({
-            prepareResponse
-        })
-        if (res) {
-            const split = res.destination.split(':')[1].split("?")[0]
-            console.log(split)
-            return split
-        }
-        return null
+    if (res) {
+        return res.paymentRequest
     }
     return null
 }

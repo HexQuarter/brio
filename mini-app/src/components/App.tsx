@@ -1,7 +1,7 @@
 import { type PropsWithChildren } from 'react';
 import { Navigate, Route, Routes, HashRouter, useLocation } from 'react-router-dom';
 import { AppRoot } from '@telegram-apps/telegram-ui';
-import { useWallet } from '@/lib/useWallet';
+import { useWallet } from '@/lib/walletContext';
 import { MainPage } from '@/pages/MainPage';
 import { WelcomePage } from '@/pages/WelcomePage';
 import { OnBoardingPage } from '@/pages/onboarding/OnBoardingPage';
@@ -42,7 +42,7 @@ export function App() {
               <Route path="receive" element={<WalletReceive />} />
               <Route path="send" element={<WalletSend />} />
               <Route path="activity" element={<WalletActivity />} />
-              <Route path="activity/:txid" element={<WalletActivityDetails />} />
+              <Route path="activity/:id" element={<WalletActivityDetails />} />
               <Route path="settings" element={<WalletSettings />} />
               <Route path="backup" element={<BackupWalletPage />} />
             </Route>

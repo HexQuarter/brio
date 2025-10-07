@@ -1,32 +1,37 @@
 // import { t } from 'i18next';
-import { useWallet } from '@/lib/useWallet';
+import { useWallet } from '@/lib/walletContext';
 import { shortenAddress } from '@/lib/utils';
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { FormattedPayment } from './WalletActivity';
 import { LuCopy } from 'react-icons/lu';
 import { toast } from 'sonner';
+import { Payment } from '@breeztech/breez-sdk-spark/web';
+import { convertSatsToBtc, formatBtcAmount, formatFiatAmount } from '@/helpers/number';
 
 export const WalletActivityDetails : React.FC = () => {
     const {t} = useTranslation()
-    const location = useLocation()
-    const { currency} = useWallet()
+    const {id} = useParams()
+    const { breezSdk, currency} = useWallet()
     const navigate = useNavigate()
 
-    const [payment, setPayment] = useState<undefined | FormattedPayment>(undefined)
+    const [payment, setPayment] = useState<undefined | Payment>(undefined)
+    const [price, setPrice] = useState(0)
 
     useEffect(() => {
-        const urlParams = new URLSearchParams(location.search)
-        if (urlParams && urlParams.has('payment')) {
-            const payment = JSON.parse(urlParams.get('payment') as string) as FormattedPayment
-            console.log(payment)
-            setPayment(payment)
+        const loadPayment = async () => {
+            const paymentResponse = await breezSdk?.getPayment({ paymentId: id as string })
+            const rateResponse = await breezSdk?.listFiatRates()
+            const rate = rateResponse?.rates.find(r => r.coin.toLowerCase() == currency.toLowerCase())
+            setPayment(paymentResponse?.payment)
+            if (!rate) return
+            setPrice(rate.value)
         }
 
-    }, [location])
+        loadPayment()
+    }, [breezSdk])
 
     const copy = async (data: string) => {
         await navigator.clipboard.writeText(data)
@@ -49,13 +54,13 @@ export const WalletActivityDetails : React.FC = () => {
                             { payment.paymentType == 'send' && <span>{t('walletActivity.spendBtcTitle')}</span>}
                             { payment.paymentType == 'receive' && <span>{t('walletActivity.receiveBtcTitle')}</span>}
                         </span>
-                        <Badge variant={payment.status == 'complete' ? 'default' : payment.status == 'failed' ? 'destructive' : 'warning'}>
+                        <Badge variant={payment.status == 'completed' ? 'default' : payment.status == 'failed' ? 'destructive' : 'warning'}>
                             {t(`walletActivity.status.${payment.status}`)}
                         </Badge>
                     </div>
                     
                     <div className='flex flex-col gap-2'>
-                        {payment.details.type == 'bitcoin' &&
+                        {/* {payment.details.type == '' &&
                             <>
                                 <div className='flex justify-between'>
                                     <span className='text-gray-400'>{t('walletActivity.address')}</span>
@@ -72,17 +77,9 @@ export const WalletActivityDetails : React.FC = () => {
                                     </span>
                                 </div>
                             </>
-                        }
-                        {payment.details.type == 'lightning' && 
-                            <div className='flex justify-between'>
-                                <span className='text-gray-400'>{t('walletActivity.offer')}</span>
-                                <span className='flex gap-2'>
-                                    {shortenAddress(payment.destination as string)}
-                                    <div className="active:text-primary"><LuCopy className='w-5 h-5' onClick={() => copy(payment.destination as string)} /></div>
-                                </span>
-                            </div>
-                        }
-                        {payment.details.type == 'lightning' &&
+                        } */}
+                      
+                        {payment.details?.type == 'lightning' &&
                             <div className='flex justify-between'>
                                 <span className='text-gray-400'>{t('walletActivity.publicKey')}</span>
                                 <span className='flex gap-2'>
@@ -91,13 +88,25 @@ export const WalletActivityDetails : React.FC = () => {
                                 </span>
                             </div>
                         }
+                        {payment.details?.type == 'lightning' && 
+                            <div className='flex justify-between'>
+                                <span className='text-gray-400'>{t('walletActivity.invoice')}</span>
+                                <span className='flex gap-2'>
+                                    {shortenAddress(payment.details.invoice as string)}
+                                    <div className="active:text-primary"><LuCopy className='w-5 h-5' onClick={() => copy((payment.details as any).invoice as string)} /></div>
+                                </span>
+                            </div>
+                        }
+                        { payment.paymentType == 'send' &&
                         <div className='flex justify-between'>
                             <span className='text-gray-400'>{t('walletActivity.fees')}</span>
                             <span className='items-center'>
-                                {payment.btcFee} BTC 
-                                <span className='text-xs'> / {payment.fiatFee} {currency}</span>
+                                {formatBtcAmount(convertSatsToBtc(payment.fees))} BTC 
+                                { price > 0 &&
+                                    <span className='text-xs'> / {formatFiatAmount(convertSatsToBtc(payment.fees) * price)} {currency}</span>
+                                }
                             </span>
-                        </div>
+                        </div>}
                         <div className='flex justify-between'>
                             <span className='text-gray-400'>{t('walletActivity.date')}</span>
                             <span>{new Date(payment.timestamp * 1000).toLocaleString()}</span>
@@ -105,14 +114,15 @@ export const WalletActivityDetails : React.FC = () => {
                             <div className='flex justify-between'>
                             <span className='text-gray-400'>{t('walletActivity.amount')}</span>
                             <div className={`flex flex-col gap-1 ${payment.paymentType == 'send' ? 'text-red-600' : 'text-green-600'}`}>
-                                <span>{payment.paymentType == 'send' ? '-' : '+'}{payment.btcAmount} BTC</span>
-                                <span>{payment.paymentType == 'send' ? '-' : '+'}{payment.fiatAmount} {currency}</span>
+                                <span>{payment.paymentType == 'send' ? '-' : '+'}{formatBtcAmount(convertSatsToBtc(payment.amount))} BTC</span>
+                                { price > 0 &&
+                                    <span>{payment.paymentType == 'send' ? '-' : '+'}{formatFiatAmount(convertSatsToBtc(payment.amount) * price)} {currency}</span>
+                                }
                             </div>
                         </div>
                     </div>
                 </div>
             }
-
         </div>
     )
 }

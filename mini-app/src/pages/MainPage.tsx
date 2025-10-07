@@ -1,6 +1,6 @@
 import { Page } from "@/components/Page";
 import { Button } from "@/components/ui/button";
-import { useWallet } from "@/lib/useWallet";
+import { useWallet } from "@/lib/walletContext";
 import { useTranslation } from "react-i18next";
 import { BsCurrencyBitcoin } from "react-icons/bs";
 import { AppList, type App } from "@/components/AppList";
@@ -8,8 +8,6 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { UnlockWalletPage } from "./wallet/UnlockWalletPage";
 import { useEffect, useState } from "react";
 import { BackupWalletPage } from "./wallet/BackupWalletPage";
-import { retrieveLaunchParams } from "@telegram-apps/sdk-react";
-import { fetchInvoiceRequest } from "@/lib/api";
 
 export function MainPage() {
     const wallet = useWallet(); 
@@ -21,34 +19,6 @@ export function MainPage() {
     useEffect(() => {
         setBackup(location.pathname == '/wallet/backup')
     }, [location])
-
-    useEffect(() => {
-         const loadInvoiceRequest = async () => {
-            const {tgWebAppData: data} = retrieveLaunchParams()
-            if (data?.start_param) {
-                const params = new URLSearchParams(data.start_param)
-                const offer = params.get('offer')
-                if (offer) {
-                    try {
-                        const res = await fetchInvoiceRequest(offer)
-                        const { invoiceRequest } = await res.json()
-                        const invoice = await wallet.breezSdk?.createBolt12Invoice({
-                            invoiceRequest: invoiceRequest,
-                            offer: offer
-                        })
-                        console.log('Bolt12 Invoice', invoice)
-                    }
-                    catch(e) {
-                        console.error(e)
-                    }
-                }
-            }
-        }
-
-        if (wallet.breezSdk) {
-            loadInvoiceRequest()
-        }
-    }, [wallet.breezSdk])
 
     const apps = [
         { 

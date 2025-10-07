@@ -8,7 +8,7 @@ type RegisterParams = {
     tapRootAddress: string
     publicKey: string
     breezBtcAddress: string 
-    breezBolt12Offer: string
+    breezLnUrl: string
     tgInitData: string
 }
 
@@ -29,7 +29,7 @@ export const registerUser = async (params: RegisterParams) => {
                 tapRootAddress: params.tapRootAddress,
                 publicKey: params.publicKey,
                 breezBtcAddress: params.breezBtcAddress,
-                breezBolt12Offer: params.breezBolt12Offer,
+                breezLnUrl: params.breezLnUrl,
                 tgInitData: params.tgInitData
             }
         })

@@ -7,7 +7,7 @@ const CreateSchema = z.object({
     tapRootAddress: z.string(),
     publicKey: z.string(),
     breezBtcAddress: z.string(),
-    breezBolt12Offer: z.string(),
+    breezLnUrl: z.string(),
     tgInitData: z.any()
 });
 
@@ -32,7 +32,7 @@ export const handler = async (req, res) => {
     await req.db.put(`p:${createUserRequest.tapRootAddress}`, {
         publicKey: createUserRequest.publicKey,
         breezBtcAddress: createUserRequest.breezBtcAddress,
-        breezBolt12Offer: createUserRequest.breezBolt12Offer,
+        breezLnUrl: createUserRequest.breezLnUrl,
         handle: hashHandle
     })
 

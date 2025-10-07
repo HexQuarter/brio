@@ -9,7 +9,7 @@ import {
 import { Button } from '../ui/button';
 import { useNavigate } from 'react-router-dom';
 import { t } from 'i18next';
-import { useWallet } from '@/lib/useWallet';
+import { useWallet } from '@/lib/walletContext';
 
 import {
   AlertDialog,

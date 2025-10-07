@@ -6,7 +6,7 @@ import { useState } from "react";
 
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import { useWallet } from "@/lib/useWallet";
+import { useWallet } from "@/lib/walletContext";
 
 export function UnlockWalletPage() {
     const wallet = useWallet()

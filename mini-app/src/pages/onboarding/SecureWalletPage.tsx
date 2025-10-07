@@ -2,13 +2,13 @@
 import { Page } from "@/components/Page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"
-import { getSessionMnemonic, useWallet } from "@/lib/useWallet";
+import { getSessionMnemonic, useWallet } from "@/lib/walletContext";
 import { useState } from "react";
 
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 
-import { retrieveRawInitData } from "@telegram-apps/sdk-react";
+import { retrieveLaunchParams, retrieveRawInitData } from "@telegram-apps/sdk-react";
 import { Progress } from "@/components/ui/progress";
 
 import { registerUser } from "@/lib/api";
@@ -58,22 +58,38 @@ export function SecureWalletPage() {
     
             setProgressLabel(t('walletSecure.progress33'))
             
+
             const lp = retrieveRawInitData()
             if (!lp) {
                 alert('Cannot retrieve Telegram init data')
                 return
             }
+
+            const data = retrieveLaunchParams()
     
             await new Promise(r => setTimeout(r, 2000));
     
             setProgressLabel(t('walletSecure.progress66'))
             setProgressValue(66)
-    
+
+            const available = await wallet.breezSdk?.checkLightningAddressAvailable({
+                username: data.tgWebAppData?.user?.username as string
+            })
+            let info
+            if (available) {
+                info = await wallet.breezSdk?.registerLightningAddress({
+                    username: data.tgWebAppData?.user?.username as string
+                })
+            }
+            else {
+                info = await wallet.breezSdk?.getLightningAddress()
+            }
+
             const response = await registerUser({
                 tapRootAddress: tapRootAddress, 
                 publicKey: childPubkeyHex, 
                 breezBtcAddress: await wallet.getBtcAddress(sdk) as string, 
-                breezBolt12Offer: await wallet.getBolt12Offer(sdk) as string, 
+                breezLnUrl: info?.lnurl as string,
                 tgInitData: lp
             })
     

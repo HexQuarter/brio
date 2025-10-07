@@ -14,7 +14,7 @@
     "predeploy": "npm run build"
   },
   "dependencies": {
-    "@breeztech/breez-sdk-liquid": "0.11.4",
+    "@breeztech/breez-sdk-spark": "^0.2.6",
     "@cmdcode/tapscript": "^1.5.3",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-label": "^2.1.7",

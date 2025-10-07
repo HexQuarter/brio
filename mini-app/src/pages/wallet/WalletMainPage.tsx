@@ -2,52 +2,62 @@ import { WalletBalance } from '@/components/wallet/WalletBalance';
 
 import {  Outlet } from 'react-router-dom';
 import { WalletMenu } from '@/components/wallet/Menu';
-import { useWallet } from '@/lib/useWallet';
+import { useWallet } from '@/lib/walletContext';
 
 import { useEffect, useState } from 'react';
-import { BindingLiquidSdk } from '@breeztech/breez-sdk-liquid/web';
 import { convertSatsToBtc } from '@/helpers/number';
 import { Spinner } from '@telegram-apps/telegram-ui';
+import { BreezSdk } from '@breeztech/breez-sdk-spark/web';
 
 export const WalletMainPage = () => {
-    const { breezSdk, currency } = useWallet()    
+    const { breezSdk, currency } = useWallet()
     
     const [btcBalance, setBtcBalance] = useState(0)
     const [fiatBalance, setFiatBalance] = useState(0)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => { 
-        const loadBalance = async (breezSdk: BindingLiquidSdk) => {
-            const walletInfo = await breezSdk.getInfo()
-            const btc = convertSatsToBtc(walletInfo.walletInfo.balanceSat)
+        const loadBalance = async (breezSdk: BreezSdk, ensureSync: boolean = false) => {
+            const walletInfo = await breezSdk.getInfo({
+                // ensureSynced: true will ensure the SDK is synced with the Spark network
+                // before returning the balance
+                ensureSynced: ensureSync,
+            })
+            const btc = convertSatsToBtc(walletInfo.balanceSats)
             setBtcBalance(btc)
 
-            const fiatRates = await breezSdk.fetchFiatRates()
-            const rate = fiatRates.find(r => r.coin.toLowerCase() == currency.toLocaleLowerCase())
+            const fiatRates = await breezSdk.listFiatRates()
+            const rate = fiatRates.rates.find(r => r.coin.toLowerCase() == currency.toLocaleLowerCase())
             if (rate) {
                 setFiatBalance(btc * rate.value)
             }
+
+            setLoading(false)
         }
 
         if (breezSdk) {
             loadBalance(breezSdk)
-            setLoading(false)
-
-            const interval = setInterval(async () => await loadBalance(breezSdk), 1000)
+            
+            const interval = setInterval(async () => await loadBalance(breezSdk, true), 1000)
             return () => clearInterval(interval)
         }
     }, [breezSdk, currency])
 
   return (
-    <div className="flex flex-col gap-5 h-full pb-10">
-        {loading && <Spinner size='s' />}
-        <WalletBalance btcBalance={btcBalance} fiatBalance={fiatBalance} currency={currency}/>
-        <div className="bg-gray-100 p-5 rounded-xl flex-1 flex flex-col">
-            <div className="flex flex-col gap-20 items-center mt-5">
-                <WalletMenu />
-                <Outlet />
-            </div>
+        <div className='flex flex-col items-center h-full pb-10'>
+            { loading && <Spinner size='l' />}
+            { !loading && 
+                <div className="flex flex-col gap-5 h-full ">
+                    {loading && <Spinner size='s' />}
+                    <WalletBalance btcBalance={btcBalance} fiatBalance={fiatBalance} currency={currency}/>
+                        <div className="bg-gray-100 p-1 rounded-xl flex-1 flex flex-col">
+                            <div className="flex flex-col gap-20 items-center mt-5">
+                                <WalletMenu />
+                                <Outlet />
+                            </div>
+                        </div>
+                </div>
+            }
         </div>
-    </div>
   );
 };
