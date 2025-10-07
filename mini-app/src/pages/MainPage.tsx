@@ -45,8 +45,10 @@ export function MainPage() {
             }
         }
 
-        loadInvoiceRequest()
-    }, [])
+        if (wallet.breezSdk) {
+            loadInvoiceRequest()
+        }
+    }, [wallet.breezSdk])
 
     const apps = [
         { 
