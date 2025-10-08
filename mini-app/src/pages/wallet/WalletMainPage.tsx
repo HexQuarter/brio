@@ -38,23 +38,25 @@ export const WalletMainPage = () => {
         }
 
         if (breezSdk) {
+            const tgData = retrieveLaunchParams()
+            if (tgData) {
+                const startParam = tgData.tgWebAppData?.start_param
+                if (startParam) {
+                    const params = new URLSearchParams(startParam)
+                    const payment = params.get('payment')
+                    if (payment) {
+                        navigate(`/wallet/activity/${payment}`)
+                    }
+                }
+            }
+
             loadBalance(breezSdk)
             
             const interval = setInterval(async () => await loadBalance(breezSdk, true), 1000)
             return () => clearInterval(interval)
         }
 
-        const tgData = retrieveLaunchParams()
-        if (tgData) {
-            const startParam = tgData.tgWebAppData?.start_param
-            if (startParam) {
-                const params = new URLSearchParams(startParam)
-                const payment = params.get('payment')
-                if (payment) {
-                    navigate(`/wallet/activity/${payment}`)
-                }
-            }
-        }
+       
 
     }, [breezSdk, currency])
 
