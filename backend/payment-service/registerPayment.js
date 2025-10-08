@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { getBotId } from "../bot/index.js";
+import { getBotToken } from "../bot/index.js";
 
 const RegisterSchema = z.object({
     handle: z.string(),
@@ -16,8 +16,11 @@ export const handler = async (req, res) => {
         const registerPaymentRequest = parsingResult.data
         const tapRootAddress = await req.db.get(`h:${registerPaymentRequest.handle}`)
         if (tapRootAddress) {
-            const { chatId } = await req.db.get(`p:${tapRootAddress}`)
-            await notifyTelegram(chatId, getBotId(), registerPaymentRequest.payment)
+            const user = await req.db.get(`p:${tapRootAddress}`)
+            const postResponse = await notifyTelegram(user.chatId, getBotToken(), registerPaymentRequest.payment)
+            if (postResponse.status >= 400) {
+              return res.status(500).json({ error: await postResponse.json() })
+            }
             return res.status(201).json({ status: "ok" })
         }
 
@@ -32,7 +35,7 @@ export const handler = async (req, res) => {
 async function notifyTelegram(chatId, botToken, payment) {
     const params = new URLSearchParams({ payment });
     const miniappLink = `https://t.me/brio_dev_bot?startapp=${params.toString()}`;
-    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    return await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
