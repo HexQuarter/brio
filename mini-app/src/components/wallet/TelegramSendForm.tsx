@@ -182,6 +182,7 @@ export const TelegramSendForm = () => {
                     <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')}</Label>
                     <Input 
                         type="number" 
+                        inputMode="decimal"
                         min={0.001} 
                         step={0.001} 
                         value={fiatAmount} 
