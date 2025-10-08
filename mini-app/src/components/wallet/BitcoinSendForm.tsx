@@ -31,7 +31,7 @@ export const BitcoinSendForm  = () => {
     const [sendError, setSendError] = useState<string|null>(null)
     const [inputType, setInputType] = useState<InputType | null>(null)
     const [fees, setFees] = useState(0)
-    const [loadingPayment, setLoadingPayment] = useState(false)
+    const [loadingPayment, setLoadingPayment] = useState<string | null>(null)
 
     const pasteAddress = async () => {
         const text = await navigator.clipboard.readText();
@@ -103,9 +103,8 @@ export const BitcoinSendForm  = () => {
             clearTimeout(debounceTimeout.current)
         }
         debounceTimeout.current = setTimeout(async () => {
-            setLoadingPayment(true)
-
             try {
+                setLoadingPayment(t('walletSend.fetchingFees'))
                 if (!inputType) return
                 switch(inputType.type) {
                     case "lnurlPay":
@@ -113,7 +112,7 @@ export const BitcoinSendForm  = () => {
                             amountSats: convertBtcToSats(btc),
                             payRequest: inputType,
                         })
-                        setLoadingPayment(false)
+                        setLoadingPayment(null)
                         if (!prepareResponse) {
                             throw new Error('Unable to prepare LNURL payment')
                         }
@@ -147,7 +146,7 @@ export const BitcoinSendForm  = () => {
                             const fastFeeSats = feeQuote.speedFast.userFeeSat + feeQuote.speedFast.l1BroadcastFeeSat
                             setFees(fastFeeSats)
                             setPrepareResponse(prepareResponse)
-                            setLoadingPayment(false)
+                            setLoadingPayment(null)
                         }
                         }
                         break
@@ -164,11 +163,11 @@ export const BitcoinSendForm  = () => {
             }
             catch(e) {
                 console.log(e)
-                setLoadingPayment(false)
+                setLoadingPayment(null)
                 setSendError((e as Error).message)
             }
             finally {
-                setLoadingPayment(false)
+                setLoadingPayment(null)
             }
         }, 500)
 
@@ -177,7 +176,7 @@ export const BitcoinSendForm  = () => {
 
     const handleSend = async () => {
         setSendError(null)
-        setLoadingPayment(true)
+        setLoadingPayment(t('wallet.sendPaymentPending'))
         try {
             if (!inputType && !prepareResponse) return
             switch(inputType?.type) {
@@ -185,13 +184,14 @@ export const BitcoinSendForm  = () => {
                     await breezSdk?.lnurlPay({
                         prepareResponse: prepareResponse as PrepareLnurlPayResponse
                     })
-                    setLoadingPayment(false)
+                    setLoadingPayment(null)
                     navigate('/wallet/activity')
                     break
                 case "lightningAddress":
                     await breezSdk?.lnurlPay({
                         prepareResponse: prepareResponse as PrepareLnurlPayResponse
                     })
+                    setLoadingPayment(null)
                     navigate('/wallet/activity')
                     break
                 case "bitcoinAddress":
@@ -204,6 +204,7 @@ export const BitcoinSendForm  = () => {
                             prepareResponse: prepareResponse as PrepareSendPaymentResponse,
                             options
                         })
+                        setLoadingPayment(null)
                         navigate('/wallet/activity')
                     }
                     break
@@ -218,16 +219,17 @@ export const BitcoinSendForm  = () => {
                             prepareResponse: prepareResponse as PrepareSendPaymentResponse,
                             options
                         })
+                        setLoadingPayment(null)
                         navigate('/wallet/activity')
                     }
             }
         }
         catch(e) {
-            setLoadingPayment(false)
+            setLoadingPayment(null)
             setSendError((e as Error).message)
         }
         finally{
-            setLoadingPayment(false)
+            setLoadingPayment(null)
         }
     }
 
@@ -275,7 +277,11 @@ export const BitcoinSendForm  = () => {
                         <Button className="w-40" onClick={() => handleSend()}>Send</Button>
                         {fees > 0 && <p className="text-xs">Fees: {formatBtcAmount(convertSatsToBtc(fees))} BTC / {formatFiatAmount(convertSatsToBtc(fees) * price)} {currency}</p>}
                     </div>}
-                {loadingPayment && <Spinner size="s"/>}
+                 {loadingPayment && 
+                            <div className='flex flex-col items-center gap-2'>
+                                <Spinner size="s"/>
+                                <p className="text-xs">{loadingPayment}</p>
+                            </div>}
                 { sendError &&
                     <p className="text-red-500 text-sm italic mt-2">{sendError}</p>
                 }

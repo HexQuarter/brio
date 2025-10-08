@@ -25,7 +25,7 @@ export const TelegramSendForm = () => {
     const [price, setPrice] = useState(0)
     const [prepareResponse, setPrepareResponse] = useState<PrepareLnurlPayResponse | undefined>(undefined)
     const [fees, setFees] = useState(0)
-    const [loadingPayment, setLoadingPayment] = useState(false)
+    const [loadingPayment, setLoadingPayment] = useState<null | string>(null)
 
     useEffect(() => {
         setLookupError(null)
@@ -75,7 +75,7 @@ export const TelegramSendForm = () => {
         debounceTimeout.current = setTimeout(async () => {
             try {
                 setSendError(null)
-                setLoadingPayment(true)
+                setLoadingPayment(t('walletSend.fetchingFees'))
                 const input = await parse(address)
                 if (input.type != 'lnurlPay') {
                     setSendError(t('wallet.invalidAddress'))
@@ -87,18 +87,18 @@ export const TelegramSendForm = () => {
                     payRequest: input,
                     comment: 'Pay via Brio'
                 })
-                setLoadingPayment(false)
+                setLoadingPayment(null)
                 if (!prepareResponse) {
                     return
                 }
                 const feeSats = prepareResponse.feeSats
                 setFees(feeSats)
-                setLoadingPayment(false)
+                setLoadingPayment(null)
                 setPrepareResponse(prepareResponse)
             }
             catch(e) {
                 console.error(e)
-                setLoadingPayment(false)
+                setLoadingPayment(null)
                 setSendError((e as Error).message)
             }
         }, 500)
@@ -108,7 +108,7 @@ export const TelegramSendForm = () => {
 
     const handleSend = async () => {
         setSendError(null)
-        setLoadingPayment(true)
+        setLoadingPayment(t('wallet.sendPaymentPending'))
         try {
 
             let listenerId: string | undefined
@@ -124,14 +124,14 @@ export const TelegramSendForm = () => {
                                 await breezSdk?.removeEventListener(listenerId as string)
                                 toast(t('wallet.sendPaymentSucceeded'))
                                 await new Promise(r => setTimeout(r, 1000));
-                                setLoadingPayment(false)
+                                setLoadingPayment(null)
                                 navigate('/wallet/activity')
                             }
                             break
                         case 'paymentFailed':
                             if (event.payment.paymentType == 'send' && event.payment.status == 'failed') {
                                 await breezSdk?.removeEventListener(listenerId as string)
-                                setLoadingPayment(false)
+                                setLoadingPayment(null)
                                 setSendError(t('wallet.paymentFailed'))
                             }
                             break
@@ -149,7 +149,7 @@ export const TelegramSendForm = () => {
         }
         catch(e) {
             console.error(e)
-            setLoadingPayment(false)
+            setLoadingPayment(null)
             setSendError((e as Error).message)
         }
     }
@@ -198,7 +198,11 @@ export const TelegramSendForm = () => {
                             <Button className="w-40" onClick={() => handleSend()}>Send</Button>
                             {fees > 0 && <p className="text-xs">Fees: {formatBtcAmount(convertSatsToBtc(fees))} BTC / {formatFiatAmount(convertSatsToBtc(fees) * price)} {currency}</p>}
                         </div>}
-                    {loadingPayment && <Spinner size="s"/>}
+                    {loadingPayment && 
+                            <div className='flex flex-col items-center gap-2'>
+                                <Spinner size="s"/>
+                                <p className="text-xs">{loadingPayment}</p>
+                            </div>}
                     { sendError &&
                         <p className="text-red-500 text-sm italic mt-2">{sendError}</p>
                     }

@@ -90,7 +90,7 @@
     "wallet.unablePrepareBolt12": "Unable to prepare offer payment",
     "wallet.unableSendBolt12": "Unable to prepare offer payment",
     "wallet.receivePaymentPending": "You received a payment. Awaiting confirmation",
-    "wallet.snedaymentPending": "You sent a payment. Awaiting confirmation",
+    "wallet.sendPaymentPending": "You sent a payment. Awaiting confirmation",
     "wallet.sendPaymentSucceeded": "Your payment is successful",
     "wallet.paymentFailed": "Payment failed",
 
@@ -128,5 +128,6 @@
     "walletActivity.status.refundable": "Refundable",
     "walletActivity.status.refundPending": "Refund pending",
     "walletActivity.status.waitingFeeAcceptance": "Waiting fee acceptance",
-    "walletActivity.copyToast": "Copied into the clipboard"
+    "walletActivity.copyToast": "Copied into the clipboard",
+    "walletSend.fetchingFees": "Calculting estimated fees"
 }
