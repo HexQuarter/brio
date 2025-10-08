@@ -11,6 +11,7 @@ import { useWallet } from "@/lib/walletContext"
 import { useNavigate } from "react-router-dom"
 import { parse, PrepareLnurlPayResponse, SdkEvent } from "@breeztech/breez-sdk-spark/web"
 import { toast } from "sonner"
+import { openTelegramLink } from "@telegram-apps/sdk-react"
 
 export const TelegramSendForm = () => {
     const navigate = useNavigate()
@@ -155,6 +156,19 @@ export const TelegramSendForm = () => {
         }
     }
 
+    const shareInvite = () => {
+        const link = 'https://t.me/brio_dev_bot'
+        if (openTelegramLink.isAvailable()) {
+            openTelegramLink(
+                `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent("Use Bitcoin on Telegram")}`
+            )
+        }
+        else {
+            navigator.clipboard.writeText(link)
+            toast.info('Invitation link copied. Share it via Telegram manually')
+        }
+    }
+
     return (
         <div className='flex flex-col gap-10 pt-10'>
             <div className='flex flex-col gap-1'>
@@ -169,7 +183,10 @@ export const TelegramSendForm = () => {
                     autoComplete="false"
                     />
                 { lookupError &&
-                    <p className="text-red-500 text-sm italic mt-2">{lookupError}</p>
+                    <div>
+                        <p className="text-red-500 text-sm italic mt-2">{lookupError}</p>
+                        <Button variant="link" className="p-0 text-sm italic" onClick={() => shareInvite()}>Share an invitation</Button>
+                    </div>
                 }
             </div>
             
