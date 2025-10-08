@@ -234,7 +234,14 @@ export const BitcoinSendForm  = () => {
                 <Label htmlFor="address" className='text-gray-400'>{t('wallet.address')}</Label>
                 <div className="flex flex-col gap-2">
                     <div className='flex items-center gap-5 border-b border-gray-200 hover:border-primary'>
-                        <Input id="address" placeholder={t('wallet.bitcoin.address.placeholder')} className='border-none' value={address} onChange={(e) => setAddress(e.target.value)} />
+                        <Input 
+                            id="address" 
+                            placeholder={t('wallet.bitcoin.address.placeholder')} 
+                            value={address} 
+                            onChange={(e) => setAddress(e.target.value)} 
+                            autoCorrect="false"
+                            autoCapitalize="false"
+                            spellCheck="false"/>
                         <LuCopy className="w-5 h-5" onClick={() => pasteAddress()}/>
                         <LuScanLine className="w-5 h-5" onClick={() => setScanner(true)}/>
                     </div>

@@ -170,7 +170,11 @@ export const TelegramSendForm = () => {
                         min={0} 
                         step={0.001} 
                         value={fiatAmount} 
-                        onChange={(e) => handleAmountChange(parseFloat(e.target.value))} /> 
+                        onChange={(e) => handleAmountChange(parseFloat(e.target.value))}
+                        autoCorrect="false"
+                        autoCapitalize="false"
+                        spellCheck="false"
+                        /> 
                     <small>{formatBtcAmount(btcAmount)}  BTC</small>
                 </div>
             }
