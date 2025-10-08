@@ -238,6 +238,7 @@ export const BitcoinSendForm  = () => {
                             id="address" 
                             placeholder={t('wallet.bitcoin.address.placeholder')} 
                             value={address} 
+                            inputMode='decimal'
                             onChange={(e) => setAddress(e.target.value)} 
                             autoCorrect="false"
                             autoCapitalize="false"
