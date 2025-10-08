@@ -70,7 +70,7 @@ if (import.meta.env.DEV) {
           ['hash', 'some-hash'],
           ['signature', 'some-signature'],
           ['user', JSON.stringify({ id: 1, first_name: 'Vladislav', username: 'vlad' })],
-          ['start_param', 'offer=lno1pqpsrp4qpgqppyszm9h2m63a0qqsg3y6efwfx3suue7p2e8zu8tnyf06vlwnhxt6vqvq8legkjuzyz64yc7ghdll37w6dtpgl2uezt9t03s9h80yug387axvqypfrxqjyxvct68jch7gkafw0d3n2cdk2lg25urnhq7p6tu50xm2yasq9n95hn7vdyeufz7kkphp8s244rwx5khqt033pwt80zcj82znnya87tz8dsj6z8sz823myj72zcssxy47eqncdfcu0w34lntc58s64pfre9dt834t76kex9juct8meftx']
+          //['start_param', JSON.stringify({ payment: '0199c2cb-fce2-7a7e-8f3a-e59ce8118be2' })]
         ]).toString()],
         ['tgWebAppVersion', '8.4'],
         ['tgWebAppPlatform', 'tdesktop'],

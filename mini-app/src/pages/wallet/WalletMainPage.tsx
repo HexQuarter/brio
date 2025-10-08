@@ -1,6 +1,6 @@
 import { WalletBalance } from '@/components/wallet/WalletBalance';
 
-import {  Outlet } from 'react-router-dom';
+import {  Outlet, useNavigate } from 'react-router-dom';
 import { WalletMenu } from '@/components/wallet/Menu';
 import { useWallet } from '@/lib/walletContext';
 
@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { convertSatsToBtc } from '@/helpers/number';
 import { Spinner } from '@telegram-apps/telegram-ui';
 import { BreezSdk } from '@breeztech/breez-sdk-spark/web';
+import { retrieveLaunchParams } from '@telegram-apps/sdk-react';
 
 export const WalletMainPage = () => {
     const { breezSdk, currency } = useWallet()
@@ -15,6 +16,7 @@ export const WalletMainPage = () => {
     const [btcBalance, setBtcBalance] = useState(0)
     const [fiatBalance, setFiatBalance] = useState(0)
     const [loading, setLoading] = useState(true)
+    const navigate = useNavigate()
 
     useEffect(() => { 
         const loadBalance = async (breezSdk: BreezSdk, ensureSync: boolean = false) => {
@@ -41,6 +43,18 @@ export const WalletMainPage = () => {
             const interval = setInterval(async () => await loadBalance(breezSdk, true), 1000)
             return () => clearInterval(interval)
         }
+
+        const tgData = retrieveLaunchParams()
+        if (tgData) {
+            const startParam = tgData.tgWebAppData?.start_param
+            if (startParam) {
+                const { payment } = JSON.parse(startParam)
+                if (payment) {
+                    navigate(`/wallet/activity/${payment}`)
+                }
+            }
+        }
+
     }, [breezSdk, currency])
 
   return (
