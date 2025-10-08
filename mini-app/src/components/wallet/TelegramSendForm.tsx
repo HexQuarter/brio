@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { t } from "i18next"
 
 import { Input } from "@/components/ui/input"
@@ -50,6 +50,8 @@ export const TelegramSendForm = () => {
         return () => clearTimeout(delayDebounceFn)
     }, [handle])
 
+    let debounceTimeout = useRef<number|undefined>(undefined);
+
     const handleAmountChange = (amount: number) => {
         setSendError(null)
 
@@ -63,16 +65,21 @@ export const TelegramSendForm = () => {
         const btc = amount / price
         setBtcAmount(btc)
 
-        const delayDebounceFn = setTimeout(async () => {
+        if (debounceTimeout.current) {
+            clearTimeout(debounceTimeout.current)
+        }
+        debounceTimeout.current = setTimeout(async () => {
             try {
+                setSendError(null)
                 setLoadingPayment(true)
                 const input = await parse(address)
                 if (input.type != 'lnurlPay') {
                     setSendError(t('wallet.invalidAddress'))
                     return
                 }
+               
                 const prepareResponse = await breezSdk?.prepareLnurlPay({
-                    amountSats: convertBtcToSats(btcAmount),
+                    amountSats: convertBtcToSats(btc),
                     payRequest: input,
                     comment: 'Pay via Brio'
                 })
@@ -92,7 +99,7 @@ export const TelegramSendForm = () => {
             }
         }, 500)
 
-        return () => clearTimeout(delayDebounceFn)
+        return () => clearTimeout(debounceTimeout.current)
     }
 
     const handleSend = async () => {

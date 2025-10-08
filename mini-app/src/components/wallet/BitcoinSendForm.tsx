@@ -1,7 +1,7 @@
 import { LuCopy, LuScanLine } from "react-icons/lu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState, useEffect} from "react";
+import { useState, useEffect, useRef} from "react";
 import { IDetectedBarcode, Scanner } from '@yudiel/react-qr-scanner';
 import { t } from "i18next";
 import { Button } from "@/components/ui/button"
@@ -81,9 +81,12 @@ export const BitcoinSendForm  = () => {
 
     }, [breezSdk, address])
 
+    let debounceTimeout = useRef<number|undefined>(undefined);
+
     const handleAmountChange = async (amount: number) => {
-        if (amount == 0 && price > 0) return
         setSendError(null)
+
+        if (amount == 0 && price > 0) return
         if (Number.isNaN(amount)) {
             setFiatAmount(0)
             return
@@ -93,7 +96,10 @@ export const BitcoinSendForm  = () => {
         const btc = amount / price
         setBtcAmount(btc)
 
-        const delayDebounceFn = setTimeout(async () => {
+        if (debounceTimeout.current) {
+            clearTimeout(debounceTimeout.current)
+        }
+        debounceTimeout.current = setTimeout(async () => {
             setLoadingPayment(true)
 
             try {
@@ -101,7 +107,7 @@ export const BitcoinSendForm  = () => {
                 switch(inputType.type) {
                     case "lnurlPay":
                         {const prepareResponse = await breezSdk?.prepareLnurlPay({
-                            amountSats: convertBtcToSats(btcAmount),
+                            amountSats: convertBtcToSats(btc),
                             payRequest: inputType,
                         })
                         setLoadingPayment(false)
@@ -163,7 +169,7 @@ export const BitcoinSendForm  = () => {
             }
         }, 500)
 
-        return () => clearTimeout(delayDebounceFn)
+        return () => clearTimeout(debounceTimeout.current)
     }
 
     const handleSend = async () => {
