@@ -154,7 +154,15 @@ export const TelegramSendForm = () => {
         <div className='flex flex-col gap-10 pt-10'>
             <div className='flex flex-col gap-1'>
                 <Label htmlFor="handle" className='text-gray-400'>{t('wallet.telegram.handle')}</Label>
-                <Input id='handle' placeholder={t('wallet.telegram.handle.placeholder')} value={handle} onChange={(e) => setHandle(e.target.value)}/>
+                <Input id='handle' 
+                    placeholder={t('wallet.telegram.handle.placeholder')} 
+                    value={handle} 
+                    onChange={(e) => setHandle(e.target.value)}
+                    autoCorrect="false"
+                    autoCapitalize="false"
+                    spellCheck="false"
+                    autoComplete="false"
+                    />
                 { lookupError &&
                     <p className="text-red-500 text-sm italic mt-2">{lookupError}</p>
                 }
@@ -169,15 +177,12 @@ export const TelegramSendForm = () => {
                 <div>
                     <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')}</Label>
                     <Input 
-                        type="text"
-                        inputMode="decimal"
-                        pattern="[0-9]*[.,]?[0-9]*"
+                        type="number" 
+                        inputMode='decimal'
+                        min={0} 
+                        step={0.001} 
                         value={fiatAmount} 
                         onChange={(e) => handleAmountChange(parseFloat(e.target.value))}
-                        autoCorrect="false"
-                        autoCapitalize="false"
-                        spellCheck="false"
-                        autoComplete="off"
                         /> 
                     <small>{formatBtcAmount(btcAmount)}  BTC</small>
                 </div>

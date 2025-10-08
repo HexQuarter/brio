@@ -236,16 +236,13 @@ export const BitcoinSendForm  = () => {
                     <div className='flex items-center gap-5 border-b border-gray-200 hover:border-primary'>
                         <Input 
                             id="address" 
+                            type="text"
                             placeholder={t('wallet.bitcoin.address.placeholder')} 
                             value={address} 
-                            type="text"
-                            inputMode="decimal"
-                            pattern="[0-9]*[.,]?[0-9]*"
                             onChange={(e) => setAddress(e.target.value)} 
                             autoCorrect="false"
                             autoCapitalize="false"
-                            spellCheck="false"
-                            autoComplete="off"/>
+                            spellCheck="false"/>
                         <LuCopy className="w-5 h-5" onClick={() => pasteAddress()}/>
                         <LuScanLine className="w-5 h-5" onClick={() => setScanner(true)}/>
                     </div>
@@ -263,6 +260,7 @@ export const BitcoinSendForm  = () => {
                         type="number" 
                         min={0} 
                         step={0.001} 
+                        inputMode='decimal'
                         value={fiatAmount} 
                         onChange={(e) => handleAmountChange(parseFloat(e.target.value))} /> 
                     <small>{formatBtcAmount(btcAmount)} BTC</small>
