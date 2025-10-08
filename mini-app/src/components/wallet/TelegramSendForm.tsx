@@ -31,7 +31,8 @@ export const TelegramSendForm = () => {
         setLookupError(null)
         if (handle == "" || !breezSdk) return
         const delayDebounceFn = setTimeout(async () => {
-            const response = await fetchUserInfo(handle)
+            const strippedHandle = handle.startsWith('@') ? handle.slice(1, handle.length) : handle
+            const response = await fetchUserInfo(strippedHandle)
             if (response.status == 200) {
                 const { user: userInfo }  = await response.json()
                 setAddress(userInfo.breezLnUrl)

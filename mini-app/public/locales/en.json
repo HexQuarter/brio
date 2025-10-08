@@ -71,7 +71,7 @@
     "wallet.sendTelegram": "Send on Telegram",
     "wallet.payBitcoin": "Pay via Bitcoin",
     "wallet.telegram.handle": "Telegram Handle",
-    "wallet.telegram.handle.placeholder": "Username without the @",
+    "wallet.telegram.handle.placeholder": "i.e. @JohnDoe",
     "wallet.telegram.phoneNumber": "Phone number",
     "wallet.telegram.phoneNumber.placeholder": "(i.e. +336xxxxxxxx)",
     "wallet.telegram.notFound": "Telegram not matching registed user. User might not be part of the Brio ecosystem",
