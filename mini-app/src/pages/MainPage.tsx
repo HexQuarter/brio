@@ -1,7 +1,5 @@
 import { Page } from "@/components/Page";
-import { Button } from "@/components/ui/button";
 import { useWallet } from "@/lib/walletContext";
-import { useTranslation } from "react-i18next";
 import { BsCurrencyBitcoin } from "react-icons/bs";
 import { BiCollection } from "react-icons/bi";
 import { AppList, type App } from "@/components/AppList";
@@ -12,7 +10,6 @@ import { BackupWalletPage } from "./wallet/BackupWalletPage";
 
 export function MainPage() {
     const wallet = useWallet(); 
-    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation()
 
@@ -42,26 +39,10 @@ export function MainPage() {
                 {backup && <BackupWalletPage />}
                 {!backup &&
                     <>
-                        <AppList apps={apps} onChange={(app: App) => navigate(app.path)} />
-                        {backup && <Outlet />}
                         {!wallet.walletExists &&
-                            <div className="bg-gray-100 p-5 rounded-xl flex-1 flex flex-col">
-                                <div className="p-5 bg-white rounded-xl flex-1">
-                                    <div className='flex flex-col gap-5'>
-                                        <div className="flex flex-col gap-10">
-                                            <div className="flex flex-col gap-10">
-                                                <h3 className='text-2xl font-medium'>{t('main.nowalletTitle')}</h3>
-                                                <p>{t('main.nowalletDescription_1')}</p>
-                                                <p>{t('main.nowalletDescription_2')}</p>
-                                                <p>{t('main.nowalletDescription_3')}</p>
-                                            </div>
-                                            <div className="flex flex-col gap-5 items-center">
-                                                <Button className="w-40" onClick={() => navigate('/onboarding/create-wallet')}>{t('main.createButton')}</Button>
-                                                <Button variant="secondary" className="w-40" onClick={() => navigate('/onboarding/restore-wallet')}>{t('main.restoreButton')}</Button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div>
+                                <AppList apps={apps} onChange={(app: App) => navigate(`${app.path}?visit`)} />
+                                <Outlet />
                             </div>
                         }
 
@@ -69,7 +50,10 @@ export function MainPage() {
                             <UnlockWalletPage />
                         }
                         {wallet.walletExists && !wallet.promptForPassword &&
-                            <Outlet />
+                            <div>
+                                <AppList apps={apps} onChange={(app: App) => navigate(app.path)} />
+                                <Outlet />
+                            </div>
                         }
                     </>
                 }

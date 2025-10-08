@@ -68,7 +68,7 @@ export function BackupWalletPage() {
                     </div>
                 }
                 {mnemonic.join('').length == 0 &&
-                    <form onSubmit={() => displayMnemonic()}>
+                    <form onSubmit={() => displayMnemonic()} className="flex flex-col gap-5">
                         <div className="flex flex-col gap-5">
                             <p>{t('walletUnlock.description')}</p>
                             <Input 
