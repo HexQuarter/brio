@@ -2,7 +2,6 @@ import { LuCopy, LuScanLine } from "react-icons/lu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect, useRef} from "react";
-import { IDetectedBarcode, Scanner } from '@yudiel/react-qr-scanner';
 import { t } from "i18next";
 import { Button } from "@/components/ui/button"
 import { convertSatsToBtc, convertBtcToSats, formatBtcAmount, formatFiatAmount } from "@/helpers/number";
@@ -11,6 +10,7 @@ import { InputType, PrepareLnurlPayResponse, PrepareSendPaymentResponse, SendPay
 import { Spinner } from "@telegram-apps/telegram-ui";
 import { useNavigate } from "react-router-dom";
 import { parse } from "@breeztech/breez-sdk-spark/web";
+import { openQrScanner } from "@telegram-apps/sdk-react";
 
 
 export const BitcoinSendForm  = () => {
@@ -26,7 +26,7 @@ export const BitcoinSendForm  = () => {
         undefined
     >(undefined) 
 
-    const [scanner, setScanner] = useState(false)
+    // const [scanner, setScanner] = useState(false)
     const [parseAddressError, setParseAddressError] = useState<string|null>(null)
     const [sendError, setSendError] = useState<string|null>(null)
     const [inputType, setInputType] = useState<InputType | null>(null)
@@ -38,13 +38,20 @@ export const BitcoinSendForm  = () => {
         setAddress(text)
     }
 
-    const onScannerResult = (detectedCodes: IDetectedBarcode[]) => {
-        if (detectedCodes.length == 0) {
-            return
+    const showScanner = async () => {
+        const result = await openQrScanner()
+        if (result) {
+            setAddress(result)
         }
-        setAddress(detectedCodes[0].rawValue)
-        setScanner(false)
     }
+
+    // const onScannerResult = (detectedCodes: IDetectedBarcode[]) => {
+    //     if (detectedCodes.length == 0) {
+    //         return
+    //     }
+    //     setAddress(detectedCodes[0].rawValue)
+    //     setScanner(false)
+    // }
 
     useEffect(() => {
         const handleAddressChange = async (address: string) => {
@@ -249,13 +256,13 @@ export const BitcoinSendForm  = () => {
                             autoCapitalize="false"
                             spellCheck="false"/>
                         <LuCopy className="w-5 h-5" onClick={() => pasteAddress()}/>
-                        <LuScanLine className="w-5 h-5" onClick={() => setScanner(true)}/>
+                        <LuScanLine className="w-5 h-5" onClick={() => showScanner()}/>
                     </div>
                     { parseAddressError &&
                         <p className="text-red-500 text-sm italic mt-2">{parseAddressError}</p>
                     }
                 </div>
-                {scanner && <Scanner onScan={onScannerResult} />}
+                {/* {scanner && <Scanner onScan={onScannerResult} />} */}
             </div>
             
             { inputType && price > 0 && 
