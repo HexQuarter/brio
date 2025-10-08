@@ -59,13 +59,13 @@ export const WalletActivity : React.FC = () => {
     return (
         <div className="flex flex-col gap-5 text-center w-full h-full rounded-sm">
             <h3 className="text-2xl font-medium">{t('walletActivity.title')}</h3>
-            <div className='flex flex-col p-2 gap-2'>
+            <div className='flex flex-col p-2'>
                 {loading && <Spinner size='s'/>}
                 {!loading && payments.map((payment: FormattedPayment) => (
-                    <div className='border-b-1 border-gray-100 flex flex-col p-3 bg-white rounded-sm shadow-xs' key={payment.id} onClick={() => navigate(`${payment.id}`)}>
+                    <div className='border-gray-300 flex flex-col p-3 border-b-1 active:bg-white hover:bg-white' key={payment.id} onClick={() => navigate(`${payment.id}`)}>
                         <div className='flex items-center justify-between text-left' >
-                            <div className={`flex gap-2 text-${payment.paymentType == 'send' ? 'red' : 'green'}-800`}>
-                                <span className='w-30'>
+                            <div className={`flex gap-2 ${payment.paymentType == 'send' ? 'text-red-800' : 'text-green-800'}`}>
+                                <span className='w-20'>
                                     { payment.paymentType == 'receive' && 'Received'}
                                     { payment.paymentType == 'send' && 'Sent'}
                                 </span>

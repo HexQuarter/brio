@@ -60,24 +60,17 @@ export const WalletActivityDetails : React.FC = () => {
                     </div>
                     
                     <div className='flex flex-col gap-2'>
-                        {/* {payment.details.type == '' &&
+                        {payment.details?.type == 'deposit' &&
                             <>
-                                <div className='flex justify-between'>
-                                    <span className='text-gray-400'>{t('walletActivity.address')}</span>
-                                    <span className='flex gap-2'>
-                                        {shortenAddress(payment.details.bitcoinAddress)}
-                                        <div className="active:text-primary"><LuCopy className='w-5 h-5' onClick={() => copy((payment.details as any).bitcoinAddress as string)}/></div>
-                                    </span>
-                                </div>
                                  <div className='flex justify-between'>
                                     <span className='text-gray-400'>{t('walletActivity.transaction')}</span>
                                     <span className='flex gap-2'>
-                                        {shortenAddress(payment.details.lockupTxId as string)}
-                                        <div className="active:text-primary"><LuCopy className='w-5 h-5' onClick={() => copy((payment.details as any).lockupTxId as string)} /></div>
+                                        {shortenAddress(payment.details.txId as string)}
+                                        <div className="active:text-primary"><LuCopy className='w-5 h-5' onClick={() => copy((payment.details as any).txId as string)} /></div>
                                     </span>
                                 </div>
                             </>
-                        } */}
+                        }
                       
                         {payment.details?.type == 'lightning' &&
                             <div className='flex justify-between'>
