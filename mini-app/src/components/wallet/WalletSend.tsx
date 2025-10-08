@@ -20,7 +20,6 @@ export const WalletSend : React.FC = () => {
                     <BitcoinSendForm />
                 </TabsContent>
             </Tabs>
-            
         </div>
     )
 }

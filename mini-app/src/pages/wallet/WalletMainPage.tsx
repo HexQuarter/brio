@@ -76,7 +76,7 @@ export const WalletMainPage = () => {
                     {loading && <Spinner size='s' />}
                     <WalletBalance btcBalance={btcBalance} fiatBalance={fiatBalance} currency={currency}/>
                         <div className="bg-gray-100 p-1 rounded-xl flex-1 flex flex-col">
-                            <div className="flex flex-col gap-20 items-center mt-5 p-2">
+                            <div className="flex flex-col gap-20 mt-5 p-2">
                                 <WalletMenu />
                                 <Outlet />
                             </div>
