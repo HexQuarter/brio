@@ -70,7 +70,7 @@ if (import.meta.env.DEV) {
           ['hash', 'some-hash'],
           ['signature', 'some-signature'],
           ['user', JSON.stringify({ id: 1, first_name: 'Vladislav', username: 'vlad' })],
-          //['start_param', JSON.stringify({ payment: '0199c2cb-fce2-7a7e-8f3a-e59ce8118be2' })]
+          //['start_param', 'payment=0199c2cb-fce2-7a7e-8f3a-e59ce8118be2']
         ]).toString()],
         ['tgWebAppVersion', '8.4'],
         ['tgWebAppPlatform', 'tdesktop'],

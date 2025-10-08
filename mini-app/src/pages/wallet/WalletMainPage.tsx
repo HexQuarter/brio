@@ -48,7 +48,8 @@ export const WalletMainPage = () => {
         if (tgData) {
             const startParam = tgData.tgWebAppData?.start_param
             if (startParam) {
-                const { payment } = JSON.parse(startParam)
+                const params = new URLSearchParams(startParam)
+                const payment = params.get('payment')
                 if (payment) {
                     navigate(`/wallet/activity/${payment}`)
                 }

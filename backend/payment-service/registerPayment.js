@@ -33,8 +33,10 @@ export const handler = async (req, res) => {
 }
 
 async function notifyTelegram(chatId, botToken, payment) {
-    const params = JSON.stringify({ payment });
-    const miniappLink = `https://t.me/brio_dev_bot?startapp=${params}`;
+    const startParam = new URLSearchParams()
+    startParam.append('payment', payment)
+    const encodedStartParam = encodeURIComponent(startParam.toString())
+    const miniappLink = `https://t.me/brio_dev_bot?startapp=${encodedStartParam}`;
     return await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
