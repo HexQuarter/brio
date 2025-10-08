@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { convertBtcToSats, convertSatsToBtc, formatBtcAmount, formatFiatAmount } from "@/helpers/number"
-import { fetchUserInfo } from "@/lib/api"
+import { fetchUserInfo, registerPayment } from "@/lib/api"
 import { Spinner } from "@telegram-apps/telegram-ui"
 import { useWallet } from "@/lib/walletContext"
 import { useNavigate } from "react-router-dom"
@@ -114,6 +114,7 @@ export const TelegramSendForm = () => {
                     switch(event.type) {
                         case 'paymentSucceeded':
                             if (event.payment.paymentType == 'send' && event.payment.status == 'completed') {
+                                await registerPayment(handle, event.payment.id)
                                 await breezSdk?.removeEventListener(listenerId as string)
                                 toast(t('wallet.sendPaymentSucceeded'))
                                 await new Promise(r => setTimeout(r, 1000));

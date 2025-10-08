@@ -1,0 +1,49 @@
+import * as z from "zod";
+import { getBotId } from "../bot/index.js";
+
+const RegisterSchema = z.object({
+    handle: z.string(),
+    payment: z.string()
+});
+
+export const handler = async (req, res) => {
+    try {
+        const parsingResult = RegisterSchema.safeParse(req.body)
+        if (!parsingResult.success) {
+            return res.status(403).json({ error: parsingResult.error })
+        }
+
+        const registerPaymentRequest = parsingResult.data
+        const tapRootAddress = await req.db.get(`h:${registerPaymentRequest.handle}`)
+        if (tapRootAddress) {
+            const { chatId } = await req.db.get(`p:${tapRootAddress}`)
+            await notifyTelegram(chatId, getBotId(), registerPaymentRequest.payment)
+            return res.status(201).json({ status: "ok" })
+        }
+
+        return res.status(403).json({ error: "handle not found" })
+    }
+    catch(e) {
+        console.log(e)
+        res.status(500).json({ error: e.message })
+    }
+}
+
+async function notifyTelegram(chatId, botToken, payment) {
+    const params = new URLSearchParams({ payment });
+    const miniappLink = `https://t.me/brio_dev_bot?startapp=${params.toString()}`;
+    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+        chat_id: chatId,
+        text: `⚡ You just received a payment`,
+        reply_markup: {
+            inline_keyboard: [
+                [
+                    { text: "Check it out", url: miniappLink }
+                ]
+            ]}
+        }),
+    })
+}

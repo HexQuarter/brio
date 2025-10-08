@@ -1,5 +1,6 @@
 import * as z from "zod";
 import { createUserHandler, searchUserHandler } from "./user-service/index.js"
+import {registerPaymentHandler } from "./payment-service/index.js"
 
 const OperationSchema = z.object({
     operation: z.string(),
@@ -9,6 +10,7 @@ const OperationSchema = z.object({
 const handlers = {
     "create-user": createUserHandler,
     "search-user": searchUserHandler,
+    "register-payment": registerPaymentHandler
 }
 
 export const rpcHandler = async (req, res) => {

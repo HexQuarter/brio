@@ -53,7 +53,8 @@ export const fetchUserInfo = async (handle: string) => {
     })
 }
 
-export const fetchInvoiceRequest = async (offer: string) => {
+export const registerPayment = async(handle: string, paymentId: string) => {
+    const digest = await crypto.subtle.digest("sha-256", new TextEncoder().encode(handle))
     return await fetch(new URL("/rpc", rpcEndpoint()), {
         method: 'POST',
         headers: {
@@ -61,9 +62,10 @@ export const fetchInvoiceRequest = async (offer: string) => {
             "Accept": "application/json"
         },
         body: JSON.stringify({
-            operation: 'search-invoice-request',
+            operation: 'register-payment',
             payload: {
-                offer: offer
+                handle: buf2hex(digest),
+                payment: paymentId
             }
         })
     })

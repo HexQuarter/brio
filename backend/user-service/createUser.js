@@ -33,7 +33,8 @@ export const handler = async (req, res) => {
         publicKey: createUserRequest.publicKey,
         breezBtcAddress: createUserRequest.breezBtcAddress,
         breezLnUrl: createUserRequest.breezLnUrl,
-        handle: hashHandle
+        handle: hashHandle,
+        chatId: id
     })
 
     await req.db.put(`h:${hashHandle}`, createUserRequest.tapRootAddress)
