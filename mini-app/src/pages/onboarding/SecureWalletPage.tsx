@@ -114,7 +114,7 @@ export function SecureWalletPage() {
 
     return (
         <Page back={true}>
-            <div className="flex flex-col gap-20">
+            <form className="flex flex-col gap-20" onSubmit={() => secureWallet()}>
                 <div className='flex flex-col gap-5'>
                     <div className="flex flex-col gap-10">
                         <h2 className='text-4xl'>{t('walletSecure.title')}</h2>
@@ -138,10 +138,10 @@ export function SecureWalletPage() {
                         <Button className="w-40" onClick={() => goToWallet()}>{t('walletSecure.goToWalletButton')}</Button>
                     }
                     { progressValue == 0 &&
-                        <Button className="w-40" onClick={() => secureWallet()}>{t('walletSecure.registerButton')}</Button>
+                        <Button className="w-40" type="submit">{t('walletSecure.registerButton')}</Button>
                     }
                 </div>
-            </div>
+            </form>
         </Page>
     );
 }

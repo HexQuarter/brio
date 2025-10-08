@@ -53,10 +53,10 @@ export function BackupWalletPage() {
                 { mnemonic.join('').length > 0  &&
                     <div className="flex flex-col gap-10 w-full">
                         <p className="text-left">{t('walletBackup.subtitle')}</p>
-                        <div className="flex gap-5">
-                            <div className="grid grid-cols-3 gap-4 text-center">
+                        <div className="flex flex-col gap-5">
+                            <div className="grid grid-cols-2 gap-4 text-center">
                                 {mnemonic.map((word, index) => (
-                                    <div key={index} className="border-2 border-primary text-primary rounded  p-2">{word}</div>
+                                    <div key={index} className="border-2 border-primary text-primary rounded p-4">{word}</div>
                                 ))}
                             </div>
                             <div className="active:text-primary"><LuCopy className='w-5 h-5' onClick={() => copy()} /></div>
@@ -68,16 +68,20 @@ export function BackupWalletPage() {
                     </div>
                 }
                 {mnemonic.join('').length == 0 &&
-                    <>
+                    <form onSubmit={() => displayMnemonic()}>
                         <div className="flex flex-col gap-5">
                             <p>{t('walletUnlock.description')}</p>
-                            <Input type="password" placeholder={t('walletUnlock.inputPlaceholder')} onChange={(e) => setPassword(e.target.value)} />
+                            <Input 
+                                type="password" 
+                                placeholder={t('walletUnlock.inputPlaceholder')} 
+                                onChange={(e) => setPassword(e.target.value)} 
+                                enterKeyHint="enter"/>
                             {error && <p className="text-red-500 text-sm italic mt-2">{error}</p>}
                         </div>
                         <div className="flex justify-center">
-                            <Button className="w-40" onClick={() => displayMnemonic()}>{t('walletUnlock.nextButton')}</Button>
+                            <Button className="w-40" type="submit">{t('walletUnlock.nextButton')}</Button>
                         </div>
-                    </>
+                    </form>
                 }
             </div>
         </Page>

@@ -38,14 +38,20 @@ export function UnlockWalletPage() {
                         <h2 className='text-4xl'>{t('walletUnlock.title')}</h2>
                     </div>
                 </div>
-                <div className="flex flex-col gap-5">
-                    <p>{t('walletUnlock.description')}</p>
-                    <Input type="password" placeholder={t('walletUnlock.inputPlaceholder')} onChange={(e) => setPassword(e.target.value)} />
-                    {error && <p className="text-red-500 text-sm italic mt-2">{error}</p>}
-                </div>
-                <div className="flex justify-center">
-                    <Button className="w-40" onClick={() => unlockWallet()}>{t('walletUnlock.nextButton')}</Button>
-                </div>
+                <form onSubmit={() => unlockWallet()} className="flex flex-col gap-5">
+                    <div className="flex flex-col gap-5">
+                        <p>{t('walletUnlock.description')}</p>
+                        <Input 
+                            type="password" 
+                            placeholder={t('walletUnlock.inputPlaceholder')} 
+                            onChange={(e) => setPassword(e.target.value)} 
+                            enterKeyHint="enter" />
+                        {error && <p className="text-red-500 text-sm italic mt-2">{error}</p>}
+                    </div>
+                    <div className="flex justify-center">
+                        <Button className="w-40" type="submit">{t('walletUnlock.nextButton')}</Button>
+                    </div>
+                </form>
             </div>
         </Page>
     );
