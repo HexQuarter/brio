@@ -169,15 +169,15 @@ export const TelegramSendForm = () => {
                 <div>
                     <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')}</Label>
                     <Input 
-                        type="number" 
-                        inputMode='decimal'
-                        min={0} 
-                        step={0.001} 
+                        type="text"
+                        inputMode="decimal"
+                        pattern="[0-9]*[.,]?[0-9]*"
                         value={fiatAmount} 
                         onChange={(e) => handleAmountChange(parseFloat(e.target.value))}
                         autoCorrect="false"
                         autoCapitalize="false"
                         spellCheck="false"
+                        autoComplete="off"
                         /> 
                     <small>{formatBtcAmount(btcAmount)}  BTC</small>
                 </div>

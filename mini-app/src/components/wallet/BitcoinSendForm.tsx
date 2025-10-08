@@ -238,11 +238,14 @@ export const BitcoinSendForm  = () => {
                             id="address" 
                             placeholder={t('wallet.bitcoin.address.placeholder')} 
                             value={address} 
-                            inputMode='decimal'
+                            type="text"
+                            inputMode="decimal"
+                            pattern="[0-9]*[.,]?[0-9]*"
                             onChange={(e) => setAddress(e.target.value)} 
                             autoCorrect="false"
                             autoCapitalize="false"
-                            spellCheck="false"/>
+                            spellCheck="false"
+                            autoComplete="off"/>
                         <LuCopy className="w-5 h-5" onClick={() => pasteAddress()}/>
                         <LuScanLine className="w-5 h-5" onClick={() => setScanner(true)}/>
                     </div>
