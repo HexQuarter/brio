@@ -59,7 +59,7 @@ export function RestoreWalletPage() {
     
     return (
         <Page back={true}>
-            <div className="flex flex-col gap-20">
+            <form className="flex flex-col gap-20" onSubmit={() => navigate('/onboarding/secure-wallet')}>
                 <div className='flex flex-col gap-5'>
                     <div className="flex flex-col gap-10">
                         <h2 className='text-4xl'>{t('walletRestore.title')}</h2>
@@ -85,10 +85,10 @@ export function RestoreWalletPage() {
                 </div>
                 {mnemonic.join('').length > 0 && !error && (
                     <div className="flex justify-center">
-                        <Button className="w-40" onClick={() => navigate('/onboarding/secure-wallet')}>{t('walletRestore.nextButton')}</Button>
+                        <Button className="w-40" type="submit">{t('walletRestore.nextButton')}</Button>
                     </div>
                 )}
-            </div>
+            </form>
         </Page>
     );
 }
