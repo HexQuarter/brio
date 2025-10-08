@@ -44,14 +44,14 @@ export const WalletMainPage = () => {
     }, [breezSdk, currency])
 
   return (
-        <div className='flex flex-col items-center h-full pb-10'>
-            { loading && <Spinner size='l' />}
+        <div className='flex flex-col h-full'>
+            { loading && <div className="flex flex-col items-center "><Spinner size='l' /></div>}
             { !loading && 
                 <div className="flex flex-col gap-5 h-full ">
                     {loading && <Spinner size='s' />}
                     <WalletBalance btcBalance={btcBalance} fiatBalance={fiatBalance} currency={currency}/>
                         <div className="bg-gray-100 p-1 rounded-xl flex-1 flex flex-col">
-                            <div className="flex flex-col gap-20 items-center mt-5">
+                            <div className="flex flex-col gap-20 items-center mt-5 p-2">
                                 <WalletMenu />
                                 <Outlet />
                             </div>
