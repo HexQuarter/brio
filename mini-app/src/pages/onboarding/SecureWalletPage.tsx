@@ -70,13 +70,15 @@ export function SecureWalletPage() {
             setProgressLabel(t('walletSecure.progress66'))
             setProgressValue(66)
 
+            const usernameDigest = await crypto.subtle.digest("sha-256", new TextEncoder().encode(data.tgWebAppData?.user?.username))
+
             const available = await sdk.checkLightningAddressAvailable({
-                username: data.tgWebAppData?.user?.username as string
+                username: buf2hex(usernameDigest)
             })
             let info
             if (available) {
                 info = await sdk.registerLightningAddress({
-                    username: data.tgWebAppData?.user?.username as string
+                    username: buf2hex(usernameDigest)
                 })
             }
             else {
