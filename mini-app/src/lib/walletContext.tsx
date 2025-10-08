@@ -26,7 +26,7 @@ export type WalletContextType = {
     getBtcAddress: (breezSdk: BreezSdk) => Promise<string | null>,
     currency: string,
     changeCurrency: (currency: string) => void,
-    resetWallet: () => void
+    resetWallet: () => Promise<void>
 };
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -129,7 +129,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         return () => clearInterval(interval);
     }, [promptForPassword])
 
-    const resetWallet = () => {
+    const resetWallet = async () => {
         localStorage.removeItem(WALLET_KEY)
         localStorage.removeItem(WALLET_UNLOCK_LAST_DATE )
         localStorage.removeItem(WALLET_LN_URL)
@@ -137,6 +137,8 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         localStorage.removeItem(WALLET_CURRENCY)
 
         sessionStorage.removeItem(SESSION_MNEMONIC_KEY)
+
+        await breezSdk?.deleteLightningAddress()
 
         setWalletExists(false)
     }

@@ -27,8 +27,8 @@ export const WalletSettings : React.FC = () => {
     const navigate = useNavigate()
     const { currency, changeCurrency, resetWallet} = useWallet()
 
-    const reset = () => {
-        resetWallet()
+    const reset = async () => {
+        await resetWallet()
         navigate('/')
     }
 
