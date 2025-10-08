@@ -16,6 +16,7 @@ import { WalletActivity } from './wallet/WalletActivity';
 import { WalletActivityDetails } from './wallet/WalletActivityDetails';
 import { WalletSettings } from './wallet/WalletSettings';
 import { BackupWalletPage } from '@/pages/wallet/BackupWalletPage';
+import { ComingSoonPage } from '@/pages/ComingSoonPage';
 
 function AppRoute({ children } : PropsWithChildren<{}>) {
   const wallet = useWallet()
@@ -46,6 +47,7 @@ export function App() {
               <Route path="settings" element={<WalletSettings />} />
               <Route path="backup" element={<BackupWalletPage />} />
             </Route>
+            <Route path="/upcoming" element={<ComingSoonPage />} />
           </Route>
           <Route path="/welcome" Component={WelcomePage} />
           <Route path="/onboarding" Component={OnBoardingPage} />

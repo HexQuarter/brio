@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { IconType } from "react-icons";
 
 export type App  = {
@@ -13,12 +14,20 @@ interface AppListProps {
 }
 
 export const AppList: React.FC<AppListProps> = ({ apps, onChange }) => {
+
+    const [active, setActive] = useState(0)
+
+    const changeApp = (app: App, index :number) => {
+        setActive(index)
+        onChange(app)
+    }
+
     return (
-        <div className="flex flex-col gap-5">
-            {apps.map((app: App) => (
-                <div key={app.name} className={`flex flex-col items-center gap-2 p-5 mb-5`} onClick={() => onChange(app)}>
+        <div className="flex gap-5 justify-center">
+            {apps.map((app: App, index) => (
+                <div key={app.name} className={`flex flex-col items-center gap-2 p-5 mb-5`} onClick={() => changeApp(app, index)}>
                     <app.icon className={`w-10 h-10 ${app.className}`}/>
-                    <span className="text-sm">{app.name}</span>
+                    <span className={`text-sm ${index == active ? 'border-b-1' : ''}`}>{app.name}</span>
                 </div>
             ))}
         </div>

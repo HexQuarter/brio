@@ -13,14 +13,14 @@ export const WelcomePage: FC = () => {
 
   return (
     <div className='flex flex-col justify-between h-screen pb-20'>
-      <div style={{ alignItems: 'center', display: 'flex', flexDirection: 'column', gap: 30 }}>
+      <div className='flex flex-col gap-10 items-center'>
         <h1 className='text-6xl'><span className='font-normal'>{t('welcome.title')}</span><span className='ml-4 font-semibold'>Brio</span></h1>
         <p className=''>{t('welcome.description')}</p>
         <div>
           <Button className="" onClick={() => navigate('/onboarding') }>{t('welcome.button')}</Button>
         </div>
       </div>
-      <ComingSoon />
+      <div><ComingSoon /></div>
     </div>
   );
 };

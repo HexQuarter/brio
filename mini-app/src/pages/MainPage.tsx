@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useWallet } from "@/lib/walletContext";
 import { useTranslation } from "react-i18next";
 import { BsCurrencyBitcoin } from "react-icons/bs";
+import { BiCollection } from "react-icons/bi";
 import { AppList, type App } from "@/components/AppList";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { UnlockWalletPage } from "./wallet/UnlockWalletPage";
@@ -26,6 +27,12 @@ export function MainPage() {
             icon: BsCurrencyBitcoin, 
             className: "text-white bg-primary rounded-full p-2",
             path: "/wallet"
+        },
+        { 
+            name: "Coming apps", 
+            icon: BiCollection, 
+            className: "text-gray-500 bg-gray-200 rounded-full p-2",
+            path: "/upcoming"
         },
     ];
 
@@ -66,8 +73,6 @@ export function MainPage() {
                         }
                     </>
                 }
-                
-                
             </div>
         </Page>
     );
