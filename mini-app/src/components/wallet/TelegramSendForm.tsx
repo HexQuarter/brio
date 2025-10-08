@@ -114,7 +114,9 @@ export const TelegramSendForm = () => {
                     switch(event.type) {
                         case 'paymentSucceeded':
                             if (event.payment.paymentType == 'send' && event.payment.status == 'completed') {
-                                await registerPayment(handle, event.payment.id)
+                                if (event.payment.details?.type == 'lightning') {
+                                    await registerPayment(handle, event.payment.details.paymentHash)
+                                }
                                 await breezSdk?.removeEventListener(listenerId as string)
                                 toast(t('wallet.sendPaymentSucceeded'))
                                 await new Promise(r => setTimeout(r, 1000));

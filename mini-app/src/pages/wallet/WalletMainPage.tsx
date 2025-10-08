@@ -43,9 +43,17 @@ export const WalletMainPage = () => {
                 const startParam = tgData.tgWebAppData?.start_param
                 if (startParam) {
                     const params = new URLSearchParams(startParam)
-                    const payment = params.get('payment')
-                    if (payment) {
-                        navigate(`/wallet/activity/${payment}`)
+                    const paymentHash = params.get('payment')
+                    if (paymentHash) {
+                        const fetchPaymentId = async (hash: string) => {
+                            const { payments } = await breezSdk.listPayments({})
+                            const payment = payments.find(p => p.paymentType == 'receive' && p.details?.type == 'lightning' && p.details.paymentHash == hash)
+                            if (payment) {
+                                navigate(`/wallet/activity/${payment.id}`)
+                            }
+                        }
+
+                        fetchPaymentId(paymentHash)
                     }
                 }
             }
