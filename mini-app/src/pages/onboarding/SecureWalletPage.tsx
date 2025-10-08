@@ -57,8 +57,6 @@ export function SecureWalletPage() {
             setProgressValue(33)
     
             setProgressLabel(t('walletSecure.progress33'))
-            
-
             const lp = retrieveRawInitData()
             if (!lp) {
                 alert('Cannot retrieve Telegram init data')
@@ -72,17 +70,17 @@ export function SecureWalletPage() {
             setProgressLabel(t('walletSecure.progress66'))
             setProgressValue(66)
 
-            const available = await wallet.breezSdk?.checkLightningAddressAvailable({
+            const available = await sdk.checkLightningAddressAvailable({
                 username: data.tgWebAppData?.user?.username as string
             })
             let info
             if (available) {
-                info = await wallet.breezSdk?.registerLightningAddress({
+                info = await sdk.registerLightningAddress({
                     username: data.tgWebAppData?.user?.username as string
                 })
             }
             else {
-                info = await wallet.breezSdk?.getLightningAddress()
+                info = await sdk.getLightningAddress()
             }
 
             const response = await registerUser({
