@@ -18,7 +18,7 @@ export const TelegramSendForm = () => {
     const [handle, setHandle] = useState("")
     // const [phoneNumber, setPhoneNumber] = useState("")
     const [address, setAddress] = useState("")
-    const [fiatAmount, setFiatAmount] = useState(0)
+    const [fiatAmount, setFiatAmount] = useState<string | number>("")
     const [btcAmount, setBtcAmount] = useState(0)
     const [lookupError, setLookupError] = useState<string | null>(null)
     const [sendError, setSendError] = useState<string|null>(null)
@@ -55,13 +55,17 @@ export const TelegramSendForm = () => {
     const handleAmountChange = (amount: number) => {
         setSendError(null)
 
-        if (amount == 0) return
         if (Number.isNaN(amount)) {
-            setFiatAmount(0)
+            setFiatAmount("")
             return
         }
 
         setFiatAmount(amount)
+
+        if (amount == 0) {
+            return
+        }
+        
         const btc = amount / price
         setBtcAmount(btc)
 
@@ -178,8 +182,7 @@ export const TelegramSendForm = () => {
                     <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')}</Label>
                     <Input 
                         type="number" 
-                        inputMode='decimal'
-                        min={0} 
+                        min={0.001} 
                         step={0.001} 
                         value={fiatAmount} 
                         onChange={(e) => handleAmountChange(parseFloat(e.target.value))}

@@ -18,7 +18,7 @@ export const BitcoinSendForm  = () => {
     const { breezSdk, currency } = useWallet()
     const [address, setAddress] = useState("")
     const [price, setPrice] = useState(0)
-    const [fiatAmount, setFiatAmount] = useState(0)
+    const [fiatAmount, setFiatAmount] = useState<string | number>("")
     const [btcAmount, setBtcAmount] = useState(0)
     const [prepareResponse, setPrepareResponse] = useState<
         PrepareLnurlPayResponse | 
@@ -84,11 +84,14 @@ export const BitcoinSendForm  = () => {
     let debounceTimeout = useRef<number|undefined>(undefined);
 
     const handleAmountChange = async (amount: number) => {
-        setSendError(null)
+         if (Number.isNaN(amount)) {
+            setFiatAmount("")
+            return
+        }
 
-        if (amount == 0 && price > 0) return
-        if (Number.isNaN(amount)) {
-            setFiatAmount(0)
+        setFiatAmount(amount)
+
+        if (amount == 0) {
             return
         }
 
