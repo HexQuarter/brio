@@ -4,12 +4,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 import { TelegramSendForm } from '@/components/wallet/TelegramSendForm';
 import { BitcoinSendForm } from '@/components/wallet/BitcoinSendForm';
-import { Page } from "@/components/Page";
-
 
 export const WalletSendPage : React.FC = () => {
     return (
-        <Page back={true}>
             <div className="flex flex-col gap-10">
                 <Tabs defaultValue="telegram">
                     <TabsList>
@@ -24,6 +21,5 @@ export const WalletSendPage : React.FC = () => {
                     </TabsContent>
                 </Tabs>
             </div>
-        </Page>
     )
 }

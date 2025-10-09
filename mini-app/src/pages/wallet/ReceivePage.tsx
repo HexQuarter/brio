@@ -6,7 +6,6 @@ import { LuShare2, LuCopy } from "react-icons/lu";
 import QRCode from "react-qr-code";
 import { useWallet } from '@/lib/walletContext';
 import { toast } from "sonner"
-import { Page } from "@/components/Page";
 import { openTelegramLink } from '@telegram-apps/sdk-react';
 
 
@@ -65,7 +64,6 @@ export const WalletReceivePage : React.FC = () => {
     }
 
     return (
-        <Page back={true}>
             <div className="flex flex-col gap-10 text-center">
                 <p className="text-primary">{t('wallet.receiveTitle')}</p>
                 <Tabs defaultValue="lightning">
@@ -117,6 +115,5 @@ export const WalletReceivePage : React.FC = () => {
                     </TabsContent>
                 </Tabs>
             </div>
-        </Page>
     )
 }

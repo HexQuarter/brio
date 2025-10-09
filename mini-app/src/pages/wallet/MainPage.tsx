@@ -14,6 +14,7 @@ import { CiCircleAlert } from "react-icons/ci";
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 import { UnlockWalletPage } from './UnlockWalletPage';
+import { Page } from '@/components/Page';
 
 export const WalletMainPage = () => {
     const { breezSdk, currency, walletExists, promptForPassword } = useWallet()
@@ -81,24 +82,26 @@ export const WalletMainPage = () => {
 
      if (!walletExists && location.search == '?visit') {
         return (
-            <div className="bg-gray-100 p-5 rounded-xl flex-1 flex flex-col">
-                <div className="p-5 bg-white rounded-xl flex-1">
-                    <div className='flex flex-col gap-5'>
-                        <div className="flex flex-col gap-10">
+            <Page back={true}>
+                <div className="bg-gray-100 p-5 rounded-xl flex-1 flex flex-col">
+                    <div className="p-5 bg-white rounded-xl flex-1">
+                        <div className='flex flex-col gap-5'>
                             <div className="flex flex-col gap-10">
-                                <h3 className='text-2xl font-medium'>{t('main.nowalletTitle')}</h3>
-                                <p>{t('main.nowalletDescription_1')}</p>
-                                <p>{t('main.nowalletDescription_2')}</p>
-                                <p>{t('main.nowalletDescription_3')}</p>
-                            </div>
-                            <div className="flex flex-col gap-5 items-center">
-                                <Button className="w-40" onClick={() => navigate('/onboarding/create-wallet')}>{t('main.createButton')}</Button>
-                                <Button variant="secondary" className="w-40" onClick={() => navigate('/onboarding/restore-wallet')}>{t('main.restoreButton')}</Button>
+                                <div className="flex flex-col gap-10">
+                                    <h3 className='text-2xl font-medium'>{t('main.nowalletTitle')}</h3>
+                                    <p>{t('main.nowalletDescription_1')}</p>
+                                    <p>{t('main.nowalletDescription_2')}</p>
+                                    <p>{t('main.nowalletDescription_3')}</p>
+                                </div>
+                                <div className="flex flex-col gap-5 items-center">
+                                    <Button className="w-40" onClick={() => navigate('/onboarding/create-wallet')}>{t('main.createButton')}</Button>
+                                    <Button variant="secondary" className="w-40" onClick={() => navigate('/onboarding/restore-wallet')}>{t('main.restoreButton')}</Button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </Page>
         )
     }
 

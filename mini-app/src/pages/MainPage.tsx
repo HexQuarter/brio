@@ -3,6 +3,7 @@ import { BsCurrencyBitcoin } from "react-icons/bs";
 import { BiCollection } from "react-icons/bi";
 import { AppList, type App } from "@/components/AppList";
 import { Outlet, useNavigate } from "react-router-dom";
+import { Page } from "@/components/Page";
 
 export function MainPage() {
     const wallet = useWallet(); 
@@ -26,7 +27,9 @@ export function MainPage() {
     return (
         <div className="flex flex-col h-dvh pb-10">
             <AppList apps={apps} onChange={(app: App) => wallet.walletExists ? navigate(`${app.path}`) : navigate(`${app.path}?visit`) } />
-            <Outlet />
+            <Page back={true}>
+                <Outlet />
+            </Page>
         </div>
     );
 }

@@ -10,7 +10,7 @@ export function OnBoardingPage() {
 
     return (
         <div>
-            <Page back={false}>
+            <Page back={true}>
                 <div className='flex flex-col'>
                     <div className='flex flex-col gap-20'>
                         <div className="flex flex-col gap-10">

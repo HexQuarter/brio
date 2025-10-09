@@ -22,7 +22,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Page } from '@/components/Page';
 
 export const WalletSettingsPage : React.FC = () => {
     const navigate = useNavigate()
@@ -34,7 +33,6 @@ export const WalletSettingsPage : React.FC = () => {
     }
 
     return (
-        <Page back={true}>
             <div className="flex flex-col bg-white p-5 w-full rounded-sm">
                 <h3 className="text-2xl font-medium">{t('wallet.settings')}</h3>
                 <div className='mt-10 flex flex-col gap-2'>
@@ -77,6 +75,5 @@ export const WalletSettingsPage : React.FC = () => {
                     </div>
                 </div>
             </div>
-        </Page>
     )
 }

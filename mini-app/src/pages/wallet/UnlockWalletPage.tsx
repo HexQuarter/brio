@@ -1,5 +1,4 @@
 
-import { Page } from "@/components/Page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"
 import { FormEvent, useState } from "react";
@@ -33,7 +32,6 @@ export function UnlockWalletPage() {
     }
 
     return (
-        <Page back={true}>
             <div className="flex flex-col gap-20">
                 <div className='flex flex-col gap-5'>
                     <div className="flex flex-col gap-10">
@@ -55,6 +53,5 @@ export function UnlockWalletPage() {
                     </div>
                 </form>
             </div>
-        </Page>
     );
 }
