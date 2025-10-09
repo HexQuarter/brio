@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { getBotToken } from "../bot/index.js";
+import { getBotToken } from "../../bot/index.js";
 
 const RegisterSchema = z.object({
     handle: z.string(),

@@ -6,7 +6,7 @@ import https from 'https';
 import fs from 'fs';
 import cors from 'cors'
 
-import { rpcHandler } from './rpc.js'
+import { rpcHandler } from './rpc/index.js'
 import { startBot, getBotToken } from './bot/index.js'
 
 const db = new Level('db', { valueEncoding: 'json' })

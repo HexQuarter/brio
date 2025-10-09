@@ -1,8 +1,7 @@
 import * as z from "zod";
-import { getBotId } from "../bot/index.js";
 import { createHash } from "crypto"
 import nacl from "tweetnacl";
-import { getBotToken } from "../../bot/index.js";
+import { getBotToken, getBotId } from "../../bot/index.js";
 
 const CreateSchema = z.object({
     tapRootAddress: z.string(),
