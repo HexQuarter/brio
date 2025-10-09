@@ -1,4 +1,4 @@
-import { type PropsWithChildren } from 'react';
+import { useEffect, useState, type PropsWithChildren } from 'react';
 import { Navigate, Route, Routes, HashRouter, useLocation } from 'react-router-dom';
 import { AppRoot } from '@telegram-apps/telegram-ui';
 import { useWallet } from '@/lib/walletContext';
@@ -20,12 +20,27 @@ import { ComingSoonPage } from '@/pages/ComingSoonPage';
 
 function AppRoute({ children } : PropsWithChildren<{}>) {
   const wallet = useWallet()
-  wallet.checkWallet()
+  const [checked, setChecked] = useState(false)
+
+  useEffect(() => {
+    const forceCheckWallet = async () => {
+      await wallet.checkWallet()
+      setChecked(true)
+    }
+
+    forceCheckWallet()
+  }, [])
+
   const location = useLocation()
-  if (!wallet.walletExists && location.search != '?visit') {
-      return <Navigate to="/welcome" replace />;
-  }
-  return <>{children}</>;
+
+  return <>
+    { checked && !wallet.walletExists && location.search != '?visit' &&
+      <Navigate to="/welcome" replace />
+    }
+    {checked && (wallet.walletExists || location.search == '?visit') &&
+      children
+    }
+  </>
 }
 
 export function App() {
