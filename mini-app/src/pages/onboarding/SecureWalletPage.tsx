@@ -90,26 +90,19 @@ export function SecureWalletPage() {
             const available = await sdk.checkLightningAddressAvailable({
                 username: buf2hex(usernameDigest)
             })
-            let info
             if (available) {
-                info = await sdk.registerLightningAddress({
+                await sdk.registerLightningAddress({
                     username: buf2hex(usernameDigest)
                 })
             }
-            else {
-                info = await sdk.getLightningAddress()
-            }
 
-            if (!info?.lnurl) {
-                setError(t('walletSecure.noLightningAddressGenerated'))
-                return
-            }
+            const lnUrl = `lnurlp://breez.tips/lnurlp/${buf2hex(usernameDigest)}`
 
             const response = await registerUser({
                 tapRootAddress: tapRootAddress, 
                 publicKey: childPubkeyHex, 
                 breezBtcAddress: await wallet.getBtcAddress(sdk) as string, 
-                breezLnUrl: info.lnurl,
+                breezLnUrl: lnUrl,
                 tgInitData: lp
             })
     
