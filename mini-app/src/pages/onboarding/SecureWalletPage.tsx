@@ -36,17 +36,28 @@ export function SecureWalletPage() {
         try {
             setProgressValue(1)
             setProgressLabel(t('walletSecure.progress1'))
-            await wallet.storeWallet(password)
+            const mnemonic = getSessionMnemonic()
+            if (!mnemonic) {
+                return navigate(-1)
+            }
 
-            await new Promise(r => setTimeout(r, 1000));
-            
-            const sdk = await wallet.initWallet(password)
+            const sdk = await wallet.loadSdk(mnemonic)
             if (!sdk) {
                 setError("Cannot load the sdk")
                 return 
             }
+
+            // await wallet.storeWallet(password)
+
+            await new Promise(r => setTimeout(r, 1000));
+            
+            // const sdk = await wallet.initWallet(password)
+            // if (!sdk) {
+            //     setError("Cannot load the sdk")
+            //     return 
+            // }
     
-            const mnemonic = getSessionMnemonic() as string
+            // const mnemonic = getSessionMnemonic() as string
             const childKey = await generateChildKey(mnemonic)
             if (!childKey.publicKey) {
                 return
@@ -89,17 +100,23 @@ export function SecureWalletPage() {
                 info = await sdk.getLightningAddress()
             }
 
+            if (!info?.lnurl) {
+                setError(t('walletSecure.noLightningAddressGenerated'))
+                return
+            }
+
             const response = await registerUser({
                 tapRootAddress: tapRootAddress, 
                 publicKey: childPubkeyHex, 
                 breezBtcAddress: await wallet.getBtcAddress(sdk) as string, 
-                breezLnUrl: info?.lnurl as string,
+                breezLnUrl: info.lnurl,
                 tgInitData: lp
             })
     
             await new Promise(r => setTimeout(r, 2000));
     
             if (response.status < 400) {
+                await wallet.storeWallet(mnemonic, password)
                 setProgressValue(100)
                 setProgressLabel(t('walletSecure.progress100'))
                 return

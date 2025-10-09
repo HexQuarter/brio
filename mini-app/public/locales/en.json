@@ -37,6 +37,7 @@
     "walletSecure.progress66": "User registering...",
     "walletSecure.progress100": "Congratulations. Your account have been successfully created",
     "walletSecure.emptyPassword": "Please enter a password to secure your wallet.",
+    "walletSecure.noLightningAddressGenerated": "Unable to retrieve the Lightning address from the given mnemonic.",
 
     "main.nowalletTitle": "Your Bitcoin buddies are waiting!",
     "main.nowalletDescription_1": "To join the fun — sending, sharing, playing, and paying — you will need a wallet.",

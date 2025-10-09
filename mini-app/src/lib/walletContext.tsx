@@ -17,9 +17,10 @@ import { cloudStorage } from '@telegram-apps/sdk-react';
 export type WalletContextType = {
     walletExists: boolean;
     promptForPassword: boolean;
+    loadSdk: (mnemonic: string) => Promise<BreezSdk | null>
     initWallet: (mnemonic: string) => Promise<BreezSdk | null>
     decryptWallet: (password: string) => Promise<string | null>
-    storeWallet: (password: string) => Promise<void>
+    storeWallet: (mnemonic: string, password: string) => Promise<void>
     breezSdk: BreezSdk | undefined;
     getLnUrl: (breezSdk: BreezSdk) => Promise<string | null>
     getBtcAddress: (breezSdk: BreezSdk) => Promise<string | null>,
@@ -140,7 +141,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     const resetWallet = async () => {
         localStorage.clear()
         sessionStorage.clear()
-        cloudStorage.clear()
+        cloudStorage.clear.ifAvailable()
 
         await breezSdk?.deleteLightningAddress()
         setWalletExists(false)
@@ -180,13 +181,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         return await decrypt(cipher, password)
     }
 
-    const storeWallet = async (password: string) => {
-        const mnemonic = getSessionMnemonic()
-        if (!mnemonic) {
-            setWalletExists(false)
-            return
-        }
-
+    const storeWallet = async (mnemonic: string, password: string) => {
         const { cipher, iv, salt } = await encrypt(mnemonic, password)
     
         const encryptedWallet = JSON.stringify({
@@ -249,6 +244,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     return (
         <WalletContext.Provider
             value={{
+                loadSdk,
                 resetWallet,
                 currency,
                 changeCurrency,
