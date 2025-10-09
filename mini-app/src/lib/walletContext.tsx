@@ -10,8 +10,6 @@ import {
     initLogging,
     Seed
 } from '@breeztech/breez-sdk-spark/web'
-// import { webHookUrl } from './api';
-// import { retrieveLaunchParams } from '@telegram-apps/sdk-react';
 import { toast } from 'sonner';
 import { t } from 'i18next';
 import { cloudStorage } from '@telegram-apps/sdk-react';
@@ -140,19 +138,11 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     }, [promptForPassword])
 
     const resetWallet = async () => {
-        if (cloudStorage.isSupported()) {
-            cloudStorage.deleteItem(WALLET_KEY)
-        }
-        localStorage.removeItem(WALLET_KEY)
-        localStorage.removeItem(WALLET_UNLOCK_LAST_DATE )
-        localStorage.removeItem(WALLET_LN_URL)
-        localStorage.removeItem(WALLET_BTC_ADDRESS)
-        localStorage.removeItem(WALLET_CURRENCY)
-
-        sessionStorage.removeItem(SESSION_MNEMONIC_KEY)
+        localStorage.clear()
+        sessionStorage.clear()
+        cloudStorage.clear()
 
         await breezSdk?.deleteLightningAddress()
-
         setWalletExists(false)
     }
 
