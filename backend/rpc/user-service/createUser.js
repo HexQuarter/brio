@@ -2,6 +2,7 @@ import * as z from "zod";
 import { getBotId } from "../bot/index.js";
 import { createHash } from "crypto"
 import nacl from "tweetnacl";
+import { getBotToken } from "../../bot/index.js";
 
 const CreateSchema = z.object({
     tapRootAddress: z.string(),
@@ -45,6 +46,25 @@ export const handler = async (req, res) => {
     })
 
     await req.db.put(`h:${hashHandle}`, createUserRequest.tapRootAddress)
+
+    const startParam = params.get('start_param')
+    if (startParam) {
+      const referral = new URLSearchParams(startParam).get('referral')
+      if (referral) {
+        const tapRootAddress = req.db.get(`h:${referral}`)
+        if (!tapRootAddress) {
+          return
+        }
+        const userInfo = req.db.get(`p:${tapRootAddress}`)
+        if (!userInfo) {
+          return
+        }
+
+        const { chatId } = userInfo
+        await notifyTelegramReferral(chatId, getBotToken(), username)
+      }
+    }
+
     res.status(201).json({ status: "ok" })
 }
 
@@ -89,3 +109,13 @@ function verifyTelegramAuth(initData, botId) {
   );
 }
 
+async function notifyTelegramReferral(chatId, botToken, username) {
+    return await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+        chat_id: chatId,
+          text: `Your contact @${username} just created a wallet on Brio. You can transfer some sats to have fun !.`
+        }),
+    })
+}

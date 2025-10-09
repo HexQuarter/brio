@@ -11,11 +11,12 @@ import { useWallet } from "@/lib/walletContext"
 import { useNavigate } from "react-router-dom"
 import { parse, PrepareLnurlPayResponse, SdkEvent } from "@breeztech/breez-sdk-spark/web"
 import { toast } from "sonner"
-import { openTelegramLink } from "@telegram-apps/sdk-react"
+import { openTelegramLink, retrieveLaunchParams } from "@telegram-apps/sdk-react"
 import { addContact, listContacts } from "@/lib/contact"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 import { Check, ChevronsUpDown } from "lucide-react"
+import { buf2hex } from "@/helpers/crypto"
 
 export const TelegramSendForm = () => {
     const navigate = useNavigate()
@@ -183,15 +184,20 @@ export const TelegramSendForm = () => {
         }
     }
 
-    const shareInvite = () => {
-        const link = 'https://t.me/brio_dev_bot'
+    const shareInvite = async () => {
+        const tgData = retrieveLaunchParams()
+        const startParam = new URLSearchParams()
+        const usernameDigest = await crypto.subtle.digest("sha-256", new TextEncoder().encode(tgData.tgWebAppData?.user?.username))
+        startParam.append('referral', buf2hex(usernameDigest))
+        const encodedStartParam = encodeURIComponent(startParam.toString())
+        const miniappLink = `https://t.me/brio_dev_bot?startapp=${encodedStartParam}`;
         if (openTelegramLink.isAvailable()) {
             openTelegramLink(
-                `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent("Use Bitcoin on Telegram")}`
+                `https://t.me/share/url?url=${encodeURIComponent(miniappLink)}&text=${encodeURIComponent("Use Bitcoin on Telegram")}`
             )
         }
         else {
-            navigator.clipboard.writeText(link)
+            navigator.clipboard.writeText(miniappLink)
             toast.info('Invitation link copied. Share it via Telegram manually')
         }
     }
