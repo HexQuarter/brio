@@ -29,7 +29,7 @@ export const WalletSettingsPage : React.FC = () => {
 
     const reset = async () => {
         await resetWallet()
-        navigate('/')
+        navigate('/', { replace: true })
     }
 
     return (
