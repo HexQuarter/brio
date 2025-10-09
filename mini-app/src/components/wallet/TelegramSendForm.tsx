@@ -12,6 +12,10 @@ import { useNavigate } from "react-router-dom"
 import { parse, PrepareLnurlPayResponse, SdkEvent } from "@breeztech/breez-sdk-spark/web"
 import { toast } from "sonner"
 import { openTelegramLink } from "@telegram-apps/sdk-react"
+import { addContact, listContacts } from "@/lib/contact"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
+import { Check, ChevronsUpDown } from "lucide-react"
 
 export const TelegramSendForm = () => {
     const navigate = useNavigate()
@@ -27,6 +31,7 @@ export const TelegramSendForm = () => {
     const [prepareResponse, setPrepareResponse] = useState<PrepareLnurlPayResponse | undefined>(undefined)
     const [fees, setFees] = useState(0)
     const [loadingPayment, setLoadingPayment] = useState<null | string>(null)
+    const [contacts, setContacts] = useState<string[]>([])
 
     useEffect(() => {
         setLookupError(null)
@@ -43,7 +48,9 @@ export const TelegramSendForm = () => {
                     const rate = fiatRates?.rates.find(r => r.coin.toLowerCase() == currency.toLowerCase())
                     if (!rate) return
                     setPrice(rate.value)
-
+                    const contactSet = new Set(contacts).add(`@${strippedHandle}`)
+                    
+                    setContacts(Array.from(contactSet))
                     return
                 }
 
@@ -56,6 +63,15 @@ export const TelegramSendForm = () => {
 
         return () => clearTimeout(delayDebounceFn)
     }, [handle])
+
+    useEffect(() => {
+        const loadContacts = async () => {
+            const _contacts = await listContacts()
+            setContacts(_contacts)
+        }
+
+        loadContacts()
+    }, [])
 
     let debounceTimeout = useRef<number|undefined>(undefined);
 
@@ -104,8 +120,13 @@ export const TelegramSendForm = () => {
                 setPrepareResponse(prepareResponse)
             }
             catch(e) {
-                console.error(e)
                 setLoadingPayment(null)
+                const err = e as Error
+                console.error(e)
+                if (err.message == 'Lnurl error: error calling lnurl endpoint: Json error: data did not match any variant of untagged enum LnurlRequestDetails') {
+                    setSendError('Lightning address not registered on Spark')
+                    return
+                }
                 setSendError((e as Error).message)
             }
         }, 500)
@@ -128,6 +149,7 @@ export const TelegramSendForm = () => {
                                 if (event.payment.details?.type == 'lightning') {
                                     await registerPayment(handle, event.payment.details.paymentHash)
                                 }
+                                await addContact(handle)
                                 await breezSdk?.removeEventListener(listenerId as string)
                                 toast(t('wallet.sendPaymentSucceeded'))
                                 await new Promise(r => setTimeout(r, 1000));
@@ -174,25 +196,57 @@ export const TelegramSendForm = () => {
         }
     }
 
+    const [open, setOpen] = useState(false)
+
     return (
         <div className='flex flex-col gap-10 pt-10'>
             <div className='flex flex-col gap-1'>
                 <Label htmlFor="handle" className='text-gray-400'>{t('wallet.telegram.handle')}</Label>
-                <Input id='handle' 
-                    placeholder={t('wallet.telegram.handle.placeholder')} 
-                    value={handle} 
-                    onChange={(e) => setHandle(e.target.value)}
-                    autoCorrect="false"
-                    autoCapitalize="false"
-                    spellCheck="false"
-                    autoComplete="false"
-                    />
-                { lookupError &&
-                    <div>
-                        <p className="text-red-500 text-sm italic mt-2">{lookupError}</p>
-                        <Button variant="link" className="p-0 text-sm italic" onClick={() => shareInvite()}>Share an invitation</Button>
-                    </div>
-                }
+                <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger className="flex">
+                        <Button
+                            variant="ghost"
+                            role="combobox"
+                            aria-expanded={open}
+                            className="font-light"
+                        >
+                            {handle
+                                ? contacts.find((contact) => contact === handle)
+                                : t('wallet.telegram.handle.placeholder')}
+                            <ChevronsUpDown className="opacity-50" />
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="">
+                    <Command>
+                        <CommandInput placeholder={t('wallet.telegram.handle.placeholder')}  className="h-9" onValueChange={setHandle}/>
+                        <CommandList>
+                            <CommandEmpty>{ lookupError && 
+                                <>
+                                    <p className="text-red-500 text-sm italic mt-2">{lookupError}</p>
+                                    <Button variant="link" className="p-0 text-sm italic" onClick={() => shareInvite()}>Share an invitation</Button>
+                                </>
+                            }</CommandEmpty>
+                            <CommandGroup heading="Favourites">
+                                {contacts.map((contact) => (
+                                    <CommandItem
+                                    key={contact}
+                                    value={contact}
+                                    onSelect={(currentValue) => {
+                                        setHandle(currentValue === handle ? "" : currentValue)
+                                        setOpen(false)
+                                    }}
+                                    >
+                                    {contact}
+                                    <Check
+                                        className={`ml-auto ${handle === contact ? "opacity-100" : "opacity-0"}`}
+                                    />
+                                    </CommandItem>
+                                ))}
+                            </CommandGroup>
+                        </CommandList>
+                        </Command>
+                    </PopoverContent>
+                </Popover>
             </div>
             
             {/* <div>

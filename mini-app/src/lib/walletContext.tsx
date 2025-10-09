@@ -207,7 +207,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         localStorage.setItem(WALLET_KEY, encryptedWallet);
         sessionStorage.removeItem(SESSION_MNEMONIC_KEY);
         if (cloudStorage.isSupported()) {
-            cloudStorage.setItem(WALLET_KEY, encryptedWallet)
+            await cloudStorage.setItem(WALLET_KEY, encryptedWallet)
         }
         setWalletExists(true)
     }

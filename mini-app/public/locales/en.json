@@ -74,7 +74,7 @@
     "wallet.telegram.handle.placeholder": "i.e. @JohnDoe",
     "wallet.telegram.phoneNumber": "Phone number",
     "wallet.telegram.phoneNumber.placeholder": "(i.e. +336xxxxxxxx)",
-    "wallet.telegram.notFound": "Telegram not matching registed user. User might not be part of the Brio ecosystem",
+    "wallet.telegram.notFound": "Telegram handle is not be part of the Brio ecosystem.",
     "wallet.amount": "Amount",
     "wallet.address": "Address",
     "wallet.bitcoin.address.placeholder": "BTC or Lightning address",
