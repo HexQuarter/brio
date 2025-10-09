@@ -10,7 +10,7 @@ export const handler = async (req, res) => {
     try {
         const parsingResult = RegisterSchema.safeParse(req.body)
         if (!parsingResult.success) {
-            return res.status(403).json({ error: parsingResult.error })
+            return res.status(400).json({ error: parsingResult.error })
         }
 
         const registerPaymentRequest = parsingResult.data
@@ -24,7 +24,7 @@ export const handler = async (req, res) => {
             return res.status(201).json({ status: "ok" })
         }
 
-        return res.status(403).json({ error: "handle not found" })
+        return res.status(400).json({ error: "handle not found" })
     }
     catch(e) {
         console.log(e)

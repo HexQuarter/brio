@@ -16,7 +16,7 @@ const handlers = {
 export const rpcHandler = async (req, res) => {
     const parsingResult = OperationSchema.safeParse(req.body)
     if (!parsingResult.success) {
-        return res.status(403).json({ error: parsingResult.error })
+        return res.status(400).json({ error: parsingResult.error })
     }
 
     const {operation, payload} = parsingResult.data

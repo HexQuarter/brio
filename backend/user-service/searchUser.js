@@ -6,7 +6,7 @@ const SearchSchema = z.object({
 export const handler = async (req, res) => {
     const parsingResult = SearchSchema.safeParse(req.body)
     if (!parsingResult.success) {
-        return res.status(403).json({ error: parsingResult.error })
+        return res.status(400).json({ error: parsingResult.error })
     }
 
     const {handle} = parsingResult.data

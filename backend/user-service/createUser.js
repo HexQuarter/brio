@@ -14,7 +14,7 @@ const CreateSchema = z.object({
 export const handler = async (req, res) => {
     const parsingResult = CreateSchema.safeParse(req.body)
     if (!parsingResult.success) {
-        return res.status(403).json({ error: parsingResult.error })
+        return res.status(400).json({ error: parsingResult.error })
     }
 
     const createUserRequest = parsingResult.data
@@ -29,6 +29,13 @@ export const handler = async (req, res) => {
     const params = new URLSearchParams(createUserRequest.tgInitData);
     const { username, id } = JSON.parse(params.get('user'))
     const hashHandle = createHash('sha256').update(username).digest('hex')	
+
+    const tapRootAddress = await req.db.get(`h:${hashHandle}`)
+    if (tapRootAddress) {
+      res.status(204).json({ status: 'ok' })
+      return
+    }
+
     await req.db.put(`p:${createUserRequest.tapRootAddress}`, {
         publicKey: createUserRequest.publicKey,
         breezBtcAddress: createUserRequest.breezBtcAddress,
