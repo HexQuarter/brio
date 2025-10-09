@@ -33,20 +33,25 @@ export const TelegramSendForm = () => {
         if (handle == "" || !breezSdk) return
         const delayDebounceFn = setTimeout(async () => {
             const strippedHandle = handle.startsWith('@') ? handle.slice(1, handle.length) : handle
-            const response = await fetchUserInfo(strippedHandle)
-            if (response.status == 200) {
-                const { user: userInfo }  = await response.json()
-                setAddress(userInfo.breezLnUrl)
+            try {
+                const response = await fetchUserInfo(strippedHandle)
+                if (response.status == 200) {
+                    const { user: userInfo }  = await response.json()
+                    setAddress(userInfo.breezLnUrl)
 
-                const fiatRates = await breezSdk?.listFiatRates()
-                const rate = fiatRates?.rates.find(r => r.coin.toLowerCase() == currency.toLowerCase())
-                if (!rate) return
-                setPrice(rate.value)
+                    const fiatRates = await breezSdk?.listFiatRates()
+                    const rate = fiatRates?.rates.find(r => r.coin.toLowerCase() == currency.toLowerCase())
+                    if (!rate) return
+                    setPrice(rate.value)
 
-                return
+                    return
+                }
+
+                setLookupError(t('wallet.telegram.notFound'))
             }
-
-            setLookupError(t('wallet.telegram.notFound'))
+            catch(e) {
+                setLookupError((e as Error).message)
+            }
         }, 500)
 
         return () => clearTimeout(delayDebounceFn)
