@@ -28,7 +28,7 @@ export function UnlockWalletPage() {
             return
         }
 
-        navigate('/');
+        navigate('/', { replace: true });
     }
 
     return (

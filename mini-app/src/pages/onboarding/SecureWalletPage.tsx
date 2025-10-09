@@ -114,7 +114,7 @@ export function SecureWalletPage() {
     }
 
     function goToWallet() {
-        navigate('/');
+        navigate('/', { replace: true });
     }
 
     return (
