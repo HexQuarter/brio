@@ -54,7 +54,8 @@ export const fetchUserInfo = async (handle: string) => {
 }
 
 export const registerPayment = async(handle: string, paymentId: string) => {
-    const digest = await crypto.subtle.digest("sha-256", new TextEncoder().encode(handle))
+    const strippedHandle = handle.startsWith('@') ? handle.slice(1, handle.length) : handle
+    const digest = await crypto.subtle.digest("sha-256", new TextEncoder().encode(strippedHandle))
     return await fetch(new URL("/rpc", rpcEndpoint()), {
         method: 'POST',
         headers: {
