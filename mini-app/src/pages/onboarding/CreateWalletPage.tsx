@@ -7,6 +7,8 @@ import { wordlist } from '@scure/bip39/wordlists/english.js';
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { storeSessionMnemonic } from "@/lib/walletContext";
+import { LuCopy } from "react-icons/lu";
+import { toast } from "sonner";
 
 export function CreateWalletPage() {
     const { t } = useTranslation();
@@ -20,6 +22,14 @@ export function CreateWalletPage() {
         // Store in sessionStorage for safe transmission between pages (cleartext for now)
         storeSessionMnemonic(generatedMnemonic)
     }, []);
+
+    const copy = async () => {
+        await navigator.clipboard.writeText(mnemonic.join(' '))
+        const toastId = toast.info(t('walletBackup.copyToast'))
+        setTimeout(() => {
+            toast.dismiss(toastId)
+        }, 2000)
+    } 
 
     return (
         <Page back={true}>
@@ -35,6 +45,7 @@ export function CreateWalletPage() {
                         <div key={index} className="border-2 border-primary text-primary rounded  p-2">{word}</div>
                     ))}
                 </div>
+                <div className="active:text-primary"><LuCopy className='w-5 h-5' onClick={() => copy()} /></div>
                 <div className="bg-orange-100 text-black-700 p-5 rounded" role="alert">
                     {t('walletCreate.warning')}
                 </div>
