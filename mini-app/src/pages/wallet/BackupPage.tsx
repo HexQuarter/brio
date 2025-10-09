@@ -2,7 +2,7 @@
 import { Page } from "@/components/Page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 import { useWallet } from "@/lib/walletContext";
@@ -18,7 +18,9 @@ export function BackupWalletPage() {
     const wallet = useWallet()
     const [mnemonic, setMnemonic] = useState<string[]>([])
 
-    const displayMnemonic = async () => {
+    const displayMnemonic = async (e: FormEvent) => {
+        e.preventDefault()
+
         setError(null);
         if (!password || password == '') {
             setError(t('walletUnlock.emptyPassword'));
@@ -68,7 +70,7 @@ export function BackupWalletPage() {
                     </div>
                 }
                 {mnemonic.join('').length == 0 &&
-                    <form onSubmit={() => displayMnemonic()} className="flex flex-col gap-5">
+                    <form onSubmit={displayMnemonic} className="flex flex-col gap-5">
                         <div className="flex flex-col gap-5">
                             <p>{t('walletUnlock.description')}</p>
                             <Input 

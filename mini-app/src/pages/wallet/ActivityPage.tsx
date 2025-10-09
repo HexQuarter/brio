@@ -17,7 +17,7 @@ export type FormattedPayment = {
         fiatFee: string
     } & Payment
 
-export const WalletActivity : React.FC = () => {
+export const WalletActivityPage : React.FC = () => {
     const { t } = useTranslation()
     const { breezSdk, currency} = useWallet()
     const navigate = useNavigate()

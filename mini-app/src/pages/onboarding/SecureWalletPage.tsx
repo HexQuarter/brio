@@ -3,7 +3,7 @@ import { Page } from "@/components/Page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"
 import { getSessionMnemonic, useWallet } from "@/lib/walletContext";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
@@ -24,7 +24,9 @@ export function SecureWalletPage() {
     const [error, setError] = useState<string | null>(null);    
     const [password, setPassword] = useState<string>('');
 
-    async function secureWallet() {
+    async function secureWallet(e: FormEvent) {
+        e.preventDefault()
+
         setError(null);
         if (!password || password == '') {
             setError(t('walletSecure.emptyPassword'));
@@ -35,6 +37,8 @@ export function SecureWalletPage() {
             setProgressValue(1)
             setProgressLabel(t('walletSecure.progress1'))
             await wallet.storeWallet(password)
+
+            await new Promise(r => setTimeout(r, 1000));
             
             const sdk = await wallet.initWallet(password)
             if (!sdk) {
@@ -104,7 +108,8 @@ export function SecureWalletPage() {
             setError(response.statusText)
         }
         catch (e) {
-             setError((e as Error).message)
+            console.error(e)
+            setError((e as Error).message)
         }
     }
 
@@ -114,7 +119,7 @@ export function SecureWalletPage() {
 
     return (
         <Page back={true}>
-            <form className="flex flex-col gap-20" onSubmit={() => secureWallet()}>
+            <form className="flex flex-col gap-20" onSubmit={secureWallet}>
                 <div className='flex flex-col gap-5'>
                     <div className="flex flex-col gap-10">
                         <h2 className='text-4xl'>{t('walletSecure.title')}</h2>
@@ -135,7 +140,7 @@ export function SecureWalletPage() {
                         </div>
                     }
                     {progressValue == 100 &&
-                        <Button className="w-40" onClick={() => goToWallet()}>{t('walletSecure.goToWalletButton')}</Button>
+                        <Button type="button" className="w-40" onClick={() => goToWallet()}>{t('walletSecure.goToWalletButton')}</Button>
                     }
                     { progressValue == 0 &&
                         <Button className="w-40" type="submit">{t('walletSecure.registerButton')}</Button>

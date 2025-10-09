@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Page } from '@/components/Page';
 
-export const WalletSettings : React.FC = () => {
+export const WalletSettingsPage : React.FC = () => {
     const navigate = useNavigate()
     const { currency, changeCurrency, resetWallet} = useWallet()
 

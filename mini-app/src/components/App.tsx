@@ -2,20 +2,20 @@ import { type PropsWithChildren } from 'react';
 import { Navigate, Route, Routes, HashRouter, useLocation } from 'react-router-dom';
 import { AppRoot } from '@telegram-apps/telegram-ui';
 import { useWallet } from '@/lib/walletContext';
-import { MainPage } from '@/pages/MainPage';
 import { WelcomePage } from '@/pages/WelcomePage';
+import { MainPage } from '@/pages/MainPage';
 import { OnBoardingPage } from '@/pages/onboarding/OnBoardingPage';
 import { CreateWalletPage } from '@/pages/onboarding/CreateWalletPage';
 import { RestoreWalletPage } from '@/pages/onboarding/RestoreWalletPage';
 import { SecureWalletPage } from '@/pages/onboarding/SecureWalletPage';
-import { WalletMainPage } from '@/pages/wallet/WalletMainPage';
-import { WelcomeWallet } from './wallet/Welcome';
-import { WalletReceive } from './wallet/WalletReceive';
-import { WalletSend } from './wallet/WalletSend';
-import { WalletActivity } from './wallet/WalletActivity';
-import { WalletActivityDetails } from './wallet/WalletActivityDetails';
-import { WalletSettings } from './wallet/WalletSettings';
-import { BackupWalletPage } from '@/pages/wallet/BackupWalletPage';
+import { WalletMainPage } from '@/pages/wallet/MainPage';
+import { WalletWelcomePage } from '@/pages/wallet/WelcomePage';
+import { WalletReceivePage } from '@/pages/wallet/ReceivePage';
+import { WalletSendPage } from '@/pages/wallet/SendPage';
+import { WalletActivityPage } from '@/pages/wallet/ActivityPage';
+import { WalletActivityDetailsPage } from '@/pages/wallet/ActivityDetailsPage';
+import { WalletSettingsPage } from '@/pages/wallet/SettingsPage';
+import { BackupWalletPage } from '@/pages/wallet/BackupPage';
 import { ComingSoonPage } from '@/pages/ComingSoonPage';
 
 function AppRoute({ children } : PropsWithChildren<{}>) {
@@ -39,12 +39,12 @@ export function App() {
           }>
             <Route index element={<Navigate to="/wallet" replace />} />
             <Route path="/wallet" element={<WalletMainPage />}>
-              <Route index element={<WelcomeWallet />} />
-              <Route path="receive" element={<WalletReceive />} />
-              <Route path="send" element={<WalletSend />} />
-              <Route path="activity" element={<WalletActivity />} />
-              <Route path="activity/:id" element={<WalletActivityDetails />} />
-              <Route path="settings" element={<WalletSettings />} />
+              <Route index element={<WalletWelcomePage />} />
+              <Route path="receive" element={<WalletReceivePage />} />
+              <Route path="send" element={<WalletSendPage />} />
+              <Route path="activity" element={<WalletActivityPage />} />
+              <Route path="activity/:id" element={<WalletActivityDetailsPage />} />
+              <Route path="settings" element={<WalletSettingsPage />} />
               <Route path="backup" element={<BackupWalletPage />} />
             </Route>
             <Route path="/upcoming" element={<ComingSoonPage />} />

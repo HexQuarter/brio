@@ -13,7 +13,7 @@ import { convertSatsToBtc, formatBtcAmount, formatFiatAmount } from '@/helpers/n
 import { Page } from "@/components/Page";
 
 
-export const WalletActivityDetails : React.FC = () => {
+export const WalletActivityDetailsPage : React.FC = () => {
     const {t} = useTranslation()
     const {id} = useParams()
     const { breezSdk, currency} = useWallet()

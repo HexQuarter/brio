@@ -2,7 +2,7 @@
 import { Page } from "@/components/Page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
@@ -16,7 +16,9 @@ export function UnlockWalletPage() {
     const [error, setError] = useState<string | null>(null);    
     const [password, setPassword] = useState<string>('');
 
-    async function unlockWallet() {
+    async function unlockWallet(e: FormEvent) {
+        e.preventDefault()
+
         setError(null);
         if (!password || password == '') {
             setError(t('walletUnlock.emptyPassword'));
@@ -38,7 +40,7 @@ export function UnlockWalletPage() {
                         <h2 className='text-4xl'>{t('walletUnlock.title')}</h2>
                     </div>
                 </div>
-                <form onSubmit={() => unlockWallet()} className="flex flex-col gap-5">
+                <form onSubmit={unlockWallet} className="flex flex-col gap-5">
                     <div className="flex flex-col gap-5">
                         <p>{t('walletUnlock.description')}</p>
                         <Input 

@@ -7,7 +7,7 @@ import { BitcoinSendForm } from '@/components/wallet/BitcoinSendForm';
 import { Page } from "@/components/Page";
 
 
-export const WalletSend : React.FC = () => {
+export const WalletSendPage : React.FC = () => {
     return (
         <Page back={true}>
             <div className="flex flex-col gap-10">

@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import * as bip39 from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english.js';
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { storeSessionMnemonic } from "@/lib/walletContext";
 
@@ -56,10 +56,15 @@ export function RestoreWalletPage() {
         // Store in sessionStorage for safe transmission between pages (cleartext for now)
         storeSessionMnemonic(mnemonic.join(' '))
     }, [mnemonic]);
+
+    const secureWallet = (e: FormEvent) => {
+        e.preventDefault()
+         navigate('/onboarding/secure-wallet')
+    }
     
     return (
         <Page back={true}>
-            <form className="flex flex-col gap-20" onSubmit={() => navigate('/onboarding/secure-wallet')}>
+            <form className="flex flex-col gap-20" onSubmit={secureWallet}>
                 <div className='flex flex-col gap-5'>
                     <div className="flex flex-col gap-10">
                         <h2 className='text-4xl'>{t('walletRestore.title')}</h2>

@@ -13,36 +13,13 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CiCircleAlert } from "react-icons/ci";
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
+import { UnlockWalletPage } from './UnlockWalletPage';
 
 export const WalletMainPage = () => {
-    const { breezSdk, currency, walletExists } = useWallet()
+    const { breezSdk, currency, walletExists, promptForPassword } = useWallet()
     const location = useLocation()
     const navigate = useNavigate()
     const {t} = useTranslation()
-
-    if (!walletExists && location.search == '?visit') {
-        return (
-            <div className="bg-gray-100 p-5 rounded-xl flex-1 flex flex-col">
-                <div className="p-5 bg-white rounded-xl flex-1">
-                    <div className='flex flex-col gap-5'>
-                        <div className="flex flex-col gap-10">
-                            <div className="flex flex-col gap-10">
-                                <h3 className='text-2xl font-medium'>{t('main.nowalletTitle')}</h3>
-                                <p>{t('main.nowalletDescription_1')}</p>
-                                <p>{t('main.nowalletDescription_2')}</p>
-                                <p>{t('main.nowalletDescription_3')}</p>
-                            </div>
-                            <div className="flex flex-col gap-5 items-center">
-                                <Button className="w-40" onClick={() => navigate('/onboarding/create-wallet')}>{t('main.createButton')}</Button>
-                                <Button variant="secondary" className="w-40" onClick={() => navigate('/onboarding/restore-wallet')}>{t('main.restoreButton')}</Button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-    
     const [btcBalance, setBtcBalance] = useState(0)
     const [fiatBalance, setFiatBalance] = useState(0)
     const [loading, setLoading] = useState(true)
@@ -102,7 +79,34 @@ export const WalletMainPage = () => {
 
     }, [breezSdk, currency])
 
-  return (
+     if (!walletExists && location.search == '?visit') {
+        return (
+            <div className="bg-gray-100 p-5 rounded-xl flex-1 flex flex-col">
+                <div className="p-5 bg-white rounded-xl flex-1">
+                    <div className='flex flex-col gap-5'>
+                        <div className="flex flex-col gap-10">
+                            <div className="flex flex-col gap-10">
+                                <h3 className='text-2xl font-medium'>{t('main.nowalletTitle')}</h3>
+                                <p>{t('main.nowalletDescription_1')}</p>
+                                <p>{t('main.nowalletDescription_2')}</p>
+                                <p>{t('main.nowalletDescription_3')}</p>
+                            </div>
+                            <div className="flex flex-col gap-5 items-center">
+                                <Button className="w-40" onClick={() => navigate('/onboarding/create-wallet')}>{t('main.createButton')}</Button>
+                                <Button variant="secondary" className="w-40" onClick={() => navigate('/onboarding/restore-wallet')}>{t('main.restoreButton')}</Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    if (walletExists && promptForPassword) {
+        return <UnlockWalletPage />
+    }
+
+    return (
         <div className='flex flex-col h-full'>
             { loading && <div className="flex flex-col items-center "><Spinner size='l' /></div>}
             { !loading && !error && 

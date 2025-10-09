@@ -197,16 +197,16 @@ export const TelegramSendForm = () => {
 
             { address != '' && price > 0 && !lookupError && 
                 <div>
-                    <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')}</Label>
+                    <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')} ({currency})</Label>
                     <Input 
                         type="number" 
                         inputMode="decimal"
-                        min={0.001} 
-                        step={0.001} 
+                        min={0.01} 
+                        step={0.01} 
                         value={fiatAmount} 
                         onChange={(e) => handleAmountChange(parseFloat(e.target.value))}
                         /> 
-                    <small>{formatBtcAmount(btcAmount)}  BTC</small>
+                    {fiatAmount != '' && <small>{formatBtcAmount(btcAmount)}  BTC</small>}
                 </div>
             }
             {address != '' && !lookupError && 
