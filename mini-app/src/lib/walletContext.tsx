@@ -28,6 +28,7 @@ export type WalletContextType = {
     currency: string,
     changeCurrency: (currency: string) => void,
     resetWallet: () => Promise<void>
+    checkWallet: () => Promise<void>
 };
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -90,24 +91,25 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     const [btcAddress, setBtcAddress] = useState<string | null>(null)
     const [currency, setCurrency] = useState(localStorage.getItem(WALLET_CURRENCY)?.toUpperCase() || 'USD')
 
-    useEffect(() => {
-        const checkWallet = async () => {
-            let encryptedWallet = localStorage.getItem(WALLET_KEY)
-            if (!encryptedWallet && cloudStorage.isSupported()) {
-                encryptedWallet = await cloudStorage.getItem(WALLET_KEY)
-                if (encryptedWallet) localStorage.setItem(WALLET_KEY, encryptedWallet)
-            }
-
-            if(!encryptedWallet) {
-                setWalletExists(false)
-            }
-            if (!sessionStorage.getItem(SESSION_MNEMONIC_KEY)) {
-                setPromptForPassword(true)
+    const checkWallet = async () => {
+        let encryptedWallet = localStorage.getItem(WALLET_KEY)
+        if (!encryptedWallet && cloudStorage.isSupported()) {
+            encryptedWallet = await cloudStorage.getItem(WALLET_KEY)
+            if (encryptedWallet) {
+                localStorage.setItem(WALLET_KEY, encryptedWallet)
+                setWalletExists(true)
             }
         }
 
-        checkWallet()
+        if(!encryptedWallet) {
+            setWalletExists(false)
+        }
+        if (!sessionStorage.getItem(SESSION_MNEMONIC_KEY)) {
+            setPromptForPassword(true)
+        }
+    }
 
+    useEffect(() => {
         // Listen for other tabs / external changes
         window.addEventListener("storage", checkWallet);
         return () => window.removeEventListener("storage", checkWallet);
@@ -267,7 +269,8 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
                 storeWallet,
                 breezSdk,
                 getLnUrl,
-                getBtcAddress
+                getBtcAddress,
+                checkWallet
             }}
         >
             {children}

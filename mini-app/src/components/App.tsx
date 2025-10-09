@@ -20,6 +20,7 @@ import { ComingSoonPage } from '@/pages/ComingSoonPage';
 
 function AppRoute({ children } : PropsWithChildren<{}>) {
   const wallet = useWallet()
+  wallet.checkWallet()
   const location = useLocation()
   if (!wallet.walletExists && location.search != '?visit') {
       return <Navigate to="/welcome" replace />;
