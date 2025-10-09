@@ -44,7 +44,6 @@ if (prod === true) {
 else {
     const port = process.env.PORT || 3000
     app.listen(port, () => {
-        console.log(`HTTPS server running on port ${port}`);
-        startBot(getBotToken(), db);
+        console.log(`HTTP server running on port ${port}`);
     })
 }

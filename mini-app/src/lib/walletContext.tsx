@@ -14,6 +14,7 @@ import {
 // import { retrieveLaunchParams } from '@telegram-apps/sdk-react';
 import { toast } from 'sonner';
 import { t } from 'i18next';
+import { cloudStorage } from '@telegram-apps/sdk-react';
 
 export type WalletContextType = {
     walletExists: boolean;
@@ -77,7 +78,7 @@ class WebLogger {
 
 let logger: WebLogger | null = null;
 
-export const WalletProvider = ({children}: {children: ReactNode}) => {    
+export const WalletProvider = ({children}: {children: ReactNode}) => {
     const [walletExists, setWalletExists] = useState(!!localStorage.getItem(WALLET_KEY));
     const [promptForPassword, setPromptForPassword] = useState(
         walletExists && (
@@ -90,8 +91,14 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     const [currency, setCurrency] = useState(localStorage.getItem(WALLET_CURRENCY)?.toUpperCase() || 'USD')
 
     useEffect(() => {
-        const checkWallet = () => {
-            if(!localStorage.getItem(WALLET_KEY)) {
+        const checkWallet = async () => {
+            let encryptedWallet = localStorage.getItem(WALLET_KEY)
+            if (!encryptedWallet && cloudStorage.isSupported()) {
+                encryptedWallet = await cloudStorage.getItem(WALLET_KEY)
+                if (encryptedWallet) localStorage.setItem(WALLET_KEY, encryptedWallet)
+            }
+
+            if(!encryptedWallet) {
                 setWalletExists(false)
             }
             if (!sessionStorage.getItem(SESSION_MNEMONIC_KEY)) {
@@ -99,9 +106,10 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
             }
         }
 
+        checkWallet()
+
         // Listen for other tabs / external changes
         window.addEventListener("storage", checkWallet);
-
         return () => window.removeEventListener("storage", checkWallet);
     }, [])
 
@@ -130,6 +138,9 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     }, [promptForPassword])
 
     const resetWallet = async () => {
+        if (cloudStorage.isSupported()) {
+            cloudStorage.deleteItem(WALLET_KEY)
+        }
         localStorage.removeItem(WALLET_KEY)
         localStorage.removeItem(WALLET_UNLOCK_LAST_DATE )
         localStorage.removeItem(WALLET_LN_URL)
@@ -186,12 +197,16 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
 
         const { cipher, iv, salt } = await encrypt(mnemonic, password)
     
-        localStorage.setItem(WALLET_KEY, JSON.stringify({
+        const encryptedWallet = JSON.stringify({
             cipher: Array.from(new Uint8Array(cipher)),
             iv: Array.from(iv),
             salt: Array.from(salt)
-        }));
+        })
+        localStorage.setItem(WALLET_KEY, encryptedWallet);
         sessionStorage.removeItem(SESSION_MNEMONIC_KEY);
+        if (cloudStorage.isSupported()) {
+            cloudStorage.setItem(WALLET_KEY, encryptedWallet)
+        }
         setWalletExists(true)
     }
 

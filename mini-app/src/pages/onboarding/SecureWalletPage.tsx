@@ -99,7 +99,7 @@ export function SecureWalletPage() {
     
             await new Promise(r => setTimeout(r, 2000));
     
-            if (response.status == 201) {
+            if (response.status < 400) {
                 setProgressValue(100)
                 setProgressLabel(t('walletSecure.progress100'))
                 return

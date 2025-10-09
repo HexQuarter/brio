@@ -14,7 +14,7 @@ export const generateTapRootAddress = async (publicKey: Uint8Array) => {
 }
 
 export const generateChildKey = async (mnemonic: string) => {
-  const seed = await bip39  .mnemonicToSeed(mnemonic as string)
+  const seed = await bip39.mnemonicToSeed(mnemonic)
   let rootKey = bip32.HDKey.fromMasterSeed(seed)
   const child = rootKey.derive("m/86'/0'/0'/0/0");
   return child
