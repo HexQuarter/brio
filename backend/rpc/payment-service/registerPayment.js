@@ -18,7 +18,9 @@ export const handler = async (req, res) => {
         if (chatID) {
             const postResponse = await notifyTelegram(chatID, getBotToken(), registerPaymentRequest.payment)
             if (postResponse.status >= 400) {
-              return res.status(500).json({ error: await postResponse.json() })
+              const errMsg = await postResponse.json()
+              console.log('Error in posting payment notification: ', errMsg)
+              return res.status(500).json({ error: errMsg })
             }
             return res.status(201).json({ status: "ok" })
         }
