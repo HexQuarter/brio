@@ -186,7 +186,7 @@ export const TelegramSendForm = () => {
     const shareInvite = async () => {
         const tgData = retrieveLaunchParams()
         const startParam = new URLSearchParams()
-        startParam.append('referral', tgData.tgWebAppData?.chat?.id.toString() as string)
+        startParam.append('referral', tgData.tgWebAppData?.user?.id.toString() as string)
         const encodedStartParam = encodeURIComponent(startParam.toString())
         const miniappLink = `https://t.me/brio_dev_bot?startapp=${encodedStartParam}`;
         if (openTelegramLink.isAvailable()) {
