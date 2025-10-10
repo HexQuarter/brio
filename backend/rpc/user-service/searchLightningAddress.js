@@ -10,7 +10,7 @@ export const handler = async (req, res) => {
     }
 
     const {handle} = parsingResult.data
-    const lnURL = await req.db.get(`h:${hashHandle}`)
+    const lnURL = await req.db.get(`h:${handle}`)
     if (!lnURL) {
         return res.status(404).json({ error: "user not found" })
     }
