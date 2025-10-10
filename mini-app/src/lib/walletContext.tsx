@@ -12,7 +12,8 @@ import {
 } from '@breeztech/breez-sdk-spark/web'
 import { toast } from 'sonner';
 import { t } from 'i18next';
-import { cloudStorage } from '@telegram-apps/sdk-react';
+import { cloudStorage, retrieveLaunchParams } from '@telegram-apps/sdk-react';
+import { buf2hex } from '@/helpers/crypto';
 
 export type WalletContextType = {
     walletExists: boolean;
@@ -209,16 +210,17 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         if (cachedLnUrl) {
             return cachedLnUrl
         }
-        const info = await breezSdk?.getLightningAddress()
-        if (info) {
-            setLnUrl(info.lnurl)
-            localStorage.setItem(WALLET_LN_URL, info.lnurl)
-            return info.lnurl
-        }
-        return null
+
+        const tgParams = retrieveLaunchParams()
+        const tgUsername = tgParams.tgWebAppData?.user?.username
+        const usernameDigest = await crypto.subtle.digest("sha-256", new TextEncoder().encode(tgUsername))
+        const breezLnURL = `lnurlp://breez.tips/lnurlp/${buf2hex(usernameDigest)}`
+        setLnUrl(breezLnURL)
+        localStorage.setItem(WALLET_LN_URL, breezLnURL)
+        return breezLnURL
     }
 
-     const getBtcAddress = async (breezSdk: BreezSdk) => {
+    const getBtcAddress = async (breezSdk: BreezSdk) => {
         if (btcAddress) {
             return btcAddress
         }
