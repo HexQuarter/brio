@@ -45,10 +45,12 @@ export const handler = async (req, res) => {
       const referralChatID = new URLSearchParams(startParam).get('referral')
       if (referral) {
         const chatData = req.db.get(`c:${referralChatID}`)
-        if (!chatData) {
-          return
+        if (chatData) {
+          await notifyTelegramReferral(referralChatID, getBotToken(), username)
         }
-        await notifyTelegramReferral(referralChatID, getBotToken(), username)
+        else {
+          console.log('Referral not working', referralChatID)
+        }
       }
     }
 
