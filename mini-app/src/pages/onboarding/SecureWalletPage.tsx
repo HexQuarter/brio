@@ -107,7 +107,7 @@ export function SecureWalletPage() {
                 return
             }
     
-            setError(await response.json())
+            setError(JSON.stringify(await response.json()))
         }
         catch (e) {
             console.error(e)
