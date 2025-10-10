@@ -52,29 +52,29 @@ export const WalletMainPage = () => {
         }
 
         if (breezSdk) {
-            const tgData = retrieveLaunchParams()
-            if (tgData) {
-                const startParam = tgData.tgWebAppData?.start_param
-                if (startParam) {
-                    const params = new URLSearchParams(startParam)
-                    const paymentHash = params.get('payment')
-                    if (paymentHash) {
-                        const fetchPaymentId = async (hash: string) => {
-                            const { payments } = await breezSdk.listPayments({})
-                            const payment = payments.find(p => p.paymentType == 'receive' && p.details?.type == 'lightning' && p.details.paymentHash == hash)
-                            if (payment) {
-                                navigate(`/wallet/activity/${payment.id}`)
-                            } else {
-                                console.error("Could not find payment", payment, payments)
+            loadBalance(breezSdk).then(() => {
+                const tgData = retrieveLaunchParams()
+                if (tgData) {
+                    const startParam = tgData.tgWebAppData?.start_param
+                    if (startParam) {
+                        const params = new URLSearchParams(startParam)
+                        const paymentHash = params.get('payment')
+                        if (paymentHash) {
+                            const fetchPaymentId = async (hash: string) => {
+                                const { payments } = await breezSdk.listPayments({})
+                                const payment = payments.find(p => p.paymentType == 'receive' && p.details?.type == 'lightning' && p.details.paymentHash == hash)
+                                if (payment) {
+                                    navigate(`/wallet/activity/${payment.id}`)
+                                } else {
+                                    console.error("Could not find payment", payment, payments)
+                                }
                             }
+    
+                            fetchPaymentId(paymentHash)
                         }
-
-                        fetchPaymentId(paymentHash)
                     }
                 }
-            }
-
-            loadBalance(breezSdk)
+            })
             
             const interval = setInterval(async () => await loadBalance(breezSdk, true), 1000)
             return () => clearInterval(interval)
