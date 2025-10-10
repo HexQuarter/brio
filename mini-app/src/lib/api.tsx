@@ -36,7 +36,7 @@ export const registerUser = async (params: RegisterParams) => {
     })
 }
 
-export const fetchUserInfo = async (handle: string) => {
+export const fetchLightningAddress = async (handle: string) => {
     const digest = await crypto.subtle.digest("sha-256", new TextEncoder().encode(handle))
     return await fetch(new URL("/rpc", rpcEndpoint()), {
         method: 'POST',
@@ -45,7 +45,7 @@ export const fetchUserInfo = async (handle: string) => {
             "Accept": "application/json"
         },
         body: JSON.stringify({
-            operation: 'search-user',
+            operation: 'search-lightning-address',
             payload: {
                 handle: buf2hex(digest)
             }

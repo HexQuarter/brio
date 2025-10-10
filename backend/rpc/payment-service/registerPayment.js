@@ -14,10 +14,9 @@ export const handler = async (req, res) => {
         }
 
         const registerPaymentRequest = parsingResult.data
-        const tapRootAddress = await req.db.get(`h:${registerPaymentRequest.handle}`)
-        if (tapRootAddress) {
-            const user = await req.db.get(`p:${tapRootAddress}`)
-            const postResponse = await notifyTelegram(user.chatId, getBotToken(), registerPaymentRequest.payment)
+        const chatID = await req.db.get(`h:${registerPaymentRequest.handle}`)
+        if (chatID) {
+            const postResponse = await notifyTelegram(chatID, getBotToken(), registerPaymentRequest.payment)
             if (postResponse.status >= 400) {
               return res.status(500).json({ error: await postResponse.json() })
             }

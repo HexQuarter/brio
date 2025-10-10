@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { createUserHandler, searchUserHandler } from "./user-service/index.js"
+import { createUserHandler, searchLightningAddressHandler } from "./user-service/index.js"
 import {registerPaymentHandler } from "./payment-service/index.js"
 
 const OperationSchema = z.object({
@@ -9,7 +9,7 @@ const OperationSchema = z.object({
 
 const handlers = {
     "create-user": createUserHandler,
-    "search-user": searchUserHandler,
+    "search-lightning-address": searchLightningAddressHandler,
     "register-payment": registerPaymentHandler
 }
 

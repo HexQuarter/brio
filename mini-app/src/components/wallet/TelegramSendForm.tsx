@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { convertBtcToSats, convertSatsToBtc, formatBtcAmount, formatFiatAmount } from "@/helpers/number"
-import { fetchUserInfo, registerPayment } from "@/lib/api"
+import { fetchLightningAddress, registerPayment } from "@/lib/api"
 import { Spinner } from "@telegram-apps/telegram-ui"
 import { useWallet } from "@/lib/walletContext"
 import { useNavigate } from "react-router-dom"
@@ -16,7 +16,6 @@ import { addContact, listContacts } from "@/lib/contact"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 import { Check, ChevronsUpDown } from "lucide-react"
-import { buf2hex } from "@/helpers/crypto"
 
 export const TelegramSendForm = () => {
     const navigate = useNavigate()
@@ -40,10 +39,10 @@ export const TelegramSendForm = () => {
         const delayDebounceFn = setTimeout(async () => {
             const strippedHandle = handle.startsWith('@') ? handle.slice(1, handle.length) : handle
             try {
-                const response = await fetchUserInfo(strippedHandle)
+                const response = await fetchLightningAddress(strippedHandle)
                 if (response.status == 200) {
-                    const { user: userInfo }  = await response.json()
-                    setAddress(userInfo.breezLnUrl)
+                    const { address: lnUrl }  = await response.json()
+                    setAddress(lnUrl)
 
                     const fiatRates = await breezSdk?.listFiatRates()
                     const rate = fiatRates?.rates.find(r => r.coin.toLowerCase() == currency.toLowerCase())
@@ -187,8 +186,7 @@ export const TelegramSendForm = () => {
     const shareInvite = async () => {
         const tgData = retrieveLaunchParams()
         const startParam = new URLSearchParams()
-        const usernameDigest = await crypto.subtle.digest("sha-256", new TextEncoder().encode(tgData.tgWebAppData?.user?.username))
-        startParam.append('referral', buf2hex(usernameDigest))
+        startParam.append('referral', tgData.tgWebAppData?.chat?.id.toString() as string)
         const encodedStartParam = encodeURIComponent(startParam.toString())
         const miniappLink = `https://t.me/brio_dev_bot?startapp=${encodedStartParam}`;
         if (openTelegramLink.isAvailable()) {

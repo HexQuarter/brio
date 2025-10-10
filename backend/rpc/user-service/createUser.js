@@ -30,37 +30,25 @@ export const handler = async (req, res) => {
     const { username, id } = JSON.parse(params.get('user'))
     const hashHandle = createHash('sha256').update(username).digest('hex')	
 
-    const tapRootAddress = await req.db.get(`h:${hashHandle}`)
-    if (tapRootAddress) {
-      res.status(204).json({ status: 'ok' })
-      return
-    }
-
-    await req.db.put(`p:${createUserRequest.tapRootAddress}`, {
+    await req.db.put(`c:${id}`, {
         publicKey: createUserRequest.publicKey,
         breezBtcAddress: createUserRequest.breezBtcAddress,
         breezLnUrl: createUserRequest.breezLnUrl,
-        handle: hashHandle,
-        chatId: id
+        tapRootAddress: createUserRequest.tapRootAddress,
+        handle: hashHandle
     })
 
-    await req.db.put(`h:${hashHandle}`, createUserRequest.tapRootAddress)
+    await req.db.put(`h:${hashHandle}`, createUserRequest.breezLnUrl)
 
     const startParam = params.get('start_param')
     if (startParam) {
-      const referral = new URLSearchParams(startParam).get('referral')
+      const referralChatID = new URLSearchParams(startParam).get('referral')
       if (referral) {
-        const tapRootAddress = req.db.get(`h:${referral}`)
-        if (!tapRootAddress) {
+        const chatData = req.db.get(`c:${referralChatID}`)
+        if (!chatData) {
           return
         }
-        const userInfo = req.db.get(`p:${tapRootAddress}`)
-        if (!userInfo) {
-          return
-        }
-
-        const { chatId } = userInfo
-        await notifyTelegramReferral(chatId, getBotToken(), username)
+        await notifyTelegramReferral(referralChatID, getBotToken(), username)
       }
     }
 

@@ -64,6 +64,8 @@ export const WalletMainPage = () => {
                             const payment = payments.find(p => p.paymentType == 'receive' && p.details?.type == 'lightning' && p.details.paymentHash == hash)
                             if (payment) {
                                 navigate(`/wallet/activity/${payment.id}`)
+                            } else {
+                                console.error("Could not find payment", payment, payments)
                             }
                         }
 
