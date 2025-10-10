@@ -91,13 +91,10 @@ export const BitcoinSendForm  = () => {
     let debounceTimeout = useRef<number|undefined>(undefined);
 
     const handleAmountChange = async (amount: number) => {
-         if (Number.isNaN(amount)) {
+        if (Number.isNaN(amount)) {
             setFiatAmount("")
             return
         }
-
-        setFiatAmount(amount)
-
         if (amount == 0) {
             return
         }
@@ -129,7 +126,7 @@ export const BitcoinSendForm  = () => {
                         break
                     case "lightningAddress":
                         {const prepareResponse = await breezSdk?.prepareLnurlPay({
-                            amountSats: convertBtcToSats(btcAmount),
+                            amountSats: convertBtcToSats(btc),
                             payRequest: inputType.payRequest,
                         })
 
@@ -143,7 +140,7 @@ export const BitcoinSendForm  = () => {
                     case "bitcoinAddress":
                         {const prepareResponse = await breezSdk?.prepareSendPayment({
                             paymentRequest: inputType.address,
-                            amountSats: convertBtcToSats(btcAmount)
+                            amountSats: convertBtcToSats(btc)
                         })
                          if (!prepareResponse) {
                             throw new Error('Unable to prepare Bitcoin payment')
@@ -160,7 +157,7 @@ export const BitcoinSendForm  = () => {
                     case "bolt11Invoice":
                         const prepareResponse = await breezSdk?.prepareSendPayment({
                             paymentRequest: inputType.invoice.bolt11,
-                            amountSats: inputType.amountMsat ? undefined : convertBtcToSats(btcAmount)
+                            amountSats: inputType.amountMsat ? undefined : convertBtcToSats(btc)
                         })
                          if (!prepareResponse) {
                             throw new Error('Unable to prepare Bolt11 payment')
