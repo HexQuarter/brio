@@ -8,7 +8,7 @@ import { FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 
-import { retrieveLaunchParams, retrieveRawInitData } from "@telegram-apps/sdk-react";
+import { retrieveRawInitData } from "@telegram-apps/sdk-react";
 import { Progress } from "@/components/ui/progress";
 
 import { registerUser } from "@/lib/api";
@@ -47,16 +47,8 @@ export function SecureWalletPage() {
                 return 
             }
 
-            // await wallet.storeWallet(password)
-
             await new Promise(r => setTimeout(r, 1000));
             
-            // const sdk = await wallet.initWallet(password)
-            // if (!sdk) {
-            //     setError("Cannot load the sdk")
-            //     return 
-            // }
-    
             // const mnemonic = getSessionMnemonic() as string
             const childKey = await generateChildKey(mnemonic)
             if (!childKey.publicKey) {
@@ -78,31 +70,31 @@ export function SecureWalletPage() {
                 return
             }
 
-            const data = retrieveLaunchParams()
-    
             await new Promise(r => setTimeout(r, 2000));
     
             setProgressLabel(t('walletSecure.progress66'))
             setProgressValue(66)
+            const registerLightningAddressRequest = { username: tapRootAddress }
+            const available = await sdk.checkLightningAddressAvailable(registerLightningAddressRequest)
 
-            const usernameDigest = await crypto.subtle.digest("sha-256", new TextEncoder().encode(data.tgWebAppData?.user?.username))
-
-            const available = await sdk.checkLightningAddressAvailable({
-                username: buf2hex(usernameDigest)
-            })
+            let info
             if (available) {
-                await sdk.registerLightningAddress({
-                    username: buf2hex(usernameDigest)
-                })
+                info = await sdk.registerLightningAddress(registerLightningAddressRequest)
+            }
+            else {
+                info = await sdk.getLightningAddress()
             }
 
-            const lnUrl = `lnurlp://breez.tips/lnurlp/${buf2hex(usernameDigest)}`
+            if (!info?.lnurl) {
+                setError(t('walletSecure.noLightningAddressGenerated'))
+                return
+            }
 
             const response = await registerUser({
                 tapRootAddress: tapRootAddress, 
                 publicKey: childPubkeyHex, 
                 breezBtcAddress: await wallet.getBtcAddress(sdk) as string, 
-                breezLnUrl: lnUrl,
+                breezLnUrl: info.lnurl,
                 tgInitData: lp
             })
     

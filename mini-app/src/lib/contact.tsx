@@ -5,7 +5,7 @@ export const listContacts = async (): Promise<string[]> => {
     if (localContacts) {
         return JSON.parse(localContacts) as string[]
     }
-    if (cloudStorage.isSupported()) {
+    if (!import.meta.env.DEV && cloudStorage.getItem.isAvailable()) {
         const cloudContacts = await cloudStorage.getItem('contacts')
         if (cloudContacts) {
             const contacts = JSON.parse(cloudContacts)
@@ -26,7 +26,7 @@ export const addContact = async (handle: string) => {
     contacts = Array.from(contactSet.add(formattedHandle))
     const serializedContact = JSON.stringify(contacts)
     localStorage.setItem('contacts', serializedContact)
-    if (cloudStorage.isSupported()) {
+    if (!import.meta.env.DEV && cloudStorage.setItem.isAvailable()) {
         await cloudStorage.setItem('contacts', serializedContact)
     }
 }

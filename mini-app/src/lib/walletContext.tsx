@@ -12,8 +12,7 @@ import {
 } from '@breeztech/breez-sdk-spark/web'
 import { toast } from 'sonner';
 import { t } from 'i18next';
-import { cloudStorage, retrieveLaunchParams } from '@telegram-apps/sdk-react';
-import { buf2hex } from '@/helpers/crypto';
+import { cloudStorage } from '@telegram-apps/sdk-react';
 
 export type WalletContextType = {
     walletExists: boolean;
@@ -93,17 +92,17 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
 
     const checkWallet = async () => {
         let encryptedWallet = localStorage.getItem(WALLET_KEY)
-        if (!encryptedWallet && cloudStorage.isSupported()) {
-            encryptedWallet = await cloudStorage.getItem(WALLET_KEY)
-            if (encryptedWallet) {
-                localStorage.setItem(WALLET_KEY, encryptedWallet)
-                setWalletExists(true)
+        if (!encryptedWallet) {
+            if (!import.meta.env.DEV && cloudStorage.getItem.isAvailable()) {
+                encryptedWallet = await cloudStorage.getItem(WALLET_KEY)
+                if (encryptedWallet) {
+                    localStorage.setItem(WALLET_KEY, encryptedWallet)
+                    setWalletExists(true)
+                }
             }
         }
 
-        if(!encryptedWallet) {
-            setWalletExists(false)
-        }
+        setWalletExists(!!encryptedWallet)
         if (!sessionStorage.getItem(SESSION_MNEMONIC_KEY)) {
             setPromptForPassword(true)
         }
@@ -142,9 +141,10 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
     const resetWallet = async () => {
         localStorage.clear()
         sessionStorage.clear()
-        cloudStorage.clear.ifAvailable()
+        if (!import.meta.env.DEV && cloudStorage.clear.ifAvailable()) {
+            await cloudStorage.clear()
+        }
 
-        await breezSdk?.deleteLightningAddress()
         setWalletExists(false)
     }
 
@@ -192,7 +192,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         })
         localStorage.setItem(WALLET_KEY, encryptedWallet);
         sessionStorage.removeItem(SESSION_MNEMONIC_KEY);
-        if (cloudStorage.isSupported()) {
+        if (!import.meta.env.DEV && cloudStorage.setItem.isAvailable()) {
             await cloudStorage.setItem(WALLET_KEY, encryptedWallet)
         }
         setWalletExists(true)
@@ -211,13 +211,13 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
             return cachedLnUrl
         }
 
-        const tgParams = retrieveLaunchParams()
-        const tgUsername = tgParams.tgWebAppData?.user?.username
-        const usernameDigest = await crypto.subtle.digest("sha-256", new TextEncoder().encode(tgUsername))
-        const breezLnURL = `lnurlp://breez.tips/lnurlp/${buf2hex(usernameDigest)}`
-        setLnUrl(breezLnURL)
-        localStorage.setItem(WALLET_LN_URL, breezLnURL)
-        return breezLnURL
+        const info = await breezSdk?.getLightningAddress()
+        if (info) {
+            setLnUrl(info.lnurl)
+            localStorage.setItem(WALLET_LN_URL, info.lnurl)
+            return info.lnurl
+        }
+        return null
     }
 
     const getBtcAddress = async (breezSdk: BreezSdk) => {
