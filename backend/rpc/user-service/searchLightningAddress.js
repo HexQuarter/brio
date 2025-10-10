@@ -10,10 +10,15 @@ export const handler = async (req, res) => {
     }
 
     const {handle} = parsingResult.data
-    const lnURL = await req.db.get(`h:${handle}`)
-    if (!lnURL) {
+    const chatID = await req.db.get(`h:${handle}`)
+    if (!chatID) {
         return res.status(404).json({ error: "user not found" })
     }
 
-    res.status(200).json({ address: lnURL })
+    const chatInfo = await req.db.get(`c:${chatID}`)
+    if (!chatInfo) {
+        return res.status(500).json({ error: 'chat info is missing'})
+    }
+
+    res.status(200).json({ address: chatInfo.breezLnUrl })
 }

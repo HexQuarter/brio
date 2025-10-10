@@ -38,7 +38,7 @@ export const handler = async (req, res) => {
         handle: hashHandle
     })
 
-    await req.db.put(`h:${hashHandle}`, createUserRequest.breezLnUrl)
+    await req.db.put(`h:${hashHandle}`, id)
 
     const startParam = params.get('start_param')
     if (startParam) {
