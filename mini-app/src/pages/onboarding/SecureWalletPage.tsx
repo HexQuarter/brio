@@ -65,7 +65,6 @@ export function SecureWalletPage() {
             setProgressValue(66)
             const registerLightningAddressRequest = { username: tapRootAddress }
             const available = await sdk.checkLightningAddressAvailable(registerLightningAddressRequest)
-            console.log(available)
             let info
             if (available) {
                 info = await sdk.registerLightningAddress(registerLightningAddressRequest)

@@ -35,6 +35,7 @@ export const TelegramSendForm = () => {
 
     const [btcBalance] = useOutletContext<any>()
     const [remaining, setRemaining] = useState(0)
+    const [loadingAll, setLoadingAll] = useState(false)
 
     useEffect(() => {
         setLookupError(null)
@@ -95,12 +96,6 @@ export const TelegramSendForm = () => {
         const btc = amount / price
         setBtcAmount(btc)
 
-        if (btc >= btcBalance) {
-            setFees(0)
-            setSendError('Unsufficient funds')
-            return
-        }
-
         if (debounceTimeout.current) {
             clearTimeout(debounceTimeout.current)
         }
@@ -110,6 +105,7 @@ export const TelegramSendForm = () => {
                 setLoadingPayment(t('walletSend.fetchingFees'))
                 const input = await parse(address)
                 if (input.type != 'lnurlPay') {
+                    setLoadingPayment(null)
                     setSendError(t('wallet.invalidAddress'))
                     return
                 }
@@ -125,13 +121,13 @@ export const TelegramSendForm = () => {
                 }
                 const feeSats = prepareResponse.feeSats
                 setFees(feeSats)
-                const remaining = btcBalance - (btc - convertSatsToBtc(feeSats))
+                const reducedBtc = convertSatsToBtc(prepareResponse.amountSats + prepareResponse.feeSats)
+                const remaining = btcBalance - reducedBtc
                 setRemaining(remaining)
                 if (remaining < 0) {
                     setSendError('Unsufficient funds')
                     return
                 }
-                setLoadingPayment(null)
                 setPrepareResponse(prepareResponse)
             }
             catch(e) {
@@ -147,6 +143,28 @@ export const TelegramSendForm = () => {
         }, 500)
 
         return () => clearTimeout(debounceTimeout.current)
+    }
+
+    const drain = async () => {
+        setLoadingAll(true)
+        const input = await parse(address)
+        if (input.type != 'lnurlPay') {
+            setLoadingAll(false)
+            setSendError(t('wallet.invalidAddress'))
+            return
+        }
+
+        let prepareResponse = await breezSdk?.prepareLnurlPay({
+            amountSats: convertBtcToSats(btcBalance),
+            payRequest: input
+        })
+        setLoadingAll(false)
+        if (!prepareResponse) {
+            return
+
+        }
+        const reducedBtc = btcBalance - convertSatsToBtc(prepareResponse.feeSats)
+        handleAmountChange(parseFloat(formatFiatAmount(reducedBtc * price, 4)))
     }
 
     const handleSend = async () => {
@@ -275,7 +293,13 @@ export const TelegramSendForm = () => {
 
             { address != '' && price > 0 && !lookupError && 
                 <div>
-                    <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')} ({currency})</Label>
+                    <div className="flex justify-between">
+                        <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')} ({currency})</Label>
+                        <Button variant="outline" className="p-3 rounded-sm h-0 text-xs border-gray-200" onClick={drain}>
+                            All
+                            {loadingAll && <Spinner size="s" />}
+                        </Button>
+                    </div>
                     <Input 
                         type="number" 
                         inputMode="decimal"

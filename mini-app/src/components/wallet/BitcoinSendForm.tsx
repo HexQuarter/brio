@@ -35,6 +35,7 @@ export const BitcoinSendForm  = () => {
 
     const [btcBalance] = useOutletContext<any>()
     const [remaining, setRemaining] = useState(0)
+    const [loadingAll, setLoadingAll] = useState(false)
 
     const pasteAddress = async () => {
         const text = await navigator.clipboard.readText();
@@ -105,12 +106,6 @@ export const BitcoinSendForm  = () => {
         setFiatAmount(amount)
         const btc = amount / price
         setBtcAmount(btc)
-
-        if (btc >= btcBalance) {
-            setFees(0)
-            setSendError('Unsufficient funds')
-            return
-        }
 
         if (debounceTimeout.current) {
             clearTimeout(debounceTimeout.current)
@@ -192,8 +187,8 @@ export const BitcoinSendForm  = () => {
                         if (prepareResponse.paymentMethod.type === 'bolt11Invoice') {
                             const feeQuote = prepareResponse.paymentMethod.lightningFeeSats + (prepareResponse.paymentMethod.sparkTransferFeeSats || 0)
                             setFees(feeQuote)
-                            const remaining = btcBalance - (btc - convertSatsToBtc(feeQuote))
-                            setRemaining(remaining)
+                            const reducedBtc = convertSatsToBtc(prepareResponse.amountSats + feeQuote)
+                            const remaining = btcBalance - reducedBtc
                             if (remaining < 0) {
                                 setSendError('Unsufficient funds')
                                 return
@@ -215,6 +210,62 @@ export const BitcoinSendForm  = () => {
         }, 500)
 
         return () => clearTimeout(debounceTimeout.current)
+    }
+
+    const drain = async () => {
+        setLoadingAll(true)
+        const inputType = await parse(address)
+        if (!inputType) {
+            setLoadingAll(false)
+            return
+        }
+        let fees = 0
+        switch(inputType.type) {
+            case "lnurlPay":
+                const lnUrlPayPrepareResponse = await breezSdk?.prepareLnurlPay({
+                    amountSats: convertBtcToSats(btcBalance),
+                    payRequest: inputType,
+                })
+                if (lnUrlPayPrepareResponse) {
+                    fees = lnUrlPayPrepareResponse.feeSats
+                }
+                break
+            case "lightningAddress":
+                const lnPrepareResponse = await breezSdk?.prepareLnurlPay({
+                    amountSats: convertBtcToSats(btcBalance),
+                    payRequest: inputType.payRequest,
+                })
+                if (lnPrepareResponse) {
+                    fees = lnPrepareResponse.feeSats
+                }
+                break
+            case "bitcoinAddress":
+                const btcPrepareResponse = await breezSdk?.prepareSendPayment({
+                    paymentRequest: inputType.address,
+                    amountSats: convertBtcToSats(btcBalance)
+                })
+                 if (btcPrepareResponse && btcPrepareResponse.paymentMethod.type === 'bitcoinAddress') {
+                    const feeQuote = btcPrepareResponse.paymentMethod.feeQuote
+                    const fastFeeSats = feeQuote.speedFast.userFeeSat + feeQuote.speedFast.l1BroadcastFeeSat
+                    fees = fastFeeSats
+                 }
+                break
+            case "bolt11Invoice":
+                const bolt11PrepareResponse = await breezSdk?.prepareSendPayment({
+                    paymentRequest: inputType.invoice.bolt11,
+                    amountSats: inputType.amountMsat ? undefined : convertBtcToSats(btcBalance)
+                })
+                if (bolt11PrepareResponse && bolt11PrepareResponse.paymentMethod.type === 'bolt11Invoice') {
+                    fees = bolt11PrepareResponse.paymentMethod.lightningFeeSats + (bolt11PrepareResponse.paymentMethod.sparkTransferFeeSats || 0)
+                }
+                break
+        }
+        setLoadingAll(false)
+        if (fees == 0) {
+            return
+        }
+        const reducedBtc = btcBalance - convertSatsToBtc(fees)
+        await handleAmountChange(parseFloat(formatFiatAmount(reducedBtc * price, 4)))
     }
 
     const handleSend = async () => {
@@ -303,7 +354,13 @@ export const BitcoinSendForm  = () => {
             
             { inputType && price > 0 && 
                 <div>
-                    <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')} ({currency})</Label>
+                    <div className="flex justify-between">
+                        <Label htmlFor="amount" className='text-gray-400'>{t('wallet.amount')} ({currency})</Label>
+                        <Button variant="outline" className="p-3 rounded-sm h-0 text-xs border-gray-200" onClick={drain}>
+                            All
+                            {loadingAll && <Spinner size="s" />}
+                        </Button>
+                    </div>
                     <Input 
                         type="number" 
                         min={0} 
@@ -320,8 +377,8 @@ export const BitcoinSendForm  = () => {
                         {!sendError && <Button className="w-40" onClick={() => handleSend()}>Send</Button>}
                         {fees > 0 && 
                             <div>
-                                <p className="text-xs">Fees: {formatBtcAmount(convertSatsToBtc(fees))} BTC / {formatFiatAmount(convertSatsToBtc(fees) * price)} {currency}</p>
-                                <p className="text-xs">Remaining : {formatBtcAmount(remaining)} BTC / {formatFiatAmount(remaining * price)} {currency}</p>
+                                <p className="text-xs">Fees: {formatBtcAmount(convertSatsToBtc(fees))} BTC / {formatFiatAmount(convertSatsToBtc(fees) * price, 4)} {currency}</p>
+                                <p className="text-xs">Remaining : {formatBtcAmount(remaining)} BTC / {formatFiatAmount(remaining * price, 4)} {currency}</p>
                             </div>
                         }
                     </div>}
