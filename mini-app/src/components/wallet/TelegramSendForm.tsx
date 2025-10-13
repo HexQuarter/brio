@@ -8,7 +8,7 @@ import { convertBtcToSats, convertSatsToBtc, formatBtcAmount, formatFiatAmount }
 import { fetchLightningAddress, registerPayment } from "@/lib/api"
 import { Spinner } from "@telegram-apps/telegram-ui"
 import { useWallet } from "@/lib/walletContext"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useOutletContext } from "react-router-dom"
 import { parse, PrepareLnurlPayResponse, SdkEvent } from "@breeztech/breez-sdk-spark/web"
 import { toast } from "sonner"
 import { openTelegramLink, retrieveLaunchParams } from "@telegram-apps/sdk-react"
@@ -32,6 +32,9 @@ export const TelegramSendForm = () => {
     const [fees, setFees] = useState(0)
     const [loadingPayment, setLoadingPayment] = useState<null | string>(null)
     const [contacts, setContacts] = useState<string[]>([])
+
+    const [btcBalance] = useOutletContext<any>()
+    const [remaining, setRemaining] = useState(0)
 
     useEffect(() => {
         setLookupError(null)
@@ -92,6 +95,12 @@ export const TelegramSendForm = () => {
         const btc = amount / price
         setBtcAmount(btc)
 
+        if (btc >= btcBalance) {
+            setFees(0)
+            setSendError('Unsufficient funds')
+            return
+        }
+
         if (debounceTimeout.current) {
             clearTimeout(debounceTimeout.current)
         }
@@ -116,6 +125,12 @@ export const TelegramSendForm = () => {
                 }
                 const feeSats = prepareResponse.feeSats
                 setFees(feeSats)
+                const remaining = btcBalance - (btc - convertSatsToBtc(feeSats))
+                setRemaining(remaining)
+                if (remaining < 0) {
+                    setSendError('Unsufficient funds')
+                    return
+                }
                 setLoadingPayment(null)
                 setPrepareResponse(prepareResponse)
             }
@@ -274,10 +289,15 @@ export const TelegramSendForm = () => {
             }
             {address != '' && !lookupError && 
                 <div className="flex flex-col items-center">
-                    {!loadingPayment && !sendError && 
+                    {!loadingPayment &&
                         <div className="text-center flex flex-col gap-2 items-center">
-                            <Button className="w-40" onClick={() => handleSend()}>Send</Button>
-                            {fees > 0 && <p className="text-xs">Fees: {formatBtcAmount(convertSatsToBtc(fees))} BTC / {formatFiatAmount(convertSatsToBtc(fees) * price)} {currency}</p>}
+                            {!sendError && <Button className="w-40" onClick={() => handleSend()}>Send</Button>}
+                            {fees > 0 && 
+                                <div>
+                                    <p className="text-xs">Fees: {formatBtcAmount(convertSatsToBtc(fees))} BTC / {formatFiatAmount(convertSatsToBtc(fees) * price)} {currency}</p>
+                                    <p className="text-xs">Remaining : {formatBtcAmount(remaining)} BTC / {formatFiatAmount(remaining * price)} {currency}</p>
+                                </div>
+                            }
                         </div>}
                     {loadingPayment && 
                             <div className='flex flex-col items-center gap-2'>

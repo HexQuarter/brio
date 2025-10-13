@@ -8,7 +8,7 @@ import { convertSatsToBtc, convertBtcToSats, formatBtcAmount, formatFiatAmount }
 import { useWallet } from "@/lib/walletContext";
 import { InputType, PrepareLnurlPayResponse, PrepareSendPaymentResponse, SendPaymentOptions } from "@breeztech/breez-sdk-spark";
 import { Spinner } from "@telegram-apps/telegram-ui";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { parse } from "@breeztech/breez-sdk-spark/web";
 import { openQrScanner } from "@telegram-apps/sdk-react";
 
@@ -32,6 +32,9 @@ export const BitcoinSendForm  = () => {
     const [inputType, setInputType] = useState<InputType | null>(null)
     const [fees, setFees] = useState(0)
     const [loadingPayment, setLoadingPayment] = useState<string | null>(null)
+
+    const [btcBalance] = useOutletContext<any>()
+    const [remaining, setRemaining] = useState(0)
 
     const pasteAddress = async () => {
         const text = await navigator.clipboard.readText();
@@ -103,6 +106,12 @@ export const BitcoinSendForm  = () => {
         const btc = amount / price
         setBtcAmount(btc)
 
+        if (btc >= btcBalance) {
+            setFees(0)
+            setSendError('Unsufficient funds')
+            return
+        }
+
         if (debounceTimeout.current) {
             clearTimeout(debounceTimeout.current)
         }
@@ -122,6 +131,12 @@ export const BitcoinSendForm  = () => {
                         }
                         const feeSats = prepareResponse.feeSats
                         setFees(feeSats)
+                        const remaining = btcBalance - (btc - convertSatsToBtc(feeSats))
+                        setRemaining(remaining)
+                        if (remaining < 0) {
+                            setSendError('Unsufficient funds')
+                            return
+                        }
                         setPrepareResponse(prepareResponse)}
                         break
                     case "lightningAddress":
@@ -135,6 +150,12 @@ export const BitcoinSendForm  = () => {
                         }
                         const feeSats = prepareResponse.feeSats
                         setFees(feeSats)
+                        const remaining = btcBalance - (btc - convertSatsToBtc(feeSats))
+                        setRemaining(remaining)
+                        if (remaining < 0) {
+                            setSendError('Unsufficient funds')
+                            return
+                        }
                         setPrepareResponse(prepareResponse)}
                         break
                     case "bitcoinAddress":
@@ -149,6 +170,12 @@ export const BitcoinSendForm  = () => {
                             const feeQuote = prepareResponse.paymentMethod.feeQuote
                             const fastFeeSats = feeQuote.speedFast.userFeeSat + feeQuote.speedFast.l1BroadcastFeeSat
                             setFees(fastFeeSats)
+                            const remaining = btcBalance - (btc - convertSatsToBtc(fastFeeSats))
+                            setRemaining(remaining)
+                            if (remaining < 0) {
+                                setSendError('Unsufficient funds')
+                                return
+                            }
                             setPrepareResponse(prepareResponse)
                             setLoadingPayment(null)
                         }
@@ -161,6 +188,18 @@ export const BitcoinSendForm  = () => {
                         })
                          if (!prepareResponse) {
                             throw new Error('Unable to prepare Bolt11 payment')
+                        }
+                        if (prepareResponse.paymentMethod.type === 'bolt11Invoice') {
+                            const feeQuote = prepareResponse.paymentMethod.lightningFeeSats + (prepareResponse.paymentMethod.sparkTransferFeeSats || 0)
+                            setFees(feeQuote)
+                            const remaining = btcBalance - (btc - convertSatsToBtc(feeQuote))
+                            setRemaining(remaining)
+                            if (remaining < 0) {
+                                setSendError('Unsufficient funds')
+                                return
+                            }
+                            setPrepareResponse(prepareResponse)
+                            setLoadingPayment(null)
                         }
                         setPrepareResponse(prepareResponse)
                 }
@@ -276,10 +315,15 @@ export const BitcoinSendForm  = () => {
                 </div>
             }
             <div className="flex flex-col items-center">
-                {!loadingPayment && !sendError && 
+                {!loadingPayment &&
                     <div className="text-center flex flex-col gap-2 items-center">
-                        <Button className="w-40" onClick={() => handleSend()}>Send</Button>
-                        {fees > 0 && <p className="text-xs">Fees: {formatBtcAmount(convertSatsToBtc(fees))} BTC / {formatFiatAmount(convertSatsToBtc(fees) * price)} {currency}</p>}
+                        {!sendError && <Button className="w-40" onClick={() => handleSend()}>Send</Button>}
+                        {fees > 0 && 
+                            <div>
+                                <p className="text-xs">Fees: {formatBtcAmount(convertSatsToBtc(fees))} BTC / {formatFiatAmount(convertSatsToBtc(fees) * price)} {currency}</p>
+                                <p className="text-xs">Remaining : {formatBtcAmount(remaining)} BTC / {formatFiatAmount(remaining * price)} {currency}</p>
+                            </div>
+                        }
                     </div>}
                  {loadingPayment && 
                             <div className='flex flex-col items-center gap-2'>

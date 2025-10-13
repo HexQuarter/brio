@@ -116,7 +116,7 @@ export const WalletMainPage = () => {
                         <div className="bg-gray-100 p-1 rounded-xl flex-1 flex flex-col">
                             <div className="flex flex-col gap-20 mt-5 p-2">
                                 <WalletMenu />
-                                <Outlet />
+                                <Outlet context={[btcBalance]}/>
                             </div>
                         </div>
                 </div>
