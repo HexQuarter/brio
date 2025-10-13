@@ -12,15 +12,19 @@ export function Page({ children, back = true }: PropsWithChildren<{
 
   useEffect(() => {
     if (back) {
-      showBackButton();
-      return onBackButtonClick(() => {
-        if (window.history.state && window.history.state.idx > 0) {
-          navigate(-1);
-        } else {
-          closeMiniApp()
-        }
-      });
+      if (showBackButton.isSupported() && showBackButton.isAvailable()) {
+        showBackButton();
+        return onBackButtonClick(() => {
+          if (window.history.state && window.history.state.idx > 0) {
+            navigate(-1);
+          } else {
+            closeMiniApp()
+          }
+        });
+      }
+      return
     }
+    
     hideBackButton();
   }, [back]);
 

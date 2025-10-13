@@ -27,16 +27,13 @@
     "walletRestore.nextButton": "Secure My Wallet",
     "walletRestore.invalidMnemonic": "The mnemonic phrase you entered is invalid. Please check and try again.",
 
-    "walletSecure.title": "Secure your wallet with password",
-    "walletSecure.description": "Choose a password you will remember. Only you can unlock Brio.",
-    "walletSecure.inputPlaceholder": "Enter your password",
+    "walletSecure.title": "Wallet creation",
     "walletSecure.registerButton": "Register the wallet",
     "walletSecure.goToWalletButton": "Go to my Wallet",
     "walletSecure.progress1": "Wallet initialization...",
     "walletSecure.progress33": "Loading Telegram information...",
     "walletSecure.progress66": "User registering...",
     "walletSecure.progress100": "Congratulations. Your account have been successfully created",
-    "walletSecure.emptyPassword": "Please enter a password to secure your wallet.",
     "walletSecure.noLightningAddressGenerated": "Unable to retrieve the Lightning address from the given mnemonic.",
 
     "main.nowalletTitle": "Your Bitcoin buddies are waiting!",
@@ -47,13 +44,6 @@
     "main.restoreButton": "Restore My Wallet",
     "main.welcomeTitle": "Welcome back to Brio!",
     "main.welcomeDescription": "Your wallet is ready — you are all set to send, share, and play with Bitcoin.",
-
-    "walletUnlock.title": "Unlock your wallet",
-    "walletUnlock.description": "To access your wallet, please enter the password securing your funds.",
-    "walletUnlock.inputPlaceholder": "Enter your password",
-    "walletUnlock.nextButton": "Access my wallet",
-    "walletUnlock.emptyPassword": "Please enter a password to unlock your wallet.",
-    "walletUnlock.invalidPassword": "Please enter a valid password.",
 
     "wallet.menuReceiveBTC": "Receive BTC",
     "wallet.menuSendBTC": "Send BTC",

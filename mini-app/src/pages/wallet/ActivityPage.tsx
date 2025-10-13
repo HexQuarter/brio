@@ -34,7 +34,6 @@ export const WalletActivityPage : React.FC = () => {
                         const rawBtcAmount = convertSatsToBtc(payment.amount)
                         const feeBtcAmount = convertSatsToBtc(payment.fees)
                         const formattedPayment = payment as FormattedPayment
-                        console.log(rawBtcAmount * price, formatFiatAmount(rawBtcAmount * price))
                         formattedPayment.fiatAmount = formatFiatAmount(rawBtcAmount * price)
                         formattedPayment.btcAmount = formatBtcAmount(rawBtcAmount)
                         formattedPayment.fiatFee = formatFiatAmount(feeBtcAmount * price)
@@ -50,7 +49,7 @@ export const WalletActivityPage : React.FC = () => {
 
         const interval = setInterval(() => {
             loadingPayments()
-        }, 5000);
+        }, 2000);
         
         return () => clearInterval(interval);
 

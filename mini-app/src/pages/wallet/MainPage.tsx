@@ -13,11 +13,10 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CiCircleAlert } from "react-icons/ci";
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
-import { UnlockWalletPage } from './UnlockWalletPage';
 import { Page } from '@/components/Page';
 
 export const WalletMainPage = () => {
-    const { breezSdk, currency, walletExists, promptForPassword } = useWallet()
+    const { breezSdk, currency, walletExists } = useWallet()
     const location = useLocation()
     const navigate = useNavigate()
     const {t} = useTranslation()
@@ -105,10 +104,6 @@ export const WalletMainPage = () => {
                 </div>
             </Page>
         )
-    }
-
-    if (walletExists && promptForPassword) {
-        return <UnlockWalletPage />
     }
 
     return (

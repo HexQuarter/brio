@@ -1,7 +1,7 @@
 import { cloudStorage } from "@telegram-apps/sdk-react"
 
 export const listContacts = async (): Promise<string[]> => {
-    const localContacts = localStorage.getItem('contacts')
+    const localContacts = sessionStorage.getItem('contacts')
     if (localContacts) {
         return JSON.parse(localContacts) as string[]
     }
@@ -9,7 +9,7 @@ export const listContacts = async (): Promise<string[]> => {
         const cloudContacts = await cloudStorage.getItem('contacts')
         if (cloudContacts) {
             const contacts = JSON.parse(cloudContacts)
-            localStorage.setItem('contacts', contacts)
+            sessionStorage.setItem('contacts', contacts)
             return contacts
         }
     }
@@ -25,7 +25,7 @@ export const addContact = async (handle: string) => {
     }
     contacts = Array.from(contactSet.add(formattedHandle))
     const serializedContact = JSON.stringify(contacts)
-    localStorage.setItem('contacts', serializedContact)
+    sessionStorage.setItem('contacts', serializedContact)
     if (!import.meta.env.DEV && cloudStorage.setItem.isAvailable()) {
         await cloudStorage.setItem('contacts', serializedContact)
     }

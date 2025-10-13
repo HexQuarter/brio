@@ -1,9 +1,8 @@
 
 import { Page } from "@/components/Page";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"
 import { getSessionMnemonic, useWallet } from "@/lib/walletContext";
-import { FormEvent, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
@@ -22,25 +21,16 @@ export function SecureWalletPage() {
     const [progressLabel, setProgressLabel] = useState("")
 
     const [error, setError] = useState<string | null>(null);    
-    const [password, setPassword] = useState<string>('');
 
-    async function secureWallet(e: FormEvent) {
-        e.preventDefault()
+    useEffect(() => {
+        secureWallet()
+    }, [])
 
-        setError(null);
-        if (!password || password == '') {
-            setError(t('walletSecure.emptyPassword'));
-            return;
-        }
-
+    async function secureWallet() {
         try {
             setProgressValue(1)
             setProgressLabel(t('walletSecure.progress1'))
-            const mnemonic = getSessionMnemonic()
-            if (!mnemonic) {
-                return navigate(-1)
-            }
-
+            const mnemonic = getSessionMnemonic() as string
             const sdk = await wallet.loadSdk(mnemonic)
             if (!sdk) {
                 setError("Cannot load the sdk")
@@ -49,7 +39,6 @@ export function SecureWalletPage() {
 
             await new Promise(r => setTimeout(r, 1000));
             
-            // const mnemonic = getSessionMnemonic() as string
             const childKey = await generateChildKey(mnemonic)
             if (!childKey.publicKey) {
                 return
@@ -76,7 +65,7 @@ export function SecureWalletPage() {
             setProgressValue(66)
             const registerLightningAddressRequest = { username: tapRootAddress }
             const available = await sdk.checkLightningAddressAvailable(registerLightningAddressRequest)
-
+            console.log(available)
             let info
             if (available) {
                 info = await sdk.registerLightningAddress(registerLightningAddressRequest)
@@ -101,7 +90,7 @@ export function SecureWalletPage() {
             await new Promise(r => setTimeout(r, 2000));
     
             if (response.status < 400) {
-                await wallet.storeWallet(mnemonic, password)
+                await wallet.storeWallet(mnemonic)
                 setProgressValue(100)
                 setProgressLabel(t('walletSecure.progress100'))
                 return
@@ -120,35 +109,29 @@ export function SecureWalletPage() {
     }
 
     return (
-        <Page back={true}>
-            <form className="flex flex-col gap-20" onSubmit={secureWallet}>
+        <Page back={false}>
+            <div className="flex flex-col gap-10">
                 <div className='flex flex-col gap-5'>
                     <div className="flex flex-col gap-10">
                         <h2 className='text-4xl'>{t('walletSecure.title')}</h2>
                     </div>
                 </div>
-                { progressValue == 0 &&
-                    <div className="flex flex-col gap-5">
-                        <p>{t('walletSecure.description')}</p>
-                        <Input type="password" placeholder={t('walletSecure.inputPlaceholder')} onChange={(e) => setPassword(e.target.value)} />
-                    </div>
-                }
                 {error && <p className="text-red-500 text-sm italic mt-2">{error}</p>}
                 <div className="flex justify-center items-center flex-col gap-5">
                     {progressValue > 0 &&
                         <div className="flex flex-col gap-5 w-full text-center">
-                                <Progress value={progressValue} />
+                            <Progress value={progressValue} />
                             <p>{progressLabel}</p>
                         </div>
                     }
                     {progressValue == 100 &&
                         <Button type="button" className="w-40" onClick={() => goToWallet()}>{t('walletSecure.goToWalletButton')}</Button>
                     }
-                    { progressValue == 0 &&
+                    {/* { progressValue == 0 &&
                         <Button className="w-40" type="submit">{t('walletSecure.registerButton')}</Button>
-                    }
+                    } */}
                 </div>
-            </form>
+            </div>
         </Page>
     );
 }

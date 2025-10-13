@@ -16,11 +16,8 @@ import { cloudStorage } from '@telegram-apps/sdk-react';
 
 export type WalletContextType = {
     walletExists: boolean;
-    promptForPassword: boolean;
     loadSdk: (mnemonic: string) => Promise<BreezSdk | null>
-    initWallet: (mnemonic: string) => Promise<BreezSdk | null>
-    decryptWallet: (password: string) => Promise<string | null>
-    storeWallet: (mnemonic: string, password: string) => Promise<void>
+    storeWallet: (mnemonic: string) => Promise<void>
     breezSdk: BreezSdk | undefined;
     getLnUrl: (breezSdk: BreezSdk) => Promise<string | null>
     getBtcAddress: (breezSdk: BreezSdk) => Promise<string | null>,
@@ -32,15 +29,10 @@ export type WalletContextType = {
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
-const WALLET_KEY = 'wallet_cipher'
-const WALLET_UNLOCK_LAST_DATE = 'wallet_unlock_last_date'
+const WALLET_KEY = 'wallet'
 const WALLET_LN_URL = 'wallet_ln_url'
 const WALLET_BTC_ADDRESS = 'wallet_btc_address'
 const WALLET_CURRENCY = 'wallet_currency'
-
-const SESSION_MNEMONIC_KEY = 'wallet_session_mnemonic'
-
-const INACTIVITY_SPAN_MS = 10 * 60 * 1000; // 10 minutes
 
 const notifications = new Set<string>()
 
@@ -79,77 +71,57 @@ class WebLogger {
 let logger: WebLogger | null = null;
 
 export const WalletProvider = ({children}: {children: ReactNode}) => {
-    const [walletExists, setWalletExists] = useState(!!localStorage.getItem(WALLET_KEY));
-    const [promptForPassword, setPromptForPassword] = useState(
-        walletExists && (
-            !sessionStorage.getItem(SESSION_MNEMONIC_KEY) || requireUnlock()
-        )
-    );
+    const [walletExists, setWalletExists] = useState(!!sessionStorage.getItem(WALLET_KEY));
     const [breezSdk, setBreezSdk] = useState<BreezSdk | undefined>(undefined);
     const [lnUrl, setLnUrl] = useState<string | null>(null)
     const [btcAddress, setBtcAddress] = useState<string | null>(null)
-    const [currency, setCurrency] = useState(localStorage.getItem(WALLET_CURRENCY)?.toUpperCase() || 'USD')
+    const [currency, setCurrency] = useState(sessionStorage.getItem(WALLET_CURRENCY)?.toUpperCase() || 'USD')
 
-    const checkWallet = async () => {
-        let encryptedWallet = localStorage.getItem(WALLET_KEY)
-        if (!encryptedWallet) {
+    useEffect(() => {
+        const _loadSdk = async (mnemonic: string) => {
+            await loadSdk(mnemonic) 
+        }
+        
+        if (walletExists) {
+            _loadSdk(getSessionMnemonic() as string)
+        }
+    }, [walletExists])
+
+     const checkWallet = async () => {
+        let wallet = sessionStorage.getItem(WALLET_KEY)
+        if (!wallet) {
             if (!import.meta.env.DEV && cloudStorage.getItem.isAvailable()) {
-                encryptedWallet = await cloudStorage.getItem(WALLET_KEY)
-                if (encryptedWallet) {
-                    localStorage.setItem(WALLET_KEY, encryptedWallet)
+                wallet = await cloudStorage.getItem(WALLET_KEY)
+                if (wallet) {
+                    sessionStorage.setItem(WALLET_KEY, wallet)
                     setWalletExists(true)
                 }
             }
         }
 
-        setWalletExists(!!encryptedWallet)
-        if (!sessionStorage.getItem(SESSION_MNEMONIC_KEY)) {
-            setPromptForPassword(true)
-        }
+        const walletExists = !!wallet
+        setWalletExists(walletExists)
     }
 
     useEffect(() => {
-        // Listen for other tabs / external changes
         window.addEventListener("storage", checkWallet);
         return () => window.removeEventListener("storage", checkWallet);
     }, [])
 
-    useEffect(() => {
-        async function _loadSdk(mnemonic: string) {
-            await loadSdk(mnemonic)
-        }
-
-        if (!promptForPassword) {
-            const mnemonic = sessionStorage.getItem(SESSION_MNEMONIC_KEY);
-            if (mnemonic && !breezSdk) {
-                _loadSdk(mnemonic)
-            }
-        }
-        
-        const interval = setInterval(() => {
-            if (walletExists && requireUnlock()) {
-                localStorage.removeItem(WALLET_UNLOCK_LAST_DATE) 
-                sessionStorage.removeItem(SESSION_MNEMONIC_KEY) 
-                setPromptForPassword(true)
-                setBreezSdk(undefined)
-            }
-        }, 1000);
-        
-        return () => clearInterval(interval);
-    }, [promptForPassword])
-
     const resetWallet = async () => {
-        localStorage.clear()
         sessionStorage.clear()
-        if (!import.meta.env.DEV && cloudStorage.clear.ifAvailable()) {
+        if (!import.meta.env.DEV && cloudStorage.clear.isAvailable()) {
             await cloudStorage.clear()
         }
 
         setWalletExists(false)
     }
 
-    const changeCurrency = (value: string) => {
-        localStorage.setItem(WALLET_CURRENCY, value)
+    const changeCurrency = async (value: string) => {
+        sessionStorage.setItem(WALLET_CURRENCY, value)
+        if (!import.meta.env.DEV && cloudStorage.setItem.isAvailable()) {
+            await cloudStorage.setItem(WALLET_CURRENCY, value)
+        }
         setCurrency(value)
     }
 
@@ -164,36 +136,10 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         return sdk
     }
 
-    const initWallet = async (password: string) => {
-        const result = await decryptWallet(password)
-        if (result) {
-            setPromptForPassword(false)
-            localStorage.setItem(WALLET_UNLOCK_LAST_DATE, Date.now().toString())
-            sessionStorage.setItem(SESSION_MNEMONIC_KEY, result)
-
-            return await loadSdk(result)
-        }
-        throw new Error('Cannot decrypt the wallet')
-    }
-
-    const decryptWallet = async (password: string) => {
-        const cipher = localStorage.getItem(WALLET_KEY)
-        if (!cipher) return null;
-        return await decrypt(cipher, password)
-    }
-
-    const storeWallet = async (mnemonic: string, password: string) => {
-        const { cipher, iv, salt } = await encrypt(mnemonic, password)
-    
-        const encryptedWallet = JSON.stringify({
-            cipher: Array.from(new Uint8Array(cipher)),
-            iv: Array.from(iv),
-            salt: Array.from(salt)
-        })
-        localStorage.setItem(WALLET_KEY, encryptedWallet);
-        sessionStorage.removeItem(SESSION_MNEMONIC_KEY);
+    const storeWallet = async (mnemonic: string) => {
+        sessionStorage.setItem(WALLET_KEY, mnemonic)
         if (!import.meta.env.DEV && cloudStorage.setItem.isAvailable()) {
-            await cloudStorage.setItem(WALLET_KEY, encryptedWallet)
+            await cloudStorage.setItem(WALLET_KEY, mnemonic)
         }
         setWalletExists(true)
     }
@@ -206,7 +152,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
             return  null
         }
 
-        const cachedLnUrl = localStorage.getItem(WALLET_LN_URL)
+        const cachedLnUrl = sessionStorage.getItem(WALLET_LN_URL)
         if (cachedLnUrl) {
             return cachedLnUrl
         }
@@ -214,7 +160,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         const info = await breezSdk?.getLightningAddress()
         if (info) {
             setLnUrl(info.lnurl)
-            localStorage.setItem(WALLET_LN_URL, info.lnurl)
+            sessionStorage.setItem(WALLET_LN_URL, info.lnurl)
             return info.lnurl
         }
         return null
@@ -228,7 +174,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
             console.log('no breek sdk')
             return  null
         }
-        const cacheBtcAddress = localStorage.getItem(WALLET_BTC_ADDRESS)
+        const cacheBtcAddress = sessionStorage.getItem(WALLET_BTC_ADDRESS)
         if (cacheBtcAddress) {
             return cacheBtcAddress
         }
@@ -236,7 +182,7 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
         const address = await fetchBtcAddress(breezSdk)
         if (address) {
             setBtcAddress(address)
-            localStorage.setItem(WALLET_BTC_ADDRESS, address)
+            sessionStorage.setItem(WALLET_BTC_ADDRESS, address)
             return address
         }
         console.log('not from breez sdk')
@@ -251,9 +197,6 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
                 currency,
                 changeCurrency,
                 walletExists,
-                promptForPassword,
-                initWallet,
-                decryptWallet,
                 storeWallet,
                 breezSdk,
                 getLnUrl,
@@ -294,11 +237,6 @@ const initBreezSdk = async (mnemonic: string) => {
     }
 }
 
-const requireUnlock = () => {
-    const lastUnlockDate = localStorage.getItem(WALLET_UNLOCK_LAST_DATE) 
-    return lastUnlockDate ? Date.now() - parseInt(lastUnlockDate) > INACTIVITY_SPAN_MS : true
-}
-
 export const fetchBtcAddress = async (sdk: BreezSdk) => {
     const res = await sdk.receivePayment({
         paymentMethod: { type: 'bitcoinAddress' }
@@ -317,75 +255,9 @@ export const useWallet = () => {
 };
 
 export const getSessionMnemonic = () => {
-    return sessionStorage.getItem(SESSION_MNEMONIC_KEY);
-}
-
-const encrypt = async(mnemonic: string, password: string) => {
-    const enc = new TextEncoder();
-    const keyMaterial =  await window.crypto.subtle.importKey(
-        "raw",
-        enc.encode(password),
-        "PBKDF2",
-        false,
-        ["deriveBits", "deriveKey"],
-    );
-
-    const salt = window.crypto.getRandomValues(new Uint8Array(16));
-    const key = await window.crypto.subtle.deriveKey(
-        {
-            name: "PBKDF2",
-            salt: salt,
-            iterations: 100000,
-            hash: "SHA-256",
-        },
-        keyMaterial,
-        { name: "AES-GCM", length: 256 },
-        true,
-        ["encrypt", "decrypt"],
-    );
-
-    const iv = window.crypto.getRandomValues(new Uint8Array(12));
-    const cipher = await window.crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(mnemonic));
-    return { cipher, iv, salt}
-}
-async function decrypt(cipher: string, password: string): Promise<string | null> {
-    // Decrypt using AES-GCM with PBKDF2-derived key
-    try {
-        const { cipher: cipherArr, iv: ivArr, salt: saltArr } = JSON.parse(cipher);
-        const enc = new TextEncoder();
-        const keyMaterial = await window.crypto.subtle.importKey(
-            "raw",
-            enc.encode(password),
-            "PBKDF2",
-            false,
-            ["deriveBits", "deriveKey"],
-        );
-        const key = await window.crypto.subtle.deriveKey(
-            {
-                name: "PBKDF2",
-                salt: new Uint8Array(saltArr),
-                iterations: 100000,
-                hash: "SHA-256",
-            },
-            keyMaterial,
-            { name: "AES-GCM", length: 256 },
-            true,
-            ["encrypt", "decrypt"],
-        )
-        const decrypted = await window.crypto.subtle.decrypt(
-            {
-                name: "AES-GCM",
-                iv: new Uint8Array(ivArr),
-            },
-            key,
-            new Uint8Array(cipherArr)
-        )
-        return new TextDecoder().decode(decrypted)
-    } catch {
-        return null;
-    }
+    return sessionStorage.getItem(WALLET_KEY);
 }
 
 export const storeSessionMnemonic = (mnemonic: string) => {
-    sessionStorage.setItem(SESSION_MNEMONIC_KEY, mnemonic);
+    sessionStorage.setItem(WALLET_KEY, mnemonic);
 }

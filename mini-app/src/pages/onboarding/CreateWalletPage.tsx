@@ -12,7 +12,7 @@ import { toast } from "sonner";
 
 export function CreateWalletPage() {
     const { t } = useTranslation();
-    const navigate = useNavigate();             
+    const navigate = useNavigate();   
 
     const [mnemonic, setMnemonic] = useState<string[]>([]);
 

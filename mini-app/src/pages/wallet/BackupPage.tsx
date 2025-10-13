@@ -1,10 +1,9 @@
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"
-import { FormEvent, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
-import { useWallet } from "@/lib/walletContext";
+import { getSessionMnemonic, useWallet } from "@/lib/walletContext";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { LuCopy } from "react-icons/lu";
@@ -12,28 +11,23 @@ import { LuCopy } from "react-icons/lu";
 export function BackupWalletPage() {
     const { t } = useTranslation();
     const navigate = useNavigate()
-    const [error, setError] = useState<null | string>(null)
-    const [password, setPassword] = useState<string>('');
-    const wallet = useWallet()
     const [mnemonic, setMnemonic] = useState<string[]>([])
 
-    const displayMnemonic = async (e: FormEvent) => {
-        e.preventDefault()
-
-        setError(null);
-        if (!password || password == '') {
-            setError(t('walletUnlock.emptyPassword'));
-            return;
-        }
-
-        const decryptedMnemonic = await wallet.decryptWallet(password)
-        if(!decryptedMnemonic) {
-            setError(t('walletUnlock.invalidPassword'));
+    const wallet = useWallet()
+    
+    useEffect(() => {
+        const mnemonic = getSessionMnemonic()
+        if (!mnemonic) {
+            const toastId = toast.error('Wallet not found')
+            setTimeout(() => {
+                toast.dismiss(toastId)
+            }, 2000)
+            navigate("/", { replace: true }) 
             return
         }
 
-        setMnemonic(decryptedMnemonic.split(' '))
-    }
+        setMnemonic(mnemonic.split(' '))
+    }, [wallet.walletExists])
 
     const copy = async () => {
         await navigator.clipboard.writeText(mnemonic.join(' '))
@@ -44,7 +38,7 @@ export function BackupWalletPage() {
     }
 
     return (
-        <div className="flex flex-col gap-20">
+        <div className="flex flex-col gap-5">
             <div className='flex flex-col gap-5'>
                 <div className="flex flex-col gap-10">
                     <h2 className='text-4xl'>{t('walletBackup.title')}</h2>
@@ -66,22 +60,6 @@ export function BackupWalletPage() {
                     </div>
                     <div className="text-center"><Button onClick={() => navigate('/')}>{t('walletBackup.nextButton')}</Button></div>
                 </div>
-            }
-            {mnemonic.join('').length == 0 &&
-                <form onSubmit={displayMnemonic} className="flex flex-col gap-5">
-                    <div className="flex flex-col gap-5">
-                        <p>{t('walletUnlock.description')}</p>
-                        <Input 
-                            type="password" 
-                            placeholder={t('walletUnlock.inputPlaceholder')} 
-                            onChange={(e) => setPassword(e.target.value)} 
-                            enterKeyHint="enter"/>
-                        {error && <p className="text-red-500 text-sm italic mt-2">{error}</p>}
-                    </div>
-                    <div className="flex justify-center">
-                        <Button className="w-40" type="submit">{t('walletUnlock.nextButton')}</Button>
-                    </div>
-                </form>
             }
         </div>
     );
