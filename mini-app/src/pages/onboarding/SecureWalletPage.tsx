@@ -41,11 +41,13 @@ export function SecureWalletPage() {
             
             const childKey = await generateChildKey(mnemonic)
             if (!childKey.publicKey) {
+                setError('Cannot retrieve Bitcoin public key')
                 return
             }
             const childPubkeyHex = buf2hex(new Uint8Array(childKey.publicKey).buffer)
             const tapRootAddress = await generateTapRootAddress(childKey.publicKey)
             if (!tapRootAddress) {
+                setError('Cannot retrieve Bitcoin address')
                 return
             }
             await new Promise(r => setTimeout(r, 1000));
@@ -74,7 +76,7 @@ export function SecureWalletPage() {
 
             const lp = retrieveRawInitData()
             if (!lp) {
-                alert('Cannot retrieve Telegram init data')
+                setError('Cannot retrieve Telegram init data')
                 return
             }
 

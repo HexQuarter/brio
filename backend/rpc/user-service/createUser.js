@@ -13,63 +13,68 @@ const CreateSchema = z.object({
 });
 
 export const handler = async (req, res) => {
-    const parsingResult = CreateSchema.safeParse(req.body)
-    if (!parsingResult.success) {
-        return res.status(400).json({ error: parsingResult.error })
-    }
-
-    const createUserRequest = parsingResult.data
-
-    const prod = process.env["PROD"]
-    if (prod === true) {
-      if(!verifyTelegramAuth(createUserRequest.tgInitData, getBotId())) {
-          return res.status(401).json({ message: "invalid Telegram InitData"})
+    try {
+      const parsingResult = CreateSchema.safeParse(req.body)
+      if (!parsingResult.success) {
+          return res.status(400).json({ error: parsingResult.error })
       }
-    }
 
-    const params = new URLSearchParams(createUserRequest.tgInitData);
-    const { username, id } = JSON.parse(params.get('user'))
-    let hashHandle = undefined
-    if (username) {
-      hashHandle = createHash('sha256').update(username).digest('hex')	
-    }
+      const createUserRequest = parsingResult.data
 
-    if (!username && !createUserRequest.hashedPhoneNumber) {
-      return res.status(400).json({ error: "missing username or phone number" })
-    }
-
-    await req.db.put(`c:${id}`, {
-        publicKey: createUserRequest.publicKey,
-        breezBtcAddress: createUserRequest.breezBtcAddress,
-        breezLnUrl: createUserRequest.breezLnUrl,
-        tapRootAddress: createUserRequest.tapRootAddress,
-        handle: hashHandle,
-        phoneNumber: createUserRequest.hashedPhoneNumber
-    })
-
-    if (username) {
-      await req.db.put(`h:${hashHandle}`, id)
-    }
-
-    if (createUserRequest.hashedPhoneNumber) {
-      await req.db.put(`h:${createUserRequest.hashedPhoneNumber}`, id)
-    }
-
-    const startParam = params.get('start_param')
-    if (startParam) {
-      const referralChatID = new URLSearchParams(startParam).get('referral')
-      if (referralChatID) {
-        const chatData = req.db.get(`c:${referralChatID}`)
-        if (chatData) {
-          await notifyTelegramReferral(referralChatID, getBotToken(), username)
-        }
-        else {
-          console.log('Referral not working', referralChatID)
+      const prod = process.env["PROD"]
+      if (prod === true) {
+        if(!verifyTelegramAuth(createUserRequest.tgInitData, getBotId())) {
+            return res.status(401).json({ message: "invalid Telegram InitData"})
         }
       }
-    }
 
-    res.status(201).json({ status: "ok" })
+      const params = new URLSearchParams(createUserRequest.tgInitData);
+      const { username, id } = JSON.parse(params.get('user'))
+      let hashHandle = undefined
+      if (username) {
+        hashHandle = createHash('sha256').update(username).digest('hex')
+      }
+
+      if (!username && !createUserRequest.hashedPhoneNumber) {
+        return res.status(400).json({ error: "missing username or phone number" })
+      }
+
+      await req.db.put(`c:${id}`, {
+          publicKey: createUserRequest.publicKey,
+          breezBtcAddress: createUserRequest.breezBtcAddress,
+          breezLnUrl: createUserRequest.breezLnUrl,
+          tapRootAddress: createUserRequest.tapRootAddress,
+          handle: hashHandle,
+          phoneNumber: createUserRequest.hashedPhoneNumber
+      })
+
+      if (username) {
+        await req.db.put(`h:${hashHandle}`, id)
+      }
+
+      if (createUserRequest.hashedPhoneNumber) {
+        await req.db.put(`h:${createUserRequest.hashedPhoneNumber}`, id)
+      }
+
+      const startParam = params.get('start_param')
+      if (startParam) {
+        const referralChatID = new URLSearchParams(startParam).get('referral')
+        if (referralChatID) {
+          const chatData = req.db.get(`c:${referralChatID}`)
+          if (chatData) {
+            await notifyTelegramReferral(referralChatID, getBotToken(), username)
+          }
+          else {
+            console.log('Referral not working', referralChatID)
+          }
+        }
+      }
+
+      res.status(201).json({ status: "ok" })
+    }
+    catch(e) {
+      res.status(500).json({ error: JSON.stringify(e)})
+    }
 }
 
 function base64UrlDecode(input) {
