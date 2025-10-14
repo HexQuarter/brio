@@ -1,6 +1,7 @@
 import * as z from "zod";
 import { getBotToken } from "../../bot/index.js";
 import { USER_CONTACT_TABLE } from "../../db.js";
+import { GetItemCommand } from "@aws-sdk/client-dynamodb";
 
 const RegisterSchema = z.object({
     contact: z.string(),
