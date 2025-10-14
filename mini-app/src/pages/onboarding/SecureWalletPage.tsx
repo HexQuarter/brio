@@ -56,10 +56,14 @@ export function SecureWalletPage() {
 
             const result = requestContact.ifAvailable()
             let hashedPhoneNumber: undefined | string = undefined
+            console.log(result)
             if (result[0]) {
-                const contact = await result[1]
-                const phoneNumber = contact.contact.phone_number
-                hashedPhoneNumber = await hash(phoneNumber)
+                try {
+                    const contact = await result[1]
+                    const phoneNumber = contact.contact.phone_number
+                    hashedPhoneNumber = await hash(phoneNumber)
+                }
+                catch(e) {}
             }
 
             const lp = retrieveRawInitData()
