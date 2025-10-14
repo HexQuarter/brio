@@ -1,24 +1,50 @@
+import { GetItemCommand } from "@aws-sdk/client-dynamodb";
 import * as z from "zod";
+import { USER_TABLE, USER_CONTACT_TABLE } from "../../db.js";
 
 const SearchSchema = z.object({
     contact: z.string()
 });
+
 export const handler = async (req, res) => {
-    const parsingResult = SearchSchema.safeParse(req.body)
-    if (!parsingResult.success) {
-        return res.status(400).json({ error: parsingResult.error })
+    try {
+        const parsingResult = SearchSchema.safeParse(req.body)
+        if (!parsingResult.success) {
+            return res.status(400).json({ error: parsingResult.error })
+        }
+    
+        const {contact} = parsingResult.data
+    
+        const contactCommand = new GetItemCommand({
+            TableName: USER_CONTACT_TABLE,
+            Key: {
+                contactDigest: { S: contact }
+            }
+        })
+    
+        const contactCommandRes = await req.dbClient.send(contactCommand);
+        if (!contactCommandRes.Item) {
+            return res.status(404).json({ error: "user not found" }) 
+        }
+    
+        const { chatID } = contactCommandRes.Item
+    
+         const userCommand = new GetItemCommand({
+            TableName: USER_TABLE,
+            Key: {
+                chatID: chatID
+            }
+        })
+        const userCommandRes = await req.dbClient.send(userCommand);
+        if (!userCommandRes.Item) {
+            return res.status(500).json({ error: "user's chat info is missing" }) 
+        }
+    
+        const { breezLnUrl: { S: { breezLnUrl }}} = userCommandRes.Item
+        res.status(200).json({ address: breezLnUrl })
     }
-
-    const {contact} = parsingResult.data
-    const chatID = await req.db.get(`h:${contact}`)
-    if (!chatID) {
-        return res.status(404).json({ error: "user not found" })
+    catch(e) {
+        console.log(e)
+        res.status(500).json({ error: e.message })
     }
-
-    const chatInfo = await req.db.get(`c:${chatID}`)
-    if (!chatInfo) {
-        return res.status(500).json({ error: 'chat info is missing'})
-    }
-
-    res.status(200).json({ address: chatInfo.breezLnUrl })
 }

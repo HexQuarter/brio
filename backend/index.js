@@ -1,7 +1,6 @@
 import 'dotenv/config'
 
 import express from 'express'
-import { Level } from 'level'
 import https from 'https';
 import fs from 'fs';
 import cors from 'cors'
@@ -9,7 +8,8 @@ import cors from 'cors'
 import { rpcHandler } from './rpc/index.js'
 import { startBot, getBotToken } from './bot/index.js'
 
-const db = new Level('db', { valueEncoding: 'json' })
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+const client = new DynamoDBClient({});
 
 const app = express()
     .use(express.json())
@@ -17,7 +17,7 @@ const app = express()
         //origin: 'https://master.d1rq177b3hizoj.amplifyapp.com'
     }))
     .use((req, res, next) => {
-        req.db = db
+        req.dbClient = client
         next()
     })
 

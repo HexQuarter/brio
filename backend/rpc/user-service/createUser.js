@@ -2,6 +2,9 @@ import * as z from "zod";
 import { createHash } from "crypto"
 import nacl from "tweetnacl";
 import { getBotToken, getBotId } from "../../bot/index.js";
+import { BatchWriteItemCommand, GetItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
+
+import { USER_TABLE, USER_CONTACT_TABLE } from "../../db.js";
 
 const CreateSchema = z.object({
     tapRootAddress: z.string(),
@@ -39,29 +42,69 @@ export const handler = async (req, res) => {
         return res.status(400).json({ error: "missing username or phone number" })
       }
 
-      await req.db.put(`c:${id}`, {
-          publicKey: createUserRequest.publicKey,
-          breezBtcAddress: createUserRequest.breezBtcAddress,
-          breezLnUrl: createUserRequest.breezLnUrl,
-          tapRootAddress: createUserRequest.tapRootAddress,
-          handle: hashHandle,
-          phoneNumber: createUserRequest.hashedPhoneNumber
-      })
-
+      let userContactsCommands = []
       if (username) {
-        await req.db.put(`h:${hashHandle}`, id)
+        userContactsCommands.push({
+          PutRequest: {
+            Item: {
+              contactDigest: { S: hashHandle },
+              chatID: { S: id.toString() }
+            },
+          }
+        })
       }
 
       if (createUserRequest.hashedPhoneNumber) {
-        await req.db.put(`h:${createUserRequest.hashedPhoneNumber}`, id)
+        userContactsCommands.push({
+          PutRequest: {
+            Item: {
+              contactDigest: { S: createUserRequest.hashedPhoneNumber },
+              chatID: { S: id.toString() }
+            },
+          }
+        })
+      }
+
+      const batchCommand = []
+      batchCommand[USER_TABLE] = [
+        {
+          PutRequest: {
+            Item: {
+              chatID: { S: id.toString() },
+              publicKey: { S: createUserRequest.publicKey },
+              breezBtcAddress: { S: createUserRequest.breezBtcAddress },
+              breezLnUrl: { S: createUserRequest.breezLnUrl },
+              tapRootAddress: { S: createUserRequest.tapRootAddress },
+              handle: { S: hashHandle },
+              phoneNumber: { S: createUserRequest.hashedPhoneNumber }
+            },
+          }
+        }
+      ]
+      batchCommand[USER_CONTACT_TABLE] = userContactsCommands
+
+      const command = new BatchWriteItemCommand({
+        RequestItems: batchCommand
+      })
+
+      const response = await req.dbClient.send(command);
+      if (!response['$metadata'] || response['$metadata'].httpStatusCode != 200) {
+        return res.status(500).json({ error: response })
       }
 
       const startParam = params.get('start_param')
       if (startParam) {
         const referralChatID = new URLSearchParams(startParam).get('referral')
         if (referralChatID) {
-          const chatData = req.db.get(`c:${referralChatID}`)
-          if (chatData) {
+
+          const command = new GetItemCommand({
+            TableName: USER_TABLE,
+            Key: {
+              chatID: { S: referralChatID.toString() }
+            }
+          })
+          const response = await client.send(command);
+          if (response.Item) {
             await notifyTelegramReferral(referralChatID, getBotToken(), username)
           }
           else {
@@ -73,7 +116,8 @@ export const handler = async (req, res) => {
       res.status(201).json({ status: "ok" })
     }
     catch(e) {
-      res.status(500).json({ error: JSON.stringify(e)})
+      console.log(e)
+      res.status(500).json({ error: e.message })
     }
 }
 
