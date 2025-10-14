@@ -23,9 +23,8 @@ const onStart = (ctx, db) => {
 }
 
 const onMessage = async (ctx) => {
-    const chatId = ctx.update.message.chat.id
-    const msgId = ctx.update.message.message_id
-    console.log(`ChatID; ${chatId} MsgID; ${msgId}`)
-    await ctx.deleteMessage(chatId, msgId)
+    if (ctx.update.message.contact) {
+      await ctx.deleteMessage()
+    }
     console.log("RAW MSG:", ctx);
 }
