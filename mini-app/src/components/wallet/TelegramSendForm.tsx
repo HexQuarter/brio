@@ -154,17 +154,25 @@ export const TelegramSendForm = () => {
             return
         }
 
-        let prepareResponse = await breezSdk?.prepareLnurlPay({
-            amountSats: convertBtcToSats(btcBalance),
-            payRequest: input
-        })
-        setLoadingAll(false)
-        if (!prepareResponse) {
-            return
-
+        try {
+            let prepareResponse = await breezSdk?.prepareLnurlPay({
+                amountSats: convertBtcToSats(btcBalance),
+                payRequest: input
+            })
+            setLoadingAll(false)
+            if (!prepareResponse) {
+                return
+    
+            }
+            const reducedBtc = btcBalance - convertSatsToBtc(prepareResponse.feeSats)
+            handleAmountChange(parseFloat(formatFiatAmount(reducedBtc * price, 4)))
         }
-        const reducedBtc = btcBalance - convertSatsToBtc(prepareResponse.feeSats)
-        handleAmountChange(parseFloat(formatFiatAmount(reducedBtc * price, 4)))
+        catch (e) {
+            setLoadingAll(false)
+            const error = e as Error
+            setSendError(error.message)
+        }
+
     }
 
     const handleSend = async () => {

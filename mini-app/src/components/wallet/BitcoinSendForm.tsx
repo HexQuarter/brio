@@ -220,52 +220,59 @@ export const BitcoinSendForm  = () => {
             return
         }
         let fees = 0
-        switch(inputType.type) {
-            case "lnurlPay":
-                const lnUrlPayPrepareResponse = await breezSdk?.prepareLnurlPay({
-                    amountSats: convertBtcToSats(btcBalance),
-                    payRequest: inputType,
-                })
-                if (lnUrlPayPrepareResponse) {
-                    fees = lnUrlPayPrepareResponse.feeSats
-                }
-                break
-            case "lightningAddress":
-                const lnPrepareResponse = await breezSdk?.prepareLnurlPay({
-                    amountSats: convertBtcToSats(btcBalance),
-                    payRequest: inputType.payRequest,
-                })
-                if (lnPrepareResponse) {
-                    fees = lnPrepareResponse.feeSats
-                }
-                break
-            case "bitcoinAddress":
-                const btcPrepareResponse = await breezSdk?.prepareSendPayment({
-                    paymentRequest: inputType.address,
-                    amountSats: convertBtcToSats(btcBalance)
-                })
-                 if (btcPrepareResponse && btcPrepareResponse.paymentMethod.type === 'bitcoinAddress') {
-                    const feeQuote = btcPrepareResponse.paymentMethod.feeQuote
-                    const fastFeeSats = feeQuote.speedFast.userFeeSat + feeQuote.speedFast.l1BroadcastFeeSat
-                    fees = fastFeeSats
-                 }
-                break
-            case "bolt11Invoice":
-                const bolt11PrepareResponse = await breezSdk?.prepareSendPayment({
-                    paymentRequest: inputType.invoice.bolt11,
-                    amountSats: inputType.amountMsat ? undefined : convertBtcToSats(btcBalance)
-                })
-                if (bolt11PrepareResponse && bolt11PrepareResponse.paymentMethod.type === 'bolt11Invoice') {
-                    fees = bolt11PrepareResponse.paymentMethod.lightningFeeSats + (bolt11PrepareResponse.paymentMethod.sparkTransferFeeSats || 0)
-                }
-                break
+        try {
+            switch(inputType.type) {
+                case "lnurlPay":
+                    const lnUrlPayPrepareResponse = await breezSdk?.prepareLnurlPay({
+                        amountSats: convertBtcToSats(btcBalance),
+                        payRequest: inputType,
+                    })
+                    if (lnUrlPayPrepareResponse) {
+                        fees = lnUrlPayPrepareResponse.feeSats
+                    }
+                    break
+                case "lightningAddress":
+                    const lnPrepareResponse = await breezSdk?.prepareLnurlPay({
+                        amountSats: convertBtcToSats(btcBalance),
+                        payRequest: inputType.payRequest,
+                    })
+                    if (lnPrepareResponse) {
+                        fees = lnPrepareResponse.feeSats
+                    }
+                    break
+                case "bitcoinAddress":
+                    const btcPrepareResponse = await breezSdk?.prepareSendPayment({
+                        paymentRequest: inputType.address,
+                        amountSats: convertBtcToSats(btcBalance)
+                    })
+                     if (btcPrepareResponse && btcPrepareResponse.paymentMethod.type === 'bitcoinAddress') {
+                        const feeQuote = btcPrepareResponse.paymentMethod.feeQuote
+                        const fastFeeSats = feeQuote.speedFast.userFeeSat + feeQuote.speedFast.l1BroadcastFeeSat
+                        fees = fastFeeSats
+                     }
+                    break
+                case "bolt11Invoice":
+                    const bolt11PrepareResponse = await breezSdk?.prepareSendPayment({
+                        paymentRequest: inputType.invoice.bolt11,
+                        amountSats: inputType.amountMsat ? undefined : convertBtcToSats(btcBalance)
+                    })
+                    if (bolt11PrepareResponse && bolt11PrepareResponse.paymentMethod.type === 'bolt11Invoice') {
+                        fees = bolt11PrepareResponse.paymentMethod.lightningFeeSats + (bolt11PrepareResponse.paymentMethod.sparkTransferFeeSats || 0)
+                    }
+                    break
+            }
+            setLoadingAll(false)
+            if (fees == 0) {
+                return
+            }
+            const reducedBtc = btcBalance - convertSatsToBtc(fees)
+            await handleAmountChange(parseFloat(formatFiatAmount(reducedBtc * price, 4)))
         }
-        setLoadingAll(false)
-        if (fees == 0) {
-            return
+        catch (e) {
+            setLoadingAll(false)
+            const error = e as Error
+            setSendError(error.message)
         }
-        const reducedBtc = btcBalance - convertSatsToBtc(fees)
-        await handleAmountChange(parseFloat(formatFiatAmount(reducedBtc * price, 4)))
     }
 
     const handleSend = async () => {
