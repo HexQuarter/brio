@@ -8,9 +8,8 @@ export const listContacts = async (): Promise<string[]> => {
     if (!import.meta.env.DEV && cloudStorage.getItem.isAvailable()) {
         const cloudContacts = await cloudStorage.getItem('contacts')
         if (cloudContacts) {
-            const contacts = JSON.parse(cloudContacts)
-            sessionStorage.setItem('contacts', contacts)
-            return contacts
+            sessionStorage.setItem('contacts', cloudContacts)
+            return JSON.parse(cloudContacts)
         }
     }
     return []
