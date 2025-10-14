@@ -113,12 +113,18 @@ function verifyTelegramAuth(initData, botId) {
 }
 
 async function notifyTelegramReferral(chatId, botToken, username) {
+    let msg
+    if (username) {
+      msg = `Your contact @${username} just created a wallet on Brio from your invitation. You can transfer some sats to have fun !.`
+    } else {
+      msg = `Your contact just created a wallet on Brio from your invitation. You can transfer some sats to have fun !.`
+    }
     return await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
         chat_id: chatId,
-          text: `Your contact @${username} just created a wallet on Brio. You can transfer some sats to have fun !.`
-        }),
+          text: msg
+        })
     })
 }
