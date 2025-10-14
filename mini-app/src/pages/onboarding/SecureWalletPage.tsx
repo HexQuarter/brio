@@ -65,8 +65,10 @@ export function SecureWalletPage() {
                 if (result[0]) {
                     try {
                         const contact = await result[1]
-                        const phoneNumber = contact.contact.phone_number
-                        console.log(phoneNumber)
+                        let phoneNumber = contact.contact.phone_number
+                        if (!phoneNumber.startsWith('+')) {
+                            phoneNumber = `+${phoneNumber}`
+                        }
                         hashedPhoneNumber = await hash(phoneNumber)
                         console.log(hashedPhoneNumber)
                     }
