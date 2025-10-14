@@ -47,7 +47,7 @@ export const SearchContactForm: React.FC<Props> = ({
                     <CommandEmpty>{ lookupError && 
                         <>
                             <p className="text-red-500 text-sm italic mt-2">{lookupError}</p>
-                            <Button variant="link" className="p-0 text-sm italic" onClick={() => handleShareInvite()}>Share an invitation</Button>
+                            <Button variant="link" className="p-0 text-black text-sm italic" onClick={() => handleShareInvite()}>Share an invitation</Button>
                         </>
                     }</CommandEmpty>
                     <CommandGroup heading="Favourites">
