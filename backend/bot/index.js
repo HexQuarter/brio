@@ -7,10 +7,10 @@ export const getBotId = () => {
   return token.split(':')[0]
 }
 
-export const startBot = (token, db) => {
+export const startBot = (token) => {
   const bot = new Telegraf(token);
 
-  bot.start((ctx) => onStart(ctx, db));
+  bot.start((ctx) => onStart(ctx));
   bot.on('message', onMessage)
 
   bot.launch();
@@ -18,7 +18,7 @@ export const startBot = (token, db) => {
   console.log("Telegram bot started")
 }
 
-const onStart = (ctx, db) => {
+const onStart = (ctx) => {
   ctx.reply("Welcome to Brio! You can enjoy Bitcoin securely to anyone in the telegram community. To get started click on `Launch Brio`");
 }
 

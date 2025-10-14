@@ -38,7 +38,7 @@ if (prod === true) {
     // Create HTTPS server
     https.createServer(sslOptions, app).listen(port, '0.0.0.0', () => {
         console.log(`HTTPS server running on port ${port}`);
-        startBot(getBotToken(), db);
+        startBot(getBotToken());
     });
 }
 else {
