@@ -19,3 +19,9 @@ export const generateChildKey = async (mnemonic: string) => {
   const child = rootKey.derive("m/86'/0'/0'/0/0");
   return child
 }
+
+export const hash = async(data: string) => {
+  const bin =  await crypto.subtle
+    .digest('sha-256', new TextEncoder().encode(data))
+  return buf2hex(bin)
+}

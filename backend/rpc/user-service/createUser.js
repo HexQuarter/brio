@@ -8,7 +8,8 @@ const CreateSchema = z.object({
     publicKey: z.string(),
     breezBtcAddress: z.string(),
     breezLnUrl: z.string(),
-    tgInitData: z.any()
+    tgInitData: z.any(),
+    hashedPhoneNumber: z.string().optional()
 });
 
 export const handler = async (req, res) => {
@@ -28,7 +29,14 @@ export const handler = async (req, res) => {
 
     const params = new URLSearchParams(createUserRequest.tgInitData);
     const { username, id } = JSON.parse(params.get('user'))
-    const hashHandle = createHash('sha256').update(username).digest('hex')	
+    let hashHandle = undefined
+    if (username) {
+      hashHandle = createHash('sha256').update(username).digest('hex')	
+    }
+
+    if (!username && !createUserRequest.hashedPhoneNumber) {
+      return res.status(400).json({ error: "missing username or phone number" })
+    }
 
     await req.db.put(`c:${id}`, {
         publicKey: createUserRequest.publicKey,
@@ -38,7 +46,13 @@ export const handler = async (req, res) => {
         handle: hashHandle
     })
 
-    await req.db.put(`h:${hashHandle}`, id)
+    if (username) {
+      await req.db.put(`h:${hashHandle}`, id)
+    }
+
+    if (createUserRequest.hashedPhoneNumber) {
+      await req.db.put(`h:${createUserRequest.hashedPhoneNumber}`, id)
+    }
 
     const startParam = params.get('start_param')
     if (startParam) {

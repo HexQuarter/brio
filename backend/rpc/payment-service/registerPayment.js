@@ -2,7 +2,7 @@ import * as z from "zod";
 import { getBotToken } from "../../bot/index.js";
 
 const RegisterSchema = z.object({
-    handle: z.string(),
+    contact: z.string(),
     payment: z.string()
 });
 
@@ -14,7 +14,7 @@ export const handler = async (req, res) => {
         }
 
         const registerPaymentRequest = parsingResult.data
-        const chatID = await req.db.get(`h:${registerPaymentRequest.handle}`)
+        const chatID = await req.db.get(`h:${registerPaymentRequest.contact}`)
         if (chatID) {
             const postResponse = await notifyTelegram(chatID, getBotToken(), registerPaymentRequest.payment)
             if (postResponse.status >= 400) {

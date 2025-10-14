@@ -7,11 +7,11 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 
-import { retrieveRawInitData } from "@telegram-apps/sdk-react";
+import { retrieveRawInitData, requestContact } from "@telegram-apps/sdk-react";
 import { Progress } from "@/components/ui/progress";
 
 import { registerUser } from "@/lib/api";
-import { buf2hex, generateChildKey, generateTapRootAddress } from "@/helpers/crypto";
+import { buf2hex, generateChildKey, generateTapRootAddress, hash } from "@/helpers/crypto";
 
 export function SecureWalletPage() {
     const wallet = useWallet()
@@ -53,6 +53,15 @@ export function SecureWalletPage() {
             setProgressValue(33)
     
             setProgressLabel(t('walletSecure.progress33'))
+
+            const result = requestContact.ifAvailable()
+            let hashedPhoneNumber: undefined | string = undefined
+            if (result[0]) {
+                const contact = await result[1]
+                const phoneNumber = contact.contact.phone_number
+                hashedPhoneNumber = await hash(phoneNumber)
+            }
+
             const lp = retrieveRawInitData()
             if (!lp) {
                 alert('Cannot retrieve Telegram init data')
@@ -83,7 +92,8 @@ export function SecureWalletPage() {
                 publicKey: childPubkeyHex, 
                 breezBtcAddress: await wallet.getBtcAddress(sdk) as string, 
                 breezLnUrl: info.lnurl,
-                tgInitData: lp
+                tgInitData: lp,
+                hashedPhoneNumber: hashedPhoneNumber
             })
     
             await new Promise(r => setTimeout(r, 2000));

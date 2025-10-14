@@ -1,7 +1,7 @@
 import * as z from "zod";
 
 const SearchSchema = z.object({
-    handle: z.string()
+    contact: z.string()
 });
 export const handler = async (req, res) => {
     const parsingResult = SearchSchema.safeParse(req.body)
@@ -9,8 +9,8 @@ export const handler = async (req, res) => {
         return res.status(400).json({ error: parsingResult.error })
     }
 
-    const {handle} = parsingResult.data
-    const chatID = await req.db.get(`h:${handle}`)
+    const {contact} = parsingResult.data
+    const chatID = await req.db.get(`h:${contact}`)
     if (!chatID) {
         return res.status(404).json({ error: "user not found" })
     }
