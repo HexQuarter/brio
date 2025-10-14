@@ -22,6 +22,10 @@ const onStart = (ctx, db) => {
   ctx.reply("Welcome to Brio! You can enjoy Bitcoin securely to anyone in the telegram community. To get started click on `Launch Brio`");
 }
 
-const onMessage = (ctx) => {
-    console.log("RAW MSG:", JSON.stringify(ctx, null, 2));
+const onMessage = async (ctx) => {
+    const chatId = ctx.update.message.chat.id
+    const msgId = ctx.update.message.message_id
+    console.log(`ChatID; ${chatId} MsgID; ${msgId}`)
+    await ctx.deleteMessage(chatId, msgId)
+    console.log("RAW MSG:", ctx);
 }
