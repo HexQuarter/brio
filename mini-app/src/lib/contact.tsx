@@ -16,14 +16,13 @@ export const listContacts = async (): Promise<string[]> => {
     return []
 }
 
-export const addContact = async (handle: string) => {
-    const formattedHandle = handle.startsWith('@') ? handle : `@${handle}`
+export const addContact = async (contact: string) => {
     let contacts = await listContacts()
     const contactSet = new Set(contacts)
-    if (contactSet.has(formattedHandle)) {
+    if (contactSet.has(contact)) {
         return
     }
-    contacts = Array.from(contactSet.add(formattedHandle))
+    contacts = Array.from(contactSet.add(contact))
     const serializedContact = JSON.stringify(contacts)
     sessionStorage.setItem('contacts', serializedContact)
     if (!import.meta.env.DEV && cloudStorage.setItem.isAvailable()) {
