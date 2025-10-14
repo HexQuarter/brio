@@ -53,17 +53,21 @@ export function SecureWalletPage() {
             setProgressValue(33)
     
             setProgressLabel(t('walletSecure.progress33'))
-
-            const result = requestContact.ifAvailable()
             let hashedPhoneNumber: undefined | string = undefined
-            console.log(result)
-            if (result[0]) {
-                try {
-                    const contact = await result[1]
-                    const phoneNumber = contact.contact.phone_number
-                    hashedPhoneNumber = await hash(phoneNumber)
+
+            if (import.meta.env.DEV) {
+                hashedPhoneNumber = await hash('+33123456789')
+            }
+            else {
+                const result = requestContact.ifAvailable()
+                if (result[0]) {
+                    try {
+                        const contact = await result[1]
+                        const phoneNumber = contact.contact.phone_number
+                        hashedPhoneNumber = await hash(phoneNumber)
+                    }
+                    catch(e) {}
                 }
-                catch(e) {}
             }
 
             const lp = retrieveRawInitData()

@@ -30,3 +30,12 @@ export const addContact = async (handle: string) => {
         await cloudStorage.setItem('contacts', serializedContact)
     }
 }
+
+export const removeContact = async (contact: string) => {
+    const contacts = await listContacts()
+    const filteredContacts = contacts.filter(c => c != contact)
+    if (!import.meta.env.DEV && cloudStorage.setItem.isAvailable()) {
+        await cloudStorage.setItem('contacts', JSON.stringify(filteredContacts))
+    }
+    sessionStorage.setItem('contacts', JSON.stringify(filteredContacts))
+}

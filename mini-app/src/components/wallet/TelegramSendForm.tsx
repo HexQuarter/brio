@@ -12,16 +12,12 @@ import { useNavigate, useOutletContext } from "react-router-dom"
 import { parse, PrepareLnurlPayResponse, SdkEvent } from "@breeztech/breez-sdk-spark/web"
 import { toast } from "sonner"
 import { openTelegramLink, retrieveLaunchParams } from "@telegram-apps/sdk-react"
-import { addContact, listContacts } from "@/lib/contact"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
-import { Check, ChevronsUpDown } from "lucide-react"
-
+import { addContact, listContacts, removeContact } from "@/lib/contact"
+import { SearchContactForm } from "./TelegramSearchContact"
 export const TelegramSendForm = () => {
     const navigate = useNavigate()
     const { breezSdk, currency } = useWallet()
-    const [handle, setHandle] = useState("")
-    // const [phoneNumber, setPhoneNumber] = useState("")
+    const [contact, setContact] = useState("")
     const [address, setAddress] = useState("")
     const [fiatAmount, setFiatAmount] = useState<string | number>("")
     const [btcAmount, setBtcAmount] = useState(0)
@@ -39,11 +35,11 @@ export const TelegramSendForm = () => {
 
     useEffect(() => {
         setLookupError(null)
-        if (handle == "" || !breezSdk) return
+        if (contact == "" ||  !breezSdk) return
         const delayDebounceFn = setTimeout(async () => {
-            const strippedHandle = handle.startsWith('@') ? handle.slice(1, handle.length) : handle
+            const strippedContact = contact.startsWith('@') ? contact.slice(1, contact.length) : contact
             try {
-                const response = await fetchLightningAddress(strippedHandle)
+                const response = await fetchLightningAddress(strippedContact)
                 if (response.status == 200) {
                     const { address: lnUrl }  = await response.json()
                     setAddress(lnUrl)
@@ -52,8 +48,8 @@ export const TelegramSendForm = () => {
                     const rate = fiatRates?.rates.find(r => r.coin.toLowerCase() == currency.toLowerCase())
                     if (!rate) return
                     setPrice(rate.value)
-                    const contactSet = new Set(contacts).add(`@${strippedHandle}`)
-                    
+                    let contactSet = new Set(contacts)
+                    contactSet = contact.startsWith("+") ? contactSet.add(contact) : contactSet.add(`@${strippedContact}`)
                     setContacts(Array.from(contactSet))
                     return
                 }
@@ -66,7 +62,7 @@ export const TelegramSendForm = () => {
         }, 500)
 
         return () => clearTimeout(delayDebounceFn)
-    }, [handle])
+    }, [contact])
 
     useEffect(() => {
         const loadContacts = async () => {
@@ -188,9 +184,9 @@ export const TelegramSendForm = () => {
                         case 'paymentSucceeded':
                             if (event.payment.paymentType == 'send' && event.payment.status == 'completed') {
                                 if (event.payment.details?.type == 'lightning') {
-                                    await registerPayment(handle, event.payment.details.paymentHash)
+                                    await registerPayment(contact, event.payment.details.paymentHash)
                                 }
-                                await addContact(handle)
+                                await addContact(contact)
                                 await breezSdk?.removeEventListener(listenerId as string)
                                 toast(t('wallet.sendPaymentSucceeded'))
                                 await new Promise(r => setTimeout(r, 1000));
@@ -243,61 +239,28 @@ export const TelegramSendForm = () => {
 
     const [open, setOpen] = useState(false)
 
+    const removeFavoriteContact = async (contact: string) => {
+        await removeContact(contact)
+        setContacts(await listContacts())
+        setOpen(false)
+    }
+
     return (
         <div className='flex flex-col gap-10 pt-10'>
             <div className='flex flex-col gap-1'>
-                <Label htmlFor="handle" className='text-gray-400'>{t('wallet.telegram.handle')}</Label>
-                <Popover open={open} onOpenChange={setOpen}>
-                    <PopoverTrigger className="flex">
-                        <Button
-                            variant="ghost"
-                            role="combobox"
-                            aria-expanded={open}
-                            className="font-light"
-                        >
-                            {handle
-                                ? contacts.find((contact) => contact === handle)
-                                : t('wallet.telegram.handle.placeholder')}
-                            <ChevronsUpDown className="opacity-50" />
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="">
-                    <Command>
-                        <CommandInput placeholder={t('wallet.telegram.handle.placeholder')}  className="h-9" onValueChange={setHandle}/>
-                        <CommandList>
-                            <CommandEmpty>{ lookupError && 
-                                <>
-                                    <p className="text-red-500 text-sm italic mt-2">{lookupError}</p>
-                                    <Button variant="link" className="p-0 text-sm italic" onClick={() => shareInvite()}>Share an invitation</Button>
-                                </>
-                            }</CommandEmpty>
-                            <CommandGroup heading="Favourites">
-                                {contacts.map((contact) => (
-                                    <CommandItem
-                                    key={contact}
-                                    value={contact}
-                                    onSelect={(currentValue) => {
-                                        setHandle(currentValue === handle ? "" : currentValue)
-                                        setOpen(false)
-                                    }}
-                                    >
-                                    {contact}
-                                    <Check
-                                        className={`ml-auto ${handle === contact ? "opacity-100" : "opacity-0"}`}
-                                    />
-                                    </CommandItem>
-                                ))}
-                            </CommandGroup>
-                        </CommandList>
-                        </Command>
-                    </PopoverContent>
-                </Popover>
+                <Label className='text-gray-400 text-xs'>{t('wallet.telegram.contact')}</Label>
+                <SearchContactForm 
+                    placeholder={t('wallet.telegram.contact.placeholder')}
+                    open={open}
+                    handleOpen={setOpen}
+                    handleSelection={setContact}
+                    handleShareInvite={shareInvite}
+                    lookupError={lookupError}
+                    contacts={contacts}
+                    search={contact}
+                    removeContact={removeFavoriteContact}
+                />
             </div>
-            
-            {/* <div>
-                <Label htmlFor="phone" className='text-gray-400'>{t('wallet.telegram.phoneNumber')}</Label>
-                <Input id='phone' placeholder={t('wallet.telegram.phoneNumber.placeholder')} value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)}/>
-            </div> */}
 
             { address != '' && price > 0 && !lookupError && 
                 <div>
