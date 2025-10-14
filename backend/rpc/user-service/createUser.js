@@ -43,7 +43,8 @@ export const handler = async (req, res) => {
         breezBtcAddress: createUserRequest.breezBtcAddress,
         breezLnUrl: createUserRequest.breezLnUrl,
         tapRootAddress: createUserRequest.tapRootAddress,
-        handle: hashHandle
+        handle: hashHandle,
+        phoneNumber: createUserRequest.hashedPhoneNumber
     })
 
     if (username) {
