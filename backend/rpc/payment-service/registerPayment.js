@@ -27,9 +27,14 @@ export const handler = async (req, res) => {
         if (!contactCommandRes.Item) {
             return res.status(404).json({ error: "contact not found" }) 
         }
+
+         const { chatID: chatID_Data } = contactCommandRes.Item
+        if (!chatID_Data.S) {
+            console.log(`cannot retrieve chatID for ${contact}`)
+            return res.status(500).json({ error: 'cannot retrieve user contact' })
+        }
     
-        const { chatID: { S: chatID } } = contactCommandRes.Item
-        const postResponse = await notifyTelegram(chatID, getBotToken(), registerPaymentRequest.payment)
+        const postResponse = await notifyTelegram(chatID_Data.S, getBotToken(), registerPaymentRequest.payment)
         if (postResponse.status >= 400) {
             const errMsg = await postResponse.json()
             console.log('Error in posting payment notification: ', errMsg)

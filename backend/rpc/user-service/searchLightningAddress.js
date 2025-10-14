@@ -37,11 +37,17 @@ export const handler = async (req, res) => {
         })
         const userCommandRes = await req.dbClient.send(userCommand);
         if (!userCommandRes.Item) {
+            console.log(`'cannot retrieve user data for ${chatID}`)
             return res.status(500).json({ error: "user's chat info is missing" }) 
         }
     
-        const { breezLnUrl: { S: { breezLnUrl }}} = userCommandRes.Item
-        res.status(200).json({ address: breezLnUrl })
+        const { breezLnUrl: breezLnUrlData } = userCommandRes.Item
+        if (!breezLnUrlData.S) {
+            console.log(`'cannot retrieve LN URL for ${chatID}`)
+            return res.status(500).json({ error: 'cannot retrieve LN URL' })
+        }
+
+        res.status(200).json({ address: breezLnUrlData.S })
     }
     catch(e) {
         console.log(e)
