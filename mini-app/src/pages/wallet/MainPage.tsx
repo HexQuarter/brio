@@ -37,7 +37,7 @@ export const WalletMainPage = () => {
 
         const interval = setInterval(async () => await refreshPrice(), 5000)
         return () => clearInterval(interval)
-    }, [])
+    }, [currency])
     
     useEffect(() => { 
         const loadBalance = async (breezSdk: BreezSdk, ensureSync: boolean = false) => {
