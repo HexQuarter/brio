@@ -103,7 +103,7 @@ export const handler = async (req, res) => {
               chatID: { S: referralChatID.toString() }
             }
           })
-          const response = await client.send(command);
+          const response = await req.dbClient.send(command);
           if (response.Item) {
             await notifyTelegramReferral(referralChatID, getBotToken(), username)
           }
