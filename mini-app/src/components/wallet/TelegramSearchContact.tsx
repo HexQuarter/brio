@@ -52,9 +52,8 @@ export const SearchContactForm: React.FC<Props> = ({
                     }</CommandEmpty>
                     <CommandGroup heading="Favourites">
                         {contacts.map((contact) => (
-                            <div className={'flex justify-between h-10'}>
+                            <div className={'flex justify-between h-10'} key={contact}>
                                 <CommandItem
-                                    key={contact}
                                     value={contact}
                                     onSelect={(currentValue) => {
                                         handleSelection(currentValue === search ? search : currentValue)
