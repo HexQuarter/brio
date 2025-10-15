@@ -14,6 +14,7 @@ import { CiCircleAlert } from "react-icons/ci";
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 import { Page } from '@/components/Page';
+import { fetchPrice } from '@/lib/api';
 
 export const WalletMainPage = () => {
     const { breezSdk, currency, walletExists } = useWallet()
@@ -24,6 +25,19 @@ export const WalletMainPage = () => {
     const [fiatBalance, setFiatBalance] = useState(0)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
+    const [price, setPrice] = useState(0)
+
+    useEffect(() => {
+        const refreshPrice = async () => {
+            const price = await fetchPrice(currency)
+            setPrice(price)
+        }
+
+        refreshPrice()
+
+        const interval = setInterval(async () => await refreshPrice(), 5000)
+        return () => clearInterval(interval)
+    }, [])
     
     useEffect(() => { 
         const loadBalance = async (breezSdk: BreezSdk, ensureSync: boolean = false) => {
@@ -35,12 +49,7 @@ export const WalletMainPage = () => {
                 })
                 const btc = convertSatsToBtc(walletInfo.balanceSats)
                 setBtcBalance(btc)
-
-                const fiatRates = await breezSdk.listFiatRates()
-                const rate = fiatRates.rates.find(r => r.coin.toLowerCase() == currency.toLocaleLowerCase())
-                if (rate) {
-                    setFiatBalance(btc * rate.value)
-                }
+                setFiatBalance(btc * price)
             }
             catch(e) {
                 setError((e as Error).message)
@@ -79,7 +88,7 @@ export const WalletMainPage = () => {
             return () => clearInterval(interval)
         }
 
-    }, [breezSdk, currency])
+    }, [breezSdk, currency, price])
 
      if (!walletExists && location.search == '?visit') {
         return (

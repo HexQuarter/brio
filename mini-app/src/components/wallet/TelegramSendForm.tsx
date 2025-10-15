@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { convertBtcToSats, convertSatsToBtc, formatBtcAmount, formatFiatAmount } from "@/helpers/number"
-import { fetchLightningAddress, registerPayment } from "@/lib/api"
+import { fetchLightningAddress, fetchPrice, registerPayment } from "@/lib/api"
 import { Spinner } from "@telegram-apps/telegram-ui"
 import { useWallet } from "@/lib/walletContext"
 import { useNavigate, useOutletContext } from "react-router-dom"
@@ -43,11 +43,8 @@ export const TelegramSendForm = () => {
                 if (response.status == 200) {
                     const { address: lnUrl }  = await response.json()
                     setAddress(lnUrl)
-
-                    const fiatRates = await breezSdk?.listFiatRates()
-                    const rate = fiatRates?.rates.find(r => r.coin.toLowerCase() == currency.toLowerCase())
-                    if (!rate) return
-                    setPrice(rate.value)
+                    const price = await fetchPrice(currency)
+                    setPrice(price)
                     let contactSet = new Set(contacts)
                     contactSet = contact.startsWith("+") ? contactSet.add(contact) : contactSet.add(`@${strippedContact}`)
                     setContacts(Array.from(contactSet))

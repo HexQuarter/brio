@@ -1,6 +1,6 @@
 import * as z from "zod";
 import { createUserHandler, searchLightningAddressHandler } from "./user-service/index.js"
-import {registerPaymentHandler } from "./payment-service/index.js"
+import {registerPaymentHandler, fetchPriceHandler } from "./payment-service/index.js"
 
 const OperationSchema = z.object({
     operation: z.string(),
@@ -10,7 +10,8 @@ const OperationSchema = z.object({
 const handlers = {
     "create-user": createUserHandler,
     "search-lightning-address": searchLightningAddressHandler,
-    "register-payment": registerPaymentHandler
+    "register-payment": registerPaymentHandler,
+    "fetch-price": fetchPriceHandler
 }
 
 export const rpcHandler = async (req, res) => {
@@ -27,8 +28,8 @@ export const rpcHandler = async (req, res) => {
     }
 
     try {
-	req.body = payload
-	await handler(req, res)
+        req.body = payload
+        await handler(req, res)
     } catch (err) {
         console.error(err)
         return res.status(500).json({ error: 'internal server error' })

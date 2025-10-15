@@ -1,5 +1,6 @@
 // import { t } from 'i18next';
 import { convertSatsToBtc, formatBtcAmount, formatFiatAmount, timeAgo } from '@/helpers/number';
+import { fetchPrice } from '@/lib/api';
 import { useWallet } from '@/lib/walletContext';
 import { Payment } from '@breeztech/breez-sdk-spark';
 import { Spinner } from '@telegram-apps/telegram-ui';
@@ -25,23 +26,19 @@ export const WalletActivityPage : React.FC = () => {
     useEffect(() => {
         const loadingPayments = async () => {
             if (breezSdk) {
-                const fiatRates = await breezSdk.listFiatRates()
-                const rate = fiatRates.rates.find(r => r.coin.toLowerCase() == currency.toLocaleLowerCase())
-                if (rate) {
-                    const price = rate.value
-                    const payments = await breezSdk.listPayments({})
-                    setPayments(payments.payments.map((payment: Payment) => {
-                        const rawBtcAmount = convertSatsToBtc(payment.amount)
-                        const feeBtcAmount = convertSatsToBtc(payment.fees)
-                        const formattedPayment = payment as FormattedPayment
-                        formattedPayment.fiatAmount = formatFiatAmount(rawBtcAmount * price)
-                        formattedPayment.btcAmount = formatBtcAmount(rawBtcAmount)
-                        formattedPayment.fiatFee = formatFiatAmount(feeBtcAmount * price)
-                        formattedPayment.btcFee = formatBtcAmount(feeBtcAmount)
-                        return formattedPayment
-                    }))
-                    setLoading(false)
-                }
+                const price = await fetchPrice(currency)
+                const payments = await breezSdk.listPayments({})
+                setPayments(payments.payments.map((payment: Payment) => {
+                    const rawBtcAmount = convertSatsToBtc(payment.amount)
+                    const feeBtcAmount = convertSatsToBtc(payment.fees)
+                    const formattedPayment = payment as FormattedPayment
+                    formattedPayment.fiatAmount = formatFiatAmount(rawBtcAmount * price)
+                    formattedPayment.btcAmount = formatBtcAmount(rawBtcAmount)
+                    formattedPayment.fiatFee = formatFiatAmount(feeBtcAmount * price)
+                    formattedPayment.btcFee = formatBtcAmount(feeBtcAmount)
+                    return formattedPayment
+                }))
+                setLoading(false)
             }
         }
 

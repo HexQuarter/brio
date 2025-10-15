@@ -11,6 +11,7 @@ import { Spinner } from "@telegram-apps/telegram-ui";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { parse } from "@breeztech/breez-sdk-spark/web";
 import { openQrScanner } from "@telegram-apps/sdk-react";
+import { fetchPrice } from "@/lib/api";
 
 
 export const BitcoinSendForm  = () => {
@@ -71,10 +72,8 @@ export const BitcoinSendForm  = () => {
                 }
                 setInputType(inputType)
                
-                const fiatRates = await breezSdk?.listFiatRates()
-                const rate = fiatRates?.rates.find(r => r.coin.toLowerCase() == currency.toLowerCase())
-                if (!rate) return
-                setPrice(rate.value)
+                const price = await fetchPrice(currency)
+                setPrice(price)
 
                 if (inputType.type == 'bolt11Invoice'){
                     if (inputType.amountMsat) {

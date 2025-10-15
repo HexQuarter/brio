@@ -10,6 +10,7 @@ import { LuCopy } from 'react-icons/lu';
 import { toast } from 'sonner';
 import { Payment } from '@breeztech/breez-sdk-spark/web';
 import { convertSatsToBtc, formatBtcAmount, formatFiatAmount } from '@/helpers/number';
+import { fetchPrice } from '@/lib/api';
 
 export const WalletActivityDetailsPage : React.FC = () => {
     const {t} = useTranslation()
@@ -23,11 +24,9 @@ export const WalletActivityDetailsPage : React.FC = () => {
     useEffect(() => {
         const loadPayment = async () => {
             const paymentResponse = await breezSdk?.getPayment({ paymentId: id as string })
-            const rateResponse = await breezSdk?.listFiatRates()
-            const rate = rateResponse?.rates.find(r => r.coin.toLowerCase() == currency.toLowerCase())
+            const price = await fetchPrice(currency)
             setPayment(paymentResponse?.payment)
-            if (!rate) return
-            setPrice(rate.value)
+            setPrice(price)
         }
 
         loadPayment()

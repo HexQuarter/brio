@@ -73,3 +73,25 @@ export const registerPayment = async(contact: string, paymentId: string) => {
         })
     })
 }
+
+export const fetchPrice = async(currency: string) => {
+    const response = await fetch(new URL("/rpc", rpcEndpoint()), {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify({
+            operation: 'fetch-price',
+            payload: {
+                currency: currency.toLowerCase()
+            }
+        })
+    })
+    if (response.status == 200) {
+        const { price } = await response.json() as any
+        return price
+    }
+
+    throw new Error(JSON.stringify(await response.json()))
+}
