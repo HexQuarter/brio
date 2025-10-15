@@ -20,7 +20,7 @@ export const handler = async (req, res) => {
         const contactCommand = new GetItemCommand({
             TableName: USER_CONTACT_TABLE,
             Key: {
-                contactDigest: { S: contact }
+                contactDigest: { S: registerPaymentRequest.contact }
             }
         })
     
@@ -31,7 +31,7 @@ export const handler = async (req, res) => {
 
          const { chatID: chatID_Data } = contactCommandRes.Item
         if (!chatID_Data.S) {
-            console.log(`cannot retrieve chatID for ${contact}`)
+            console.log(`cannot retrieve chatID for ${registerPaymentRequest.contact}`)
             return res.status(500).json({ error: 'cannot retrieve user contact' })
         }
     
