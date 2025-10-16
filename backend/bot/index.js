@@ -54,22 +54,21 @@ const onMessage = async (ctx) => {
 
       if (message.photo) {
         const photos = message.photo
-	const latestPhoto = photos[photos.length - 1]
+	      const latestPhoto = photos[photos.length - 1]
         const file = await ctx.telegram.getFile(latestPhoto.file_id)
-        const fileUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file.file_path}`
+        const fileUrl = `https://api.telegram.org/file/bot${getBotToken()}/${file.file_path}`
         const response = await axios.get(fileUrl, { responseType: 'arraybuffer' })
-	const command = new PutObjectCommand({
-	   Bucket: 'brio-support-attachments',
-	   Key: latestPhoto.file_id,
-	   Body: response.data,
-	   ContentType: 'image/jpeg'
-	 });
+        const command = new PutObjectCommand({
+          Bucket: 'brio-support-attachments',
+          Key: latestPhoto.file_id,
+          Body: response.data,
+          ContentType: 'image/jpeg'
+        });
         await client.send(command);
       }
 
       // handle the message (save, send to admin, etc.)
       console.log(`Support issue from ${user}: ${JSON.stringify(message)}`)
-
       await ctx.telegram.sendMessage(ADMIN_CHAT_ID, `🆘 BRIO: New support request from @${ctx.from.username || ctx.from.first_name}:\n\n${JSON.stringify(message)}`)
 
       await ctx.reply('✅ Thanks, your issue has been reported.')
