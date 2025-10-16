@@ -55,9 +55,12 @@ export const fetchLightningAddress = async (contact: string) => {
     })
 }
 
-export const registerPayment = async(contact: string, paymentId: string) => {
-    const strippedContact = contact.startsWith('@') ? contact.slice(1, contact.length) : contact
-    const hashedContact = await hash(strippedContact)
+export const registerPayment = async(method: string, paymentId: string, amount: number, contact: string | undefined) => {
+    let contactDigest: undefined | string = undefined
+    if (contact) {
+        const strippedContact = contact.startsWith('@') ? contact.slice(1, contact.length) : contact
+        contactDigest = await hash(strippedContact)
+    }
     return await fetch(new URL("/rpc", rpcEndpoint()), {
         method: 'POST',
         headers: {
@@ -67,8 +70,10 @@ export const registerPayment = async(contact: string, paymentId: string) => {
         body: JSON.stringify({
             operation: 'register-payment',
             payload: {
-                contact: hashedContact,
-                payment: paymentId
+                method: method,
+                contactDigest: contactDigest,
+                paymentId: paymentId,
+                amount: amount
             }
         })
     })

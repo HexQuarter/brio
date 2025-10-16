@@ -11,7 +11,7 @@ import { Spinner } from "@telegram-apps/telegram-ui";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { parse } from "@breeztech/breez-sdk-spark/web";
 import { openQrScanner } from "@telegram-apps/sdk-react";
-import { fetchPrice } from "@/lib/api";
+import { fetchPrice, registerPayment } from "@/lib/api";
 
 
 export const BitcoinSendForm  = () => {
@@ -284,6 +284,7 @@ export const BitcoinSendForm  = () => {
                     await breezSdk?.lnurlPay({
                         prepareResponse: prepareResponse as PrepareLnurlPayResponse
                     })
+                    await new Promise(r => setTimeout(r, 1000));
                     setLoadingPayment(null)
                     navigate('/wallet/activity')
                     break
@@ -291,6 +292,7 @@ export const BitcoinSendForm  = () => {
                     await breezSdk?.lnurlPay({
                         prepareResponse: prepareResponse as PrepareLnurlPayResponse
                     })
+                    await new Promise(r => setTimeout(r, 1000));
                     setLoadingPayment(null)
                     navigate('/wallet/activity')
                     break
@@ -300,10 +302,17 @@ export const BitcoinSendForm  = () => {
                             type: 'bitcoinAddress',
                             confirmationSpeed: 'fast'
                         }
-                        await breezSdk?.sendPayment({
+                        const res = await breezSdk?.sendPayment({
                             prepareResponse: prepareResponse as PrepareSendPaymentResponse,
                             options
                         })
+                        if (res && res.payment.details?.type == 'withdraw') {
+                            // Register the btc payment upfront as the user will not wait 10 min to await conf
+                            const txId = res.payment.details?.txId
+                            await registerPayment('btc', txId, convertSatsToBtc(res.payment.amount), undefined)
+                        }
+
+                        await new Promise(r => setTimeout(r, 1000));
                         setLoadingPayment(null)
                         navigate('/wallet/activity')
                     }
@@ -319,6 +328,7 @@ export const BitcoinSendForm  = () => {
                             prepareResponse: prepareResponse as PrepareSendPaymentResponse,
                             options
                         })
+                        await new Promise(r => setTimeout(r, 1000));
                         setLoadingPayment(null)
                         navigate('/wallet/activity')
                     }

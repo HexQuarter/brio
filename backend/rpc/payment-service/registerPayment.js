@@ -1,11 +1,13 @@
 import * as z from "zod";
 import { getBotToken } from "../../bot/index.js";
-import { USER_CONTACT_TABLE } from "../../db.js";
-import { GetItemCommand } from "@aws-sdk/client-dynamodb";
+import { USER_CONTACT_TABLE, PAYMENT_TABLE } from "../../db.js";
+import { GetItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
 
 const RegisterSchema = z.object({
-    contact: z.string(),
-    payment: z.string()
+    contactDigest: z.string().optional(),
+    method: z.string(),
+    amount: z.number(),
+    paymentId: z.string()
 });
 
 export const handler = async (req, res) => {
@@ -17,10 +19,27 @@ export const handler = async (req, res) => {
 
         const registerPaymentRequest = parsingResult.data
 
+        const putCommand = new PutItemCommand({
+            TableName: PAYMENT_TABLE,
+            Item: {
+                paymentId: { S: registerPaymentRequest.paymentId },
+                amount: { N: registerPaymentRequest.amount.toString() },
+                method: { S: registerPaymentRequest.method }
+            }
+        })
+        const putCommandRes = await req.dbClient.send(putCommand);
+        if (!putCommandRes['$metadata'] || putCommandRes['$metadata'].httpStatusCode != 200) {
+            return res.status(500).json({ error: putCommandRes })
+        }
+
+        if (!registerPaymentRequest.contactDigest) {
+            return res.status(201).json({ status: "ok" })
+        }
+
         const contactCommand = new GetItemCommand({
             TableName: USER_CONTACT_TABLE,
             Key: {
-                contactDigest: { S: registerPaymentRequest.contact }
+                contactDigest: { S: registerPaymentRequest.contactDigest }
             }
         })
     
@@ -29,19 +48,23 @@ export const handler = async (req, res) => {
             return res.status(404).json({ error: "contact not found" }) 
         }
 
-         const { chatID: chatID_Data } = contactCommandRes.Item
+        const { chatID: chatID_Data } = contactCommandRes.Item
         if (!chatID_Data.S) {
-            console.log(`cannot retrieve chatID for ${registerPaymentRequest.contact}`)
+            console.log(`cannot retrieve chatID for ${registerPaymentRequest.contactDigest}`)
             return res.status(500).json({ error: 'cannot retrieve user contact' })
         }
     
-        const postResponse = await notifyTelegram(chatID_Data.S, getBotToken(), registerPaymentRequest.payment)
-        if (postResponse.status >= 400) {
-            const errMsg = await postResponse.json()
-            console.log('Error in posting payment notification: ', errMsg)
-            return res.status(500).json({ error: errMsg })
+        const prod = process.env['PROD'] || true
+        if (prod === true) {
+            const postResponse = await notifyTelegram(chatID_Data.S, getBotToken(), registerPaymentRequest.paymentId)
+            if (postResponse.status >= 400) {
+                const errMsg = await postResponse.json()
+                console.log('Error in posting payment notification: ', errMsg)
+                return res.status(500).json({ error: errMsg })
+            }
         }
-        return res.status(201).json({ status: "ok" })
+
+        res.status(201).json({ status: "ok" })
     }
     catch(e) {
         console.log(e)

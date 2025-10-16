@@ -13,6 +13,8 @@ import {
 import { toast } from 'sonner';
 import { t } from 'i18next';
 import { cloudStorage } from '@telegram-apps/sdk-react';
+import { registerPayment } from './api';
+import { convertSatsToBtc } from '@/helpers/number';
 
 export type WalletContextType = {
     walletExists: boolean;
@@ -37,7 +39,7 @@ const WALLET_CURRENCY = 'wallet_currency'
 const notifications = new Set<string>()
 
 class JsEventListener {
-    onEvent = (event: SdkEvent) => {
+    onEvent = async (event: SdkEvent) => {
         switch(event.type) {
             case "paymentSucceeded": 
                 if (event.payment.status == 'pending') {
@@ -48,6 +50,17 @@ class JsEventListener {
                         toast.success(t('wallet.receivePaymentPending'))
                     }
                     notifications.add(event.payment.id)
+                }
+                if (event.payment.paymentType == 'send' && event.payment.status == 'completed') {
+                    toast.success(t('wallet.sendPaymentSucceeded'))
+                    switch (event.payment.details?.type) {
+                        case 'lightning': 
+                            await registerPayment('lightning', event.payment.details.paymentHash, convertSatsToBtc(event.payment.amount), undefined)
+                            break
+                        default:
+                            console.log('not supported')
+                            break
+                    }
                 }
                 break
             case "paymentFailed":
