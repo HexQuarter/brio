@@ -23,7 +23,26 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
-const currencies = ['USD', 'EUR','GBP','RUB', 'JPY' ,'KRW' ,'KZT' ,'NGN' ,'CNY', 'INR'] 
+const currencies = [
+    'USD', 
+    'EUR',
+    'GBP',
+    'RUB', 
+    'JPY', 
+    'CAD',
+    'CHF',
+    'CNY',
+    'KRW',
+    'AUD',
+    'NZD',
+    'SGD',
+    'KZT', 
+    'NGN',
+    'INR',
+    'ZAR',
+    'SEK',
+    'MXN'
+] 
 
 export const WalletSettingsPage : React.FC = () => {
     const navigate = useNavigate()

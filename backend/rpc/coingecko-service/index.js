@@ -1,0 +1,1 @@
+export { handler as fetchPriceHandler } from "./fetchPrice.js"

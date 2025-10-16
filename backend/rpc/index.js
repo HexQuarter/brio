@@ -1,6 +1,7 @@
 import * as z from "zod";
 import { createUserHandler, searchLightningAddressHandler } from "./user-service/index.js"
-import {registerPaymentHandler, fetchPriceHandler } from "./payment-service/index.js"
+import {registerPaymentHandler } from "./payment-service/index.js"
+import { fetchPriceHandler } from "./coingecko-service/index.js";
 
 const OperationSchema = z.object({
     operation: z.string(),
