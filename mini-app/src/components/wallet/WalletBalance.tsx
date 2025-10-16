@@ -2,7 +2,18 @@ import React, {useEffect, useState} from 'react';
 import { useTranslation } from 'react-i18next';
 import { BsCurrencyBitcoin } from "react-icons/bs";
 import { FiEye, FiSettings } from 'react-icons/fi';
-import { PiCurrencyDollarBold, PiCurrencyEurBold } from "react-icons/pi";
+import { 
+   PiCurrencyDollarBold, 
+   PiCurrencyEurBold, 
+   PiCurrencyGbpBold,
+   PiCurrencyJpyBold,
+   PiCurrencyKrwBold,
+   PiCurrencyKztBold,
+   PiCurrencyNgnBold,
+   PiCurrencyRubBold,
+   PiCurrencyCnyBold,
+   PiCurrencyInrBold
+} from "react-icons/pi";
 import { useLocation, useNavigate } from 'react-router-dom';
 
 interface WalletBalanceProps {
@@ -40,6 +51,14 @@ export const WalletBalance: React.FC<WalletBalanceProps> = ({ btcBalance, fiatBa
                <div className="flex gap-2 items-center">
                   { currency == 'USD' && <PiCurrencyDollarBold className='text-primary text-3xl'/>}
                   { currency == 'EUR' && <PiCurrencyEurBold className='text-primary text-3xl'/>}
+                  { currency == 'GBP' && <PiCurrencyGbpBold className='text-primary text-3xl'/>}
+                  { currency == 'JPY' && <PiCurrencyJpyBold className='text-primary text-3xl'/>}
+                  { currency == 'KRW' && <PiCurrencyKrwBold className='text-primary text-3xl'/>}
+                  { currency == 'KZT' && <PiCurrencyKztBold className='text-primary text-3xl'/>}
+                  { currency == 'NGN' && <PiCurrencyNgnBold className='text-primary text-3xl'/>}
+                  { currency == 'RUB' && <PiCurrencyRubBold className='text-primary text-3xl'/>}
+                  { currency == 'CNY' && <PiCurrencyCnyBold className='text-primary text-3xl'/>}
+                  { currency == 'INR' && <PiCurrencyInrBold className='text-primary text-3xl'/>}
                   <span className="text-2xl font-medium">
                      {visibleBalance ? new Intl.NumberFormat("en", {maximumFractionDigits: 4}).format(fiatBalance) : '****'}
                   </span>

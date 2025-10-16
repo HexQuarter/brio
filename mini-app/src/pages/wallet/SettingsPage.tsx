@@ -23,6 +23,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
+const currencies = ['USD', 'EUR','GBP','RUB', 'JPY' ,'KRW' ,'KZT' ,'NGN' ,'CNY', 'INR'] 
+
 export const WalletSettingsPage : React.FC = () => {
     const navigate = useNavigate()
     const { currency, changeCurrency, resetWallet} = useWallet()
@@ -44,8 +46,9 @@ export const WalletSettingsPage : React.FC = () => {
                                     <SelectValue placeholder={currency} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="USD">USD</SelectItem>
-                                    <SelectItem value="EUR">EUR</SelectItem>
+                                    {currencies.map(currency => (
+                                        <SelectItem key={currency} value={currency}>{currency}</SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </span>
