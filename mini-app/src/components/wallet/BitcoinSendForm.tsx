@@ -393,8 +393,8 @@ export const BitcoinSendForm  = () => {
                         {!sendError && <Button className="w-40" onClick={() => handleSend()}>Send</Button>}
                         {fees > 0 && 
                             <div>
-                                <p className="text-xs">Fees: {formatBtcAmount(convertSatsToBtc(fees))} BTC / {formatFiatAmount(convertSatsToBtc(fees) * price, 4)} {currency}</p>
-                                <p className="text-xs">Remaining : {formatBtcAmount(remaining)} BTC / {formatFiatAmount(remaining * price, 4)} {currency}</p>
+                                <p className="text-xs">{t('fees')}: {formatBtcAmount(convertSatsToBtc(fees))} BTC / {formatFiatAmount(convertSatsToBtc(fees) * price, 4)} {currency}</p>
+                                <p className="text-xs">{t('remaining')} : {formatBtcAmount(remaining)} BTC / {formatFiatAmount(remaining * price, 4)} {currency}</p>
                             </div>
                         }
                     </div>}

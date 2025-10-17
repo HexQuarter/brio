@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { ChevronsUpDown } from "lucide-react"
 import { LuX } from "react-icons/lu"
+import { useTranslation } from "react-i18next"
 
 type Props = {
     open: boolean
@@ -27,6 +28,8 @@ export const SearchContactForm: React.FC<Props> = ({
     placeholder, 
     removeContact
 }) => {
+    const { t } = useTranslation();
+
     return (
         <Popover open={open} onOpenChange={handleOpen}>
             <PopoverTrigger className="flex">
@@ -50,23 +53,25 @@ export const SearchContactForm: React.FC<Props> = ({
                             <Button variant="link" className="p-0 text-black text-sm italic" onClick={() => handleShareInvite()}>Share an invitation</Button>
                         </>
                     }</CommandEmpty>
-                    <CommandGroup heading="Favourites">
-                        {contacts.map((contact) => (
-                            <div className={'flex justify-between h-10'} key={contact}>
-                                <CommandItem
-                                    value={contact}
-                                    onSelect={(currentValue) => {
-                                        handleSelection(currentValue === search ? search : currentValue)
-                                        handleOpen(false)
-                                    }} className="flex w-full">
-                                    {contact}
-                                </CommandItem>
-                                <Button variant="ghost" className="text-xs active:bg-primary active:text-white" onClick={() => removeContact(contact)}>
-                                    <LuX />
-                                </Button>
-                            </div>
-                        ))}
-                    </CommandGroup>
+                    { contacts.length > 0 && 
+                        <CommandGroup heading={t('wallet.favourites')}>
+                            {contacts.map((contact) => (
+                                <div className={'flex justify-between h-10'} key={contact}>
+                                    <CommandItem
+                                        value={contact}
+                                        onSelect={(currentValue) => {
+                                            handleSelection(currentValue === search ? search : currentValue)
+                                            handleOpen(false)
+                                        }} className="flex w-full">
+                                        {contact}
+                                    </CommandItem>
+                                    <Button variant="ghost" className="text-xs active:bg-primary active:text-white" onClick={() => removeContact(contact)}>
+                                        <LuX />
+                                    </Button>
+                                </div>
+                            ))}
+                        </CommandGroup>
+                    }
                 </CommandList>
                 </Command>
             </PopoverContent>

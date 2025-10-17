@@ -4,20 +4,22 @@ import { BiCollection } from "react-icons/bi";
 import { AppList, type App } from "@/components/AppList";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Page } from "@/components/Page";
+import { useTranslation } from "react-i18next";
 
 export function MainPage() {
     const wallet = useWallet(); 
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const apps = [
         { 
-            name: "Wallet", 
+            name: t('wallet'), 
             icon: BsCurrencyBitcoin, 
             className: "text-white bg-primary rounded-full p-2",
             path: "/wallet"
         },
         { 
-            name: "Coming apps", 
+            name: t('next_apps'), 
             icon: BiCollection, 
             className: "text-gray-500 bg-gray-200 rounded-full p-2",
             path: "/upcoming"

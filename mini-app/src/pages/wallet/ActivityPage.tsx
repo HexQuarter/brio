@@ -1,5 +1,4 @@
-// import { t } from 'i18next';
-import { convertSatsToBtc, formatBtcAmount, formatFiatAmount, timeAgo } from '@/helpers/number';
+import { convertSatsToBtc, formatBtcAmount, formatFiatAmount } from '@/helpers/number';
 import { fetchPrice } from '@/lib/api';
 import { useWallet } from '@/lib/walletContext';
 import { Payment } from '@breeztech/breez-sdk-spark';
@@ -8,6 +7,30 @@ import { InfoIcon } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+
+import { formatDistanceToNow } from "date-fns";
+import { enUS, fr, es, zhCN, hi } from "date-fns/locale";
+import i18n from "../../i18n";
+
+const locales = {
+  en: enUS,
+  fr,
+  es,
+  zh: zhCN,
+  hi,
+} as const;
+
+type LocaleKey = keyof typeof locales;
+
+const timeAgo = (timestamp: number) => {
+  const lang = (i18n.language.split("-")[0] as LocaleKey) || "en"
+  const locale = locales[lang] ?? enUS
+
+  return formatDistanceToNow(timestamp, {
+    addSuffix: true,
+    locale,
+  })
+}
 
 export type FormattedPayment = {
         fiatAmount: string
@@ -54,7 +77,7 @@ export const WalletActivityPage : React.FC = () => {
 
     return (
         <div className="flex flex-col gap-5 text-center w-full h-full rounded-sm">
-            <h3 className="text-2xl font-medium">{t('walletActivity.title')}</h3>
+            <h3 className="text-2xl font-medium">{t('walletActivities.title')}</h3>
             <div className='flex flex-col p-2'>
                 {loading && <Spinner size='s'/>}
                 {!loading && payments.map((payment: FormattedPayment) => (
@@ -62,13 +85,13 @@ export const WalletActivityPage : React.FC = () => {
                         <div className='flex items-center justify-between text-left' >
                             <div className={`flex gap-2 ${payment.paymentType == 'send' ? 'text-red-800' : 'text-green-800'}`}>
                                 <span className='w-20'>
-                                    { payment.paymentType == 'receive' && 'Received'}
-                                    { payment.paymentType == 'send' && 'Sent'}
+                                    { payment.paymentType == 'receive' && t('walletActivity.received')}
+                                    { payment.paymentType == 'send' && t('walletActivity.sent')}
                                 </span>
                                 <div className='flex flex-col'>
                                     <span>{payment.btcAmount} BTC</span>
                                     <div className='flex text-left text-xs text-gray-400'>
-                                        <span>{payment.fiatAmount} {currency} - {timeAgo(payment.timestamp * 1000)}</span>
+                                        <span>{payment.fiatAmount} {currency} - {timeAgo(payment.timestamp * 1000) }</span>
                                     </div>
                                     <div className=''>
                                         {payment.status == 'pending' &&
