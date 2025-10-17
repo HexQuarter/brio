@@ -108,6 +108,9 @@ export const WalletProvider = ({children}: {children: ReactNode}) => {
                 if (wallet) {
                     sessionStorage.setItem(WALLET_KEY, wallet)
                     setWalletExists(true)
+
+                    const _currency = await cloudStorage.getItem(WALLET_CURRENCY)
+                    await changeCurrency(_currency)
                 }
             }
         }
