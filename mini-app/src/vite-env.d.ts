@@ -2,7 +2,7 @@
 
 interface ImportMetaEnv {
     readonly VITE_BREEZ_API_KEY: string
-    readonly BACKEND_ENDPOINT: string
+    readonly VITE_BACKEND_ENDPOINT: string
 }
 
 interface ImportMeta {
