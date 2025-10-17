@@ -1,7 +1,7 @@
 import { hash } from "@/helpers/crypto"
 
 export const rpcEndpoint = () => {
-    return import.meta.env.DEV ? 'http://localhost:3000' : 'https://dev.backend.brio.hexquarter.com'
+    return import.meta.env.DEV ? 'http://localhost:3000' : import.meta.env.BACKEND_ENDPOINT
 }
 
 type RegisterParams = {
