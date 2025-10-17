@@ -1,19 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import { useTranslation } from 'react-i18next';
-import { BsCurrencyBitcoin } from "react-icons/bs";
 import { FiEye, FiSettings } from 'react-icons/fi';
-import { 
-   PiCurrencyDollarBold, 
-   PiCurrencyEurBold, 
-   PiCurrencyGbpBold,
-   PiCurrencyJpyBold,
-   PiCurrencyKrwBold,
-   PiCurrencyKztBold,
-   PiCurrencyNgnBold,
-   PiCurrencyRubBold,
-   PiCurrencyCnyBold,
-   PiCurrencyInrBold
-} from "react-icons/pi";
 import { useLocation, useNavigate } from 'react-router-dom';
 
 interface WalletBalanceProps {
