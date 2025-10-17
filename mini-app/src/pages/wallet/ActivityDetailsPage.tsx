@@ -44,7 +44,7 @@ export const WalletActivityDetailsPage : React.FC = () => {
         <div className="flex flex-col gap-10 w-full h-full ">
             <div className='flex gap-2 items-center'>
                 <ArrowLeft onClick={() => navigate('/wallet/activity')} />
-                <h3 className="text-2xl font-medium">Transfer info</h3>
+                <h3 className="text-2xl font-medium">{t('walletActivity.title')}</h3>
             </div>
             { payment &&
                 <div className='flex flex-col gap-5 h-full text-left bg-white p-5 rounded-sm'>
@@ -91,7 +91,7 @@ export const WalletActivityDetailsPage : React.FC = () => {
                         }
                         { payment.paymentType == 'send' &&
                         <div className='flex justify-between'>
-                            <span className='text-gray-400'>{t('walletActivity.fees')}</span>
+                            <span className='text-gray-400'>{t('fees')}</span>
                             <span className='items-center'>
                                 {formatBtcAmount(convertSatsToBtc(payment.fees))} BTC 
                                 { price > 0 &&

@@ -148,7 +148,7 @@ export function SecureWalletPage() {
                         </div>
                     }
                     {progressValue == 100 &&
-                        <Button type="button" className="w-40" onClick={() => goToWallet()}>{t('walletSecure.goToWalletButton')}</Button>
+                        <Button type="button" onClick={() => goToWallet()}>{t('walletSecure.goToWalletButton')}</Button>
                     }
                     {/* { progressValue == 0 &&
                         <Button className="w-40" type="submit">{t('walletSecure.registerButton')}</Button>

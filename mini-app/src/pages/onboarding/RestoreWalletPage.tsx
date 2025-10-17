@@ -90,7 +90,7 @@ export function RestoreWalletPage() {
                 </div>
                 {mnemonic.join('').length > 0 && !error && (
                     <div className="flex justify-center">
-                        <Button className="w-40" type="submit">{t('walletRestore.nextButton')}</Button>
+                        <Button type="submit">{t('walletRestore.nextButton')}</Button>
                     </div>
                 )}
             </form>
