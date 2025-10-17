@@ -181,7 +181,7 @@ export const TelegramSendForm = () => {
                         case 'paymentSucceeded':
                             if (event.payment.paymentType == 'send' && event.payment.status == 'completed') {
                                 if (event.payment.details?.type == 'lightning') {
-                                    await registerPayment('lightning', event.payment.details.paymentHash, event.payment.amount, contact)
+                                    await registerPayment('lightning', event.payment.details.paymentHash, convertSatsToBtc(event.payment.amount), contact)
                                 }
                                 await addContact(contact)
                                 await breezSdk?.removeEventListener(listenerId as string)
