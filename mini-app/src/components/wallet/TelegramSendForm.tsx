@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { convertBtcToSats, convertSatsToBtc, formatBtcAmount, formatFiatAmount } from "@/helpers/number"
-import { fetchLightningAddress, fetchPrice, registerPayment } from "@/lib/api"
+import { fetchBotInfo, fetchLightningAddress, fetchPrice, registerPayment } from "@/lib/api"
 import { Spinner } from "@telegram-apps/telegram-ui"
 import { useWallet } from "@/lib/walletContext"
 import { useNavigate, useOutletContext } from "react-router-dom"
@@ -221,7 +221,8 @@ export const TelegramSendForm = () => {
         const startParam = new URLSearchParams()
         startParam.append('referral', tgData.tgWebAppData?.user?.id.toString() as string)
         const encodedStartParam = encodeURIComponent(startParam.toString())
-        const miniappLink = `https://t.me/brio_dev_bot?startapp=${encodedStartParam}`;
+        const botInfo = await fetchBotInfo()
+        const miniappLink = `https://t.me/${botInfo.username}?startapp=${encodedStartParam}`;
         if (openTelegramLink.isAvailable()) {
             openTelegramLink(
                 `https://t.me/share/url?url=${encodeURIComponent(miniappLink)}&text=${encodeURIComponent("Use Bitcoin on Telegram")}`

@@ -2,6 +2,7 @@ import * as z from "zod";
 import { createUserHandler, searchLightningAddressHandler } from "./user-service/index.js"
 import {registerPaymentHandler } from "./payment-service/index.js"
 import { fetchPriceHandler } from "./coingecko-service/index.js";
+import { botInfoHandler } from "./bot-service/index.js";
 
 const OperationSchema = z.object({
     operation: z.string(),
@@ -9,6 +10,7 @@ const OperationSchema = z.object({
 });
 
 const handlers = {
+    "bot-info": botInfoHandler,
     "create-user": createUserHandler,
     "search-lightning-address": searchLightningAddressHandler,
     "register-payment": registerPaymentHandler,

@@ -16,7 +16,7 @@ export const getBotId = () => {
 // Track users waiting for support replies
 const waitingForSupport = new Map()   
 
-export const startBot = (token) => {
+export const startBot = async (token) => {
   const bot = new Telegraf(token);
 
   bot.start((ctx) => onStart(ctx));
@@ -37,6 +37,8 @@ export const startBot = (token) => {
   bot.launch();
 
   console.log("Telegram bot started")
+
+  return bot
 }
 
 const onStart = (ctx) => {
