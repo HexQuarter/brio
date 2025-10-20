@@ -7,6 +7,7 @@ import QRCode from "react-qr-code";
 import { useWallet } from '@/lib/walletContext';
 import { toast } from "sonner"
 import { openTelegramLink } from '@telegram-apps/sdk-react';
+import { fetchBotInfo } from '@/lib/api';
 
 
 const shorten = (data: string) => {
@@ -45,8 +46,9 @@ export const WalletReceivePage : React.FC = () => {
 
     const shareLightningAddress = async () => {
         const msg = `Here my Brio's Lightning address ${lnURL}`
-        openTelegramLink(
-            `https://t.me/share/url?url=${encodeURIComponent('https://t.me/brio_dev_bot')}&text=${encodeURIComponent(msg)}`
+        const botInfo = await fetchBotInfo()
+        lnURL && openTelegramLink(
+            `https://t.me/share/url?url=${encodeURIComponent('https://t.me/' + botInfo.username)}&text=${encodeURIComponent(msg)}`
         )
     }
 
@@ -58,8 +60,9 @@ export const WalletReceivePage : React.FC = () => {
 
     const shareBitcoinAddress = async () => {
         const msg = `Here my Brio's Bitcoin address ${btcAddress}`
+        const botInfo = await fetchBotInfo()
         btcAddress && openTelegramLink(
-            `https://t.me/share/url?url=${encodeURIComponent('https://t.me/brio_dev_bot')}&text=${encodeURIComponent(msg)}`
+            `https://t.me/share/url?url=${encodeURIComponent('https://t.me/' + botInfo.username)}&text=${encodeURIComponent(msg)}`
         )
     }
 

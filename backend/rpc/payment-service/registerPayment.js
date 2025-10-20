@@ -56,7 +56,7 @@ export const handler = async (req, res) => {
     
         const prod = process.env['PROD'] || true
         if (prod === true) {
-            const postResponse = await notifyTelegram(chatID_Data.S, getBotToken(), registerPaymentRequest.paymentId)
+            const postResponse = await notifyTelegram(chatID_Data.S, getBotToken(), registerPaymentRequest.paymentId, req.botInfo)
             if (postResponse.status >= 400) {
                 const errMsg = await postResponse.json()
                 console.log('Error in posting payment notification: ', errMsg)
@@ -72,11 +72,11 @@ export const handler = async (req, res) => {
     }
 }
 
-async function notifyTelegram(chatId, botToken, payment) {
+async function notifyTelegram(chatId, botToken, payment, botInfo) {
     const startParam = new URLSearchParams()
     startParam.append('payment', payment)
     const encodedStartParam = encodeURIComponent(startParam.toString())
-    const miniappLink = `https://t.me/brio_dev_bot?startapp=${encodedStartParam}`;
+    const miniappLink = `https://t.me/${botInfo.username}?startapp=${encodedStartParam}`;
     return await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

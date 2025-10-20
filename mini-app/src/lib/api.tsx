@@ -100,3 +100,23 @@ export const fetchPrice = async(currency: string) => {
 
     throw new Error(JSON.stringify(await response.json()))
 }
+
+export const fetchBotInfo = async() => {
+    const response = await fetch(new URL("/rpc", rpcEndpoint()), {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify({
+            operation: 'bot-info',
+            payload: {}
+        })
+    })
+    if (response.status == 200) {
+        const botInfo = await response.json() as any
+        return botInfo
+    }
+
+    throw new Error(JSON.stringify(await response.json()))
+}
