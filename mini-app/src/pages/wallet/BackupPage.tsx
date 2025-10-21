@@ -48,12 +48,12 @@ export function BackupWalletPage() {
                 <div className="flex flex-col gap-10 w-full">
                     <p className="text-left">{t('walletBackup.subtitle')}</p>
                     <div className="flex flex-col gap-5">
+                        <div className="active:text-primary"><LuCopy className='w-5 h-5' onClick={() => copy()} /></div>
                         <div className="grid grid-cols-2 gap-4 text-center">
                             {mnemonic.map((word, index) => (
                                 <div key={index} className="border-2 border-primary text-primary rounded p-4">{word}</div>
                             ))}
                         </div>
-                        <div className="active:text-primary"><LuCopy className='w-5 h-5' onClick={() => copy()} /></div>
                     </div>
                     <div className="bg-orange-100 text-black-700 p-5 rounded" role="alert">
                         {t('walletBackup.warning')}
