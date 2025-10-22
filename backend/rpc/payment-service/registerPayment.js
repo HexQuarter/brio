@@ -55,8 +55,9 @@ export const handler = async (req, res) => {
         }
     
         const prod = process.env['PROD'] || true
-        if (prod === true) {
-            const postResponse = await notifyTelegram(chatID_Data.S, getBotToken(), registerPaymentRequest.paymentId, req.botInfo)
+        if (prod === true && req.bot) {
+            const botInfo = await req.bot.telegram.getMe();
+            const postResponse = await notifyTelegram(chatID_Data.S, getBotToken(), registerPaymentRequest.paymentId, botInfo)
             if (postResponse.status >= 400) {
                 const errMsg = await postResponse.json()
                 console.log('Error in posting payment notification: ', errMsg)
