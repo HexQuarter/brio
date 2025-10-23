@@ -22,7 +22,7 @@ export function BackupWalletPage() {
             setTimeout(() => {
                 toast.dismiss(toastId)
             }, 2000)
-            navigate("/", { replace: true }) 
+            window.location.replace("/");
             return
         }
 

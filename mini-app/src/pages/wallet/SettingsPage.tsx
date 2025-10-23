@@ -50,7 +50,7 @@ export const WalletSettingsPage : React.FC = () => {
 
     const reset = async () => {
         await resetWallet()
-        navigate('/', { replace: true })
+        window.location.replace('/');
     }
 
     return (

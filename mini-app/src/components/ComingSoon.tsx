@@ -1,7 +1,6 @@
 import React from 'react';
 import { Carousel, CarouselApi, CarouselContent, CarouselItem } from './ui/carousel';
 import { useTranslation } from 'react-i18next';
-import { Page } from './Page';
 
 type Props = {
     carousel?: boolean
@@ -43,7 +42,6 @@ export const ComingSoon: React.FC<Props> = ({ carousel = true }) => {
     }, [api])
 
     return (
-        <Page back={true}>
             <div className='flex flex-col gap-5 h-full'>
                 <p>Upcoming features</p>
                 { carousel &&
@@ -121,6 +119,5 @@ export const ComingSoon: React.FC<Props> = ({ carousel = true }) => {
                 }
                 
             </div>
-        </Page>
     )
 };
