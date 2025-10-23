@@ -104,8 +104,8 @@ export const WalletMainPage = () => {
                                     <p>{t('main.nowalletDescription_3')}</p>
                                 </div>
                                 <div className="flex flex-col gap-5 items-center">
-                                    <Button className="w-40" onClick={() => navigate('/onboarding/create-wallet')}>{t('main.createButton')}</Button>
-                                    <Button variant="secondary" className="w-40" onClick={() => navigate('/onboarding/restore-wallet')}>{t('main.restoreButton')}</Button>
+                                    <Button className="w-full" onClick={() => navigate('/onboarding/create-wallet')}>{t('main.createButton')}</Button>
+                                    <Button variant="secondary" className="w-full" onClick={() => navigate('/onboarding/restore-wallet')}>{t('main.restoreButton')}</Button>
                                 </div>
                             </div>
                         </div>
