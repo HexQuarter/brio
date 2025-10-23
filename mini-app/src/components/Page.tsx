@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { closeMiniApp, hideBackButton, onBackButtonClick, showBackButton } from '@telegram-apps/sdk-react';
 import { type PropsWithChildren, useEffect } from 'react';
+import { Button } from './ui/button';
 
 export function Page({ children, back = true }: PropsWithChildren<{
   /**
@@ -28,5 +29,12 @@ export function Page({ children, back = true }: PropsWithChildren<{
     hideBackButton();
   }, [back]);
 
-  return <>{children}</>;
+  return <>
+    {back && (<Button variant="link" onClick={() => {
+      if (window.history.state && window.history.state.idx > 0) {
+        navigate(-1);
+      }
+    }}>Back</Button>)}
+    {children}
+  </>;
 }

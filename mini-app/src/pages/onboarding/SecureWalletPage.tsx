@@ -5,7 +5,6 @@ import { getSessionMnemonic, useWallet } from "@/lib/walletContext";
 import { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
 
 import { retrieveRawInitData, requestContact } from "@telegram-apps/sdk-react";
 import { Progress } from "@/components/ui/progress";
@@ -16,7 +15,6 @@ import { buf2hex, generateChildKey, generateTapRootAddress, hash } from "@/helpe
 export function SecureWalletPage() {
     const wallet = useWallet()
     const { t } = useTranslation();
-    const navigate = useNavigate();
     const [progressValue, setProgressValue] = useState(0)
     const [progressLabel, setProgressLabel] = useState("")
 
@@ -128,7 +126,7 @@ export function SecureWalletPage() {
     }
 
     function goToWallet() {
-        navigate('/', { replace: true });
+        window.location.replace('/');
     }
 
     return (
@@ -150,9 +148,6 @@ export function SecureWalletPage() {
                     {progressValue == 100 &&
                         <Button type="button" onClick={() => goToWallet()}>{t('walletSecure.goToWalletButton')}</Button>
                     }
-                    {/* { progressValue == 0 &&
-                        <Button className="w-40" type="submit">{t('walletSecure.registerButton')}</Button>
-                    } */}
                 </div>
             </div>
         </Page>

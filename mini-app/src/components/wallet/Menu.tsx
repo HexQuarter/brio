@@ -1,11 +1,10 @@
 import { t } from "i18next"
 import { IconType } from "react-icons";
 import { GoDownload, GoHistory, GoUpload } from "react-icons/go"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import { useEffect, useState } from "react"
 
 export const WalletMenu: React.FC = () => {
-    const navigate = useNavigate()
     const location = useLocation()
 
     interface MenuItemType {
@@ -48,7 +47,7 @@ export const WalletMenu: React.FC = () => {
             item.selected = index == i
             return item
         }))
-        navigate(path)
+        window.location.replace(`#${path}`)
     }
 
     return (
