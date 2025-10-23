@@ -9,7 +9,7 @@ const client = new Coingecko({
 });
 
 const PriceSchema = z.object({
-    currency: z.string(),
+    currency: z.string().nonempty(),
 });
 
 export const handler = async (req, res) => {
