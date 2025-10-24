@@ -2,7 +2,7 @@ import * as z from "zod";
 import { createHash } from "crypto"
 import nacl from "tweetnacl";
 import { getBotToken, getBotId } from "../../bot/index.js";
-import { BatchWriteItemCommand, GetItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
+import { BatchWriteItemCommand, GetItemCommand } from "@aws-sdk/client-dynamodb";
 
 import { USER_TABLE, USER_CONTACT_TABLE } from "../../db.js";
 
@@ -75,7 +75,7 @@ export const handler = async (req, res) => {
               breezBtcAddress: { S: createUserRequest.breezBtcAddress },
               breezLnUrl: { S: createUserRequest.breezLnUrl },
               tapRootAddress: { S: createUserRequest.tapRootAddress },
-              handle: { S: hashHandle },
+              handle: { S: hashHandle || "" },
               phoneNumber: { S: createUserRequest.hashedPhoneNumber }
             },
           }
