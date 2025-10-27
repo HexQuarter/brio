@@ -241,6 +241,17 @@ export const TelegramSendForm = () => {
 
     const [open, setOpen] = useState(false)
 
+    const handleOpen = (opened: boolean) => {
+        if (!opened) {
+            if (lookupError) {
+                setLookupError("")
+                setSearch("")
+            }
+        }
+        console.log('handleOpen', opened)
+        setOpen(opened)
+    }
+
     const removeFavoriteContact = async (contact: string) => {
         await removeContact(contact)
         setContacts(await listContacts())
@@ -254,7 +265,7 @@ export const TelegramSendForm = () => {
                 <SearchContactForm 
                     placeholder={t('wallet.telegram.contact.placeholder')}
                     open={open}
-                    handleOpen={setOpen}
+                    handleOpen={handleOpen}
                     handleSelection={setSearch}
                     handleShareInvite={shareInvite}
                     lookupError={lookupError}

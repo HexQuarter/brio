@@ -1,6 +1,6 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { ChevronsUpDown } from "lucide-react"
 import { LuX } from "react-icons/lu"
 import { useTranslation } from "react-i18next"
@@ -35,6 +35,7 @@ export const SearchContactForm: React.FC<Props> = ({
     const normalizeSearch = (search: string) => search ? search.replace(/\s+/g, '') : ''
     const normalizedSearch = normalizeSearch(search || '')
     const normalizedContacts = contacts.map(contact => normalizeSearch(contact))
+    console.log('search:', search, 'normalizedSearch:', normalizedSearch, 'normalizedContacts:', normalizedContacts, 'contact:', contact)
     return (
         <Popover open={open} onOpenChange={handleOpen}>
             <PopoverTrigger className="flex">
@@ -44,7 +45,7 @@ export const SearchContactForm: React.FC<Props> = ({
                     aria-expanded={open}
                     className="font-light h-0 border-gray-300 justify-between w-full"
                 >
-                    {search || placeholder}
+                    {contact || search || placeholder}
                     <ChevronsUpDown className="opacity-50" />
                 </Button>
             </PopoverTrigger>
@@ -52,30 +53,28 @@ export const SearchContactForm: React.FC<Props> = ({
                 <Command shouldFilter={false}>
                     <CommandInput placeholder={placeholder}  className="h-9" onValueChange={(e: string) => handleSelection(normalizeSearch(e))}/>
                     <CommandList>
-                        { !search || !contact && 
-                            <CommandEmpty>
-                                { lookupError && 
-                                    <>
-                                        <p className="text-red-500 text-sm italic mt-2">{lookupError}</p>
-                                        <Button variant="link" className="p-0 text-black text-sm italic" onClick={() => handleShareInvite()}>
-                                            Share an invitation
-                                        </Button>
-                                    </>
-                                }
-                            </CommandEmpty>
-                        }
-                        { search && contact && 
+                        {search &&
                             <CommandGroup heading='Search Result'>
-                                <div className={'flex justify-between h-10'}>
-                                    <CommandItem
-                                        value={contact}
-                                        onSelect={(currentValue: string) => {
-                                            handleSelection(normalizeSearch(currentValue) === normalizedSearch ? normalizedSearch : normalizeSearch(currentValue))
-                                            handleOpen(false)
-                                        }} 
-                                        className="flex w-full">
-                                        {contact}
-                                    </CommandItem>
+                                <div className={'flex justify-between'}>
+                                    { lookupError &&
+                                            <div className="flex flex-col items-start pl-2">
+                                            <p className="text-red-500 text-xs mt-2">{lookupError}</p>
+                                            <Button variant="link" className="text-xs p-0 text-gray-500" onClick={() => handleShareInvite()}>
+                                                Share an invitation
+                                            </Button>
+                                        </div>
+                                    }
+                                    { !lookupError && contact &&
+                                        <CommandItem
+                                            value={contact}
+                                            onSelect={(currentValue: string) => {
+                                                handleSelection(normalizeSearch(currentValue) === normalizedSearch ? normalizedSearch : normalizeSearch(currentValue))
+                                                handleOpen(false)
+                                            }} 
+                                            className="flex w-full">
+                                            {contact}
+                                        </CommandItem>
+                                    }
                                 </div>
                             </CommandGroup>
                         }
