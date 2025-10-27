@@ -30,7 +30,7 @@ export function Page({ children, back = true }: PropsWithChildren<{
   }, [back]);
 
   return <>
-    {back && (<Button variant="link" onClick={() => {
+    {back && import.meta.env.DEV &&(<Button variant="link" onClick={() => {
       if (window.history.state && window.history.state.idx > 0) {
         navigate(-1);
       }
