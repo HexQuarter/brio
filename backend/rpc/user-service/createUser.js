@@ -76,7 +76,7 @@ export const handler = async (req, res) => {
               breezLnUrl: { S: createUserRequest.breezLnUrl },
               tapRootAddress: { S: createUserRequest.tapRootAddress },
               handle: { S: hashHandle || "" },
-              phoneNumber: { S: createUserRequest.hashedPhoneNumber }
+              phoneNumber: { S: createUserRequest.hashedPhoneNumber || "" }
             },
           }
         }
