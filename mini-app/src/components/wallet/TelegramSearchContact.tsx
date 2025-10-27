@@ -14,13 +14,15 @@ type Props = {
     handleShareInvite: () => void
     lookupError: string | null,
     placeholder: string
-    removeContact: (contact: string) => void
+    removeContact: (contact: string) => void,
+    contact: string | undefined
 }
 
 export const SearchContactForm: React.FC<Props> = ({ 
     open, 
     handleOpen, 
     search, 
+    contact,
     contacts, 
     handleSelection, 
     handleShareInvite, 
@@ -30,49 +32,73 @@ export const SearchContactForm: React.FC<Props> = ({
 }) => {
     const { t } = useTranslation();
 
+    const normalizeSearch = (search: string) => search ? search.replace(/\s+/g, '') : ''
+    const normalizedSearch = normalizeSearch(search || '')
+    const normalizedContacts = contacts.map(contact => normalizeSearch(contact))
     return (
         <Popover open={open} onOpenChange={handleOpen}>
             <PopoverTrigger className="flex">
                 <Button
-                    variant="ghost"
+                    variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="font-light"
+                    className="font-light h-0 border-gray-300 justify-between w-full"
                 >
-                    {search ? contacts.find((contact) => contact === search) : placeholder}
+                    {search || placeholder}
                     <ChevronsUpDown className="opacity-50" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="">
-            <Command>
-                <CommandInput placeholder={placeholder}  className="h-9" onValueChange={handleSelection}/>
-                <CommandList>
-                    <CommandEmpty>{ lookupError && 
-                        <>
-                            <p className="text-red-500 text-sm italic mt-2">{lookupError}</p>
-                            <Button variant="link" className="p-0 text-black text-sm italic" onClick={() => handleShareInvite()}>Share an invitation</Button>
-                        </>
-                    }</CommandEmpty>
-                    { contacts.length > 0 && 
-                        <CommandGroup heading={t('wallet.favourites')}>
-                            {contacts.map((contact) => (
-                                <div className={'flex justify-between h-10'} key={contact}>
+            <PopoverContent>
+                <Command shouldFilter={false}>
+                    <CommandInput placeholder={placeholder}  className="h-9" onValueChange={(e: string) => handleSelection(normalizeSearch(e))}/>
+                    <CommandList>
+                        { !search || !contact && 
+                            <CommandEmpty>
+                                { lookupError && 
+                                    <>
+                                        <p className="text-red-500 text-sm italic mt-2">{lookupError}</p>
+                                        <Button variant="link" className="p-0 text-black text-sm italic" onClick={() => handleShareInvite()}>
+                                            Share an invitation
+                                        </Button>
+                                    </>
+                                }
+                            </CommandEmpty>
+                        }
+                        { search && contact && 
+                            <CommandGroup heading='Search Result'>
+                                <div className={'flex justify-between h-10'}>
                                     <CommandItem
                                         value={contact}
-                                        onSelect={(currentValue) => {
-                                            handleSelection(currentValue === search ? search : currentValue)
+                                        onSelect={(currentValue: string) => {
+                                            handleSelection(normalizeSearch(currentValue) === normalizedSearch ? normalizedSearch : normalizeSearch(currentValue))
                                             handleOpen(false)
-                                        }} className="flex w-full">
+                                        }} 
+                                        className="flex w-full">
                                         {contact}
                                     </CommandItem>
-                                    <Button variant="ghost" className="text-xs active:bg-primary active:text-white" onClick={() => removeContact(contact)}>
-                                        <LuX />
-                                    </Button>
                                 </div>
-                            ))}
-                        </CommandGroup>
-                    }
-                </CommandList>
+                            </CommandGroup>
+                        }
+                        { normalizedContacts.length > 0 && 
+                            <CommandGroup heading={t('wallet.favourites')}>
+                                {normalizedContacts.map((contact: string) => (
+                                    <div className={'flex justify-between h-10'} key={contact}>
+                                        <CommandItem
+                                            value={contact}
+                                            onSelect={(currentValue: string) => {
+                                                handleSelection(normalizeSearch(currentValue) === normalizedSearch ? normalizedSearch : normalizeSearch(currentValue))
+                                                handleOpen(false)
+                                            }} className="flex w-full">
+                                            {contact}
+                                        </CommandItem>
+                                        <Button variant="ghost" className="text-xs active:bg-primary active:text-white" onClick={() => removeContact(contact)}>
+                                            <LuX />
+                                        </Button>
+                                    </div>
+                                ))}
+                            </CommandGroup>
+                        }
+                    </CommandList>
                 </Command>
             </PopoverContent>
         </Popover>

@@ -18,6 +18,7 @@ export const TelegramSendForm = () => {
     const navigate = useNavigate()
     const { breezSdk, currency } = useWallet()
     const [contact, setContact] = useState("")
+    const [search, setSearch] = useState("")
     const [address, setAddress] = useState("")
     const [fiatAmount, setFiatAmount] = useState<string | number>("")
     const [btcAmount, setBtcAmount] = useState(0)
@@ -35,9 +36,11 @@ export const TelegramSendForm = () => {
 
     useEffect(() => {
         setLookupError(null)
-        if (contact == "" ||  !breezSdk) return
+        if (search == "" ||  !breezSdk) return
         const delayDebounceFn = setTimeout(async () => {
-            const strippedContact = contact.startsWith('@') ? contact.slice(1, contact.length) : contact
+            const strippedContact = search.startsWith('@') 
+                ? search.slice(1, search.length) 
+                : search
             try {
                 const response = await fetchLightningAddress(strippedContact)
                 if (response.status == 200) {
@@ -45,12 +48,14 @@ export const TelegramSendForm = () => {
                     setAddress(lnUrl)
                     const price = await fetchPrice(currency)
                     setPrice(price)
-                    let contactSet = new Set(contacts)
-                    contactSet = contact.startsWith("+") ? contactSet.add(contact) : contactSet.add(`@${strippedContact}`)
-                    setContacts(Array.from(contactSet))
+                    setContact(strippedContact.startsWith("+") ? strippedContact : `@${strippedContact}`)
+                    // let contactSet = new Set(contacts)
+                    // contactSet = contact.startsWith("+") ? contactSet.add(contact) : contactSet.add(`@${strippedContact}`)
+                    // setContacts(Array.from(contactSet))
                     return
                 }
 
+                setContact("")
                 setLookupError(t('wallet.telegram.notFound'))
             }
             catch(e) {
@@ -59,7 +64,7 @@ export const TelegramSendForm = () => {
         }, 500)
 
         return () => clearTimeout(delayDebounceFn)
-    }, [contact])
+    }, [search])
 
     useEffect(() => {
         const loadContacts = async () => {
@@ -245,16 +250,17 @@ export const TelegramSendForm = () => {
     return (
         <div className='flex flex-col gap-10 pt-10'>
             <div className='flex flex-col gap-1'>
-                <Label className='text-gray-400 text-xs'>{t('wallet.telegram.contact')}</Label>
+                <Label className='text-gray-400 text-xs mb-5'>{t('wallet.telegram.contact')}</Label>
                 <SearchContactForm 
                     placeholder={t('wallet.telegram.contact.placeholder')}
                     open={open}
                     handleOpen={setOpen}
-                    handleSelection={setContact}
+                    handleSelection={setSearch}
                     handleShareInvite={shareInvite}
                     lookupError={lookupError}
                     contacts={contacts}
-                    search={contact}
+                    search={search}
+                    contact={contact}
                     removeContact={removeFavoriteContact}
                 />
             </div>
