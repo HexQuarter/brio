@@ -1,6 +1,6 @@
 import { App } from '@/components/App.tsx';
 import { ErrorBoundary } from '@/components/ErrorBoundary.tsx';
-import { WalletProvider } from '@/lib/walletContext';
+import { WalletProvider } from '@/lib/wallet/context.tsx';
 import { Toaster } from '@/components/ui/sonner';
 
 function ErrorBoundaryError({ error }: { error: unknown }) {

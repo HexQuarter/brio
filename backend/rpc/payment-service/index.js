@@ -1,1 +1,0 @@
-export { handler as registerPaymentHandler } from "./registerPayment.js"

@@ -9,7 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { t } from 'i18next';
-import { useWallet } from '@/lib/walletContext';
+import { useWallet } from '@/lib/wallet/context';
 
 import {
   AlertDialog,
@@ -50,7 +50,7 @@ export const WalletSettingsPage : React.FC = () => {
 
     const reset = async () => {
         await resetWallet()
-        window.location.replace('/');
+        window.location.replace('/#/apps');
     }
 
     return (
@@ -76,7 +76,7 @@ export const WalletSettingsPage : React.FC = () => {
                         <Button 
                             className="p-0 font-normal" 
                             variant="ghost" 
-                            onClick={() => navigate('/wallet/backup')}>
+                            onClick={() => navigate('/app/wallet/backup')}>
                                 {t('wallet.settings.backup')}
                         </Button>
                     </div>

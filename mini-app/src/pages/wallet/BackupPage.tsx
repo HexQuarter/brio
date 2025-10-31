@@ -3,14 +3,12 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
-import { getSessionMnemonic, useWallet } from "@/lib/walletContext";
+import { getSessionMnemonic, useWallet } from "@/lib/wallet/context";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
 import { LuCopy } from "react-icons/lu";
 
 export function BackupWalletPage() {
     const { t } = useTranslation();
-    const navigate = useNavigate()
     const [mnemonic, setMnemonic] = useState<string[]>([])
 
     const wallet = useWallet()
@@ -22,7 +20,7 @@ export function BackupWalletPage() {
             setTimeout(() => {
                 toast.dismiss(toastId)
             }, 2000)
-            window.location.replace("/");
+            window.location.replace("/#/apps");
             return
         }
 
@@ -58,7 +56,7 @@ export function BackupWalletPage() {
                     <div className="bg-orange-100 text-black-700 p-5 rounded" role="alert">
                         {t('walletBackup.warning')}
                     </div>
-                    <div className="text-center"><Button onClick={() => navigate('/')}>{t('walletBackup.nextButton')}</Button></div>
+                    <div className="text-center"><Button onClick={() => window.location.replace('#/app/wallet')}>{t('walletBackup.nextButton')}</Button></div>
                 </div>
             }
         </div>

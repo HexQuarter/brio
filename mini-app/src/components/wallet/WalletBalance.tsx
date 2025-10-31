@@ -17,7 +17,7 @@ export const WalletBalance: React.FC<WalletBalanceProps> = ({ btcBalance, fiatBa
     const [hideSettings, setHideSettings] = useState(false)
 
     useEffect(() => {
-      if (location.pathname == '/wallet/settings') {
+      if (location.pathname.includes('/wallet/settings')) {
          setHideSettings(true)
       } else {
          setHideSettings(false)
@@ -31,7 +31,7 @@ export const WalletBalance: React.FC<WalletBalanceProps> = ({ btcBalance, fiatBa
                <p className='text-gray-400'>{t('wallet.totalBalance')}</p>
                <div className='flex gap-4 items-center'>
                   <FiEye className='text-gray-400' onClick={() => setVisibleBalance(!visibleBalance)}/>
-                  {!hideSettings && <FiSettings className='text-gray-400' onClick={() => navigate('/wallet/settings')}/>}
+                  {!hideSettings && <FiSettings className='text-gray-400' onClick={() => navigate('/app/wallet/settings')}/>}
                </div>
             </div>
            <div className='flex gap-5'>

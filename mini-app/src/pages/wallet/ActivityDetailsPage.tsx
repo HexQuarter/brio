@@ -1,6 +1,6 @@
 // import { t } from 'i18next';
-import { useWallet } from '@/lib/walletContext';
-import { shortenAddress } from '@/lib/utils';
+import { useWallet } from '@/lib/wallet/context';
+import { shortenAddress } from '@/lib/wallet/utils';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +10,7 @@ import { LuCopy } from 'react-icons/lu';
 import { toast } from 'sonner';
 import { Payment } from '@breeztech/breez-sdk-spark/web';
 import { convertSatsToBtc, formatBtcAmount, formatFiatAmount } from '@/helpers/number';
-import { fetchPrice } from '@/lib/api';
+import { fetchPrice } from '@/lib/wallet/api';
 
 export const WalletActivityDetailsPage : React.FC = () => {
     const {t} = useTranslation()
@@ -43,7 +43,7 @@ export const WalletActivityDetailsPage : React.FC = () => {
     return (
         <div className="flex flex-col gap-10 w-full h-full ">
             <div className='flex gap-2 items-center'>
-                <ArrowLeft onClick={() => navigate('/wallet/activity')} />
+                <ArrowLeft onClick={() => navigate('/app/wallet/activity')} />
                 <h3 className="text-2xl font-medium">{t('walletActivity.title')}</h3>
             </div>
             { payment &&

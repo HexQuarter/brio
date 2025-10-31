@@ -4,10 +4,10 @@ import { Tabs, TabsList, TabsContent, TabsTrigger } from '@/components/ui/tabs';
 
 import { LuShare2, LuCopy } from "react-icons/lu";
 import QRCode from "react-qr-code";
-import { useWallet } from '@/lib/walletContext';
+import { useWallet } from '@/lib/wallet/context';
 import { toast } from "sonner"
 import { openTelegramLink } from '@telegram-apps/sdk-react';
-import { fetchBotInfo } from '@/lib/api';
+import { fetchBotInfo } from '@/lib/wallet/api';
 
 
 const shorten = (data: string) => {
@@ -70,9 +70,9 @@ export const WalletReceivePage : React.FC = () => {
             <div className="flex flex-col gap-10 text-center">
                 <p className="text-primary">{t('wallet.receiveTitle')}</p>
                 <Tabs defaultValue="lightning">
-                    <TabsList>
-                        <TabsTrigger value="lightning">{t('wallet.receive.lightningTitle')}</TabsTrigger>
-                        <TabsTrigger value="btc">{t('wallet.receive.btcTitle')}</TabsTrigger>
+                    <TabsList className='flex rounded-sm gap-2 bg-none'>
+                        <TabsTrigger className='rounded-sm' value="lightning">{t('wallet.receive.lightningTitle')}</TabsTrigger>
+                        <TabsTrigger className='rounded-sm' value="btc">{t('wallet.receive.btcTitle')}</TabsTrigger>
                     </TabsList>
                     <TabsContent value="lightning">
                         { lnURL &&

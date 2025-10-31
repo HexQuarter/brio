@@ -5,13 +5,13 @@ import { useState, useEffect, useRef} from "react";
 import { t } from "i18next";
 import { Button } from "@/components/ui/button"
 import { convertSatsToBtc, convertBtcToSats, formatBtcAmount, formatFiatAmount } from "@/helpers/number";
-import { useWallet } from "@/lib/walletContext";
+import { useWallet } from "@/lib/wallet/context";
 import { InputType, PrepareLnurlPayResponse, PrepareSendPaymentResponse, SendPaymentOptions } from "@breeztech/breez-sdk-spark";
 import { Spinner } from "@telegram-apps/telegram-ui";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { parse } from "@breeztech/breez-sdk-spark/web";
 import { openQrScanner } from "@telegram-apps/sdk-react";
-import { fetchPrice, registerPayment } from "@/lib/api";
+import { fetchPrice, registerPayment } from "@/lib/wallet/api";
 
 
 export const BitcoinSendForm  = () => {
@@ -309,7 +309,7 @@ export const BitcoinSendForm  = () => {
                         if (res && res.payment.details?.type == 'withdraw') {
                             // Register the btc payment upfront as the user will not wait 10 min to await conf
                             const txId = res.payment.details?.txId
-                            await registerPayment('btc', txId, convertSatsToBtc(res.payment.amount), undefined)
+                            await registerPayment('btc', txId, convertSatsToBtc(res.payment.amount))
                         }
 
                         await new Promise(r => setTimeout(r, 1000));

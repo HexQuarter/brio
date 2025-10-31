@@ -1,6 +1,6 @@
 import { convertSatsToBtc, formatBtcAmount, formatFiatAmount } from '@/helpers/number';
-import { fetchPrice } from '@/lib/api';
-import { useWallet } from '@/lib/walletContext';
+import { fetchPrice } from '@/lib/wallet/api';
+import { useWallet } from '@/lib/wallet/context';
 import { Payment } from '@breeztech/breez-sdk-spark';
 import { Spinner } from '@telegram-apps/telegram-ui';
 import { InfoIcon } from 'lucide-react';

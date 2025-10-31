@@ -5,14 +5,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { convertBtcToSats, convertSatsToBtc, formatBtcAmount, formatFiatAmount } from "@/helpers/number"
-import { fetchBotInfo, fetchLightningAddress, fetchPrice, registerPayment } from "@/lib/api"
+import { fetchBotInfo, fetchLightningAddress, fetchPrice, notifyPayment } from "@/lib/wallet/api"
 import { Spinner } from "@telegram-apps/telegram-ui"
-import { useWallet } from "@/lib/walletContext"
+import { useWallet } from '@/lib/wallet/context.tsx';
 import { useNavigate, useOutletContext } from "react-router-dom"
 import { parse, PrepareLnurlPayResponse, SdkEvent } from "@breeztech/breez-sdk-spark/web"
 import { toast } from "sonner"
 import { openTelegramLink, retrieveLaunchParams } from "@telegram-apps/sdk-react"
-import { addContact, listContacts, removeContact } from "@/lib/contact"
+import { addContact, listContacts, removeContact } from "@/lib/wallet/contact"
 import { SearchContactForm } from "./TelegramSearchContact"
 export const TelegramSendForm = () => {
     const navigate = useNavigate()
@@ -111,7 +111,7 @@ export const TelegramSendForm = () => {
                 const prepareResponse = await breezSdk?.prepareLnurlPay({
                     amountSats: convertBtcToSats(btc),
                     payRequest: input,
-                    comment: 'Pay via Brio'
+                    comment: 'Pay via Brio',
                 })
                 setLoadingPayment(null)
                 if (!prepareResponse) {
@@ -126,6 +126,7 @@ export const TelegramSendForm = () => {
                     setSendError('Unsufficient funds')
                     return
                 }
+                prepareResponse.invoiceDetails.description = 'Pay via Brio to ' + contact
                 setPrepareResponse(prepareResponse)
             }
             catch(e) {
@@ -186,7 +187,7 @@ export const TelegramSendForm = () => {
                         case 'paymentSucceeded':
                             if (event.payment.paymentType == 'send' && event.payment.status == 'completed') {
                                 if (event.payment.details?.type == 'lightning') {
-                                    await registerPayment('lightning', event.payment.details.paymentHash, convertSatsToBtc(event.payment.amount), contact)
+                                    await notifyPayment(event.payment.details.paymentHash, contact)
                                 }
                                 await addContact(contact)
                                 await breezSdk?.removeEventListener(listenerId as string)

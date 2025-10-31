@@ -9,9 +9,9 @@ export const WalletSendPage : React.FC = () => {
     return (
             <div className="flex flex-col gap-10">
                 <Tabs defaultValue="telegram">
-                    <TabsList>
-                        <TabsTrigger value="telegram">{t('wallet.sendTelegram')}</TabsTrigger>
-                        <TabsTrigger value="pay">{t('wallet.payBitcoin')}</TabsTrigger>
+                    <TabsList className='flex rounded-sm gap-2 bg-none'>
+                        <TabsTrigger className='rounded-sm' value="telegram">{t('wallet.sendTelegram')}</TabsTrigger>
+                        <TabsTrigger className='rounded-sm' value="pay">{t('wallet.payBitcoin')}</TabsTrigger>
                     </TabsList>
                     <TabsContent value="telegram">
                         <TelegramSendForm />

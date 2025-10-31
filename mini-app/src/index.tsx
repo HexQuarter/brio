@@ -12,7 +12,7 @@ import './index.css';
 import './mockEnv.ts';
 
 import './i18n';
-import { initWasm } from './lib/wasmLoader.tsx';
+import { initWasm } from '@/lib/wallet/wasmLoader.tsx';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 

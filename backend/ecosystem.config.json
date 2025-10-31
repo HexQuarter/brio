@@ -1,0 +1,7 @@
+{
+  "apps": [{
+    "name": "brio",
+    "script": "npm",
+    "args": "start"
+  }]
+}

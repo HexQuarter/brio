@@ -1,13 +1,13 @@
 import { useEffect, useState, type PropsWithChildren } from 'react';
-import { Navigate, Route, Routes, HashRouter, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, HashRouter } from 'react-router-dom';
 import { AppRoot } from '@telegram-apps/telegram-ui';
-import { useWallet } from '@/lib/walletContext';
+import { useWallet } from '@/lib/wallet/context';
 import { WelcomePage } from '@/pages/WelcomePage';
 import { MainPage } from '@/pages/MainPage';
-import { OnBoardingPage } from '@/pages/onboarding/OnBoardingPage';
-import { CreateWalletPage } from '@/pages/onboarding/CreateWalletPage';
-import { RestoreWalletPage } from '@/pages/onboarding/RestoreWalletPage';
-import { SecureWalletPage } from '@/pages/onboarding/SecureWalletPage';
+import { OnBoardingPage } from '@/pages/wallet/onboarding/OnBoardingPage';
+import { CreateWalletPage } from '@/pages/wallet/onboarding/CreateWalletPage';
+import { RestoreWalletPage } from '@/pages/wallet/onboarding/RestoreWalletPage';
+import { SecureWalletPage } from '@/pages/wallet/onboarding/SecureWalletPage';
 import { WalletMainPage } from '@/pages/wallet/MainPage';
 import { WalletWelcomePage } from '@/pages/wallet/WelcomePage';
 import { WalletReceivePage } from '@/pages/wallet/ReceivePage';
@@ -17,8 +17,12 @@ import { WalletActivityDetailsPage } from '@/pages/wallet/ActivityDetailsPage';
 import { WalletSettingsPage } from '@/pages/wallet/SettingsPage';
 import { BackupWalletPage } from '@/pages/wallet/BackupPage';
 import { ComingSoonPage } from '@/pages/ComingSoonPage';
+import { AppsPage } from '@/pages/AppsPage';
+import { YourVoiceWelcomePage } from '@/pages/yourvoice/WelcomePage';
+import { YourVoiceMainPage } from '@/pages/yourvoice/MainPage';
+import { VotingPage } from '@/pages/yourvoice/VotingPage';
 
-function AppRoute({ children } : PropsWithChildren<{}>) {
+function WalletRoute({ children }: PropsWithChildren<{}>) {
   const wallet = useWallet()
   const [checked, setChecked] = useState(false)
 
@@ -31,13 +35,11 @@ function AppRoute({ children } : PropsWithChildren<{}>) {
     forceCheckWallet()
   }, [])
 
-  const location = useLocation()
-
   return <>
-    { checked && !wallet.walletExists && location.search != '?visit' &&
-      <Navigate to="/welcome" replace />
+    {checked && !wallet.walletExists &&
+      <Navigate to="/app/nowallet" replace />
     }
-    {checked && (wallet.walletExists || location.search == '?visit') &&
+    {checked && (wallet.walletExists) &&
       children
     }
   </>
@@ -48,28 +50,36 @@ export function App() {
     <AppRoot>
       <HashRouter>
         <Routes>
-          <Route path="/" element={
-            <AppRoute>
-              <MainPage />
-            </AppRoute>
-          }>
-            <Route index element={<Navigate to="/wallet" replace />} />
-            <Route path="/wallet" element={<WalletMainPage />}>
-              <Route index element={<WalletWelcomePage />} />
-              <Route path="receive" element={<WalletReceivePage />} />
-              <Route path="send" element={<WalletSendPage />} />
-              <Route path="activity" element={<WalletActivityPage />} />
-              <Route path="activity/:id" element={<WalletActivityDetailsPage />} />
-              <Route path="settings" element={<WalletSettingsPage />} />
-              <Route path="backup" element={<BackupWalletPage />} />
+          <Route path="/" Component={WelcomePage} />
+          <Route path="/apps" Component={AppsPage} />
+          <Route path="/app" Component={MainPage}>
+            <Route path="wallet" element={
+              <WalletRoute>
+                <WalletMainPage />
+              </WalletRoute>
+            }>
+              <Route index Component={WalletWelcomePage} />
+              <Route path="receive" Component={WalletReceivePage} />
+              <Route path="send" Component={WalletSendPage} />
+              <Route path="activity" Component={WalletActivityPage} />
+              <Route path="activity/:id" Component={WalletActivityDetailsPage} />
+              <Route path="settings" Component={WalletSettingsPage} />
+              <Route path="backup" Component={BackupWalletPage} />
             </Route>
-            <Route path="/upcoming" element={<ComingSoonPage />} />
+            <Route path="nowallet">
+              <Route index Component={OnBoardingPage} />
+              <Route path="create-wallet" Component={CreateWalletPage} />
+              <Route path="restore-wallet" Component={RestoreWalletPage} />
+              <Route path="secure-wallet" Component={SecureWalletPage} />
+            </Route>
+            <Route path="yourvoice" Component={YourVoiceMainPage}>
+              <Route index element={<YourVoiceWelcomePage />} />
+              <Route path="poll/:id" element={<VotingPage />} />
+              {/* <Route path="past-polls/:id" element={PastPollsPage} /> */}
+            </Route>
+            <Route path="upcoming" Component={ComingSoonPage} />
           </Route>
-          <Route path="/welcome" Component={WelcomePage} />
-          <Route path="/onboarding" Component={OnBoardingPage} />
-          <Route path="/onboarding/create-wallet" Component={CreateWalletPage} />
-          <Route path="/onboarding/restore-wallet" Component={RestoreWalletPage} />
-          <Route path="/onboarding/secure-wallet" Component={SecureWalletPage} />
+          <Route path="upcoming" Component={ComingSoonPage} />
         </Routes>
       </HashRouter>
     </AppRoot>

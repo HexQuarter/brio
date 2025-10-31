@@ -18,17 +18,17 @@ export const WalletMenu: React.FC = () => {
         {
             name: t('wallet.menuReceiveBTC'),
             icon: GoDownload,
-            path: '/wallet/receive',
+            path: '/app/wallet/receive',
         },
         {
             name: t('wallet.menuSendBTC'),
             icon: GoUpload,
-            path: '/wallet/send',
+            path: '/app/wallet/send',
         },
         {
             name: t('wallet.menuActivity'),
             icon: GoHistory,
-            path: '/wallet/activity',
+            path: '/app/wallet/activity',
         }
     ])
 
