@@ -1,7 +1,7 @@
 import z from 'zod';
 
 const PollSchema = z.object({
-  org_id: z.number(),
+  org_id: z.string(),
   question: z.string(),
   scope_level: z.enum(['countries', 'region', 'continent', 'world', 'city', 'community']),
   geographic_scope: z.string(),
@@ -54,7 +54,7 @@ export const createPollHandler = async (req: { body: any, db: VoteServiceStorage
       return res.status(400).json({ message: "end date must be after the start date" })
     }
 
-    const pollId = req.db.createPoll(pollData)
+    const pollId = await req.db.createPoll(pollData)
 
     res.status(201).json({ id: pollId });
   }

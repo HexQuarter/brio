@@ -1,18 +1,22 @@
 import 'dotenv/config'
 
-import express, { RequestHandler } from 'express'
+import express from 'express'
 import cors from 'cors'
 
-import { rpcHandler } from './rpc/index.js'
-import { startBot, getBotToken } from './bot/index.js'
-import { SQLStorage } from './db.js'
+import { rpcHandler } from './rpc'
+import { startBot, getBotToken } from './bot'
+import { SQLStorage } from './db/sql'
 import { Telegraf } from 'telegraf'
-import { startCronClosingPolls } from './cron/closePolls.js'
+import { startCronClosingPolls } from './cron/closePolls'
+import { DynamodbStorage } from './db/dynamodb'
+import { VoteServiceStorage } from './rpc/vote-service/storage'
+import { UserServiceStorage } from './rpc/user-service/storage'
+import { PaymentServiceStorage } from './rpc/payment-service/storage'
 
-// import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+type Storage = UserServiceStorage & PaymentServiceStorage & VoteServiceStorage
 
 const main = async () => {
-  const db = new SQLStorage();
+  const db = new DynamodbStorage();
 
   let bot = null
   const prod = process.env['PROD'] || true
@@ -23,7 +27,7 @@ const main = async () => {
   const app = express()
     .use(express.json())
     .use(cors({}))
-    .use((req: { db: SQLStorage | null; bot: Telegraf | null }, res: any, next: any) => {
+    .use((req: { db: Storage | null; bot: Telegraf | null }, res: any, next: any) => {
       req.db = db
       req.bot = bot
       next()

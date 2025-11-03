@@ -2,7 +2,7 @@ import z from 'zod';
 import { createHash } from "crypto"
 
 const VoteSchema = z.object({
-  poll_id: z.number(),
+  poll_id: z.string(),
   vote: z.enum(['yes', 'no']),
   tgInitData: z.string(),
   age_bracket: z.enum(['<18', '18-24', '25-34', '35-44', '45-54', '55+']).optional(),
@@ -85,7 +85,7 @@ export const registerVoteHandler = async (req: { body: any, db: VoteServiceStora
   }
 }
 
-export function createVoterHash(userId: number, pollId: number, salt: string): string {
+export function createVoterHash(userId: number, pollId: string, salt: string): string {
   return createHash('sha256')
     .update(`${userId}-${pollId}-${salt}`)
     .digest('hex');

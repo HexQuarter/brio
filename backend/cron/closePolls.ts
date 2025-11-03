@@ -5,17 +5,19 @@ import { getBotToken } from '../bot';
 export const startCronClosingPolls = (db: VoteServiceStorage) => {
   cron.schedule('* * * * *', async () => {
     try {
-      const polls = await db.listPolls()
       const now = new Date()
-      polls
-        .filter(p => p.status == 'active')
-        .forEach(async (poll: Poll) => {
-          if (now.getTime() > poll.end_at * 1000) {
-            db.closePoll(poll.id)
-            console.log('Closing poll ', poll.id)
-            await notifyPollResults(db, poll);
+      const polls = await db.listActivePolls()
+      for (const p of polls) {
+        if (now.getTime() > p.end_at * 1000) {
+          const poll = await db.getPoll(`${p.org_id}-${p.id}`)
+          if (!poll) {
+            return
           }
-        })
+          await db.closePoll(poll)
+          console.log('Closing poll ', poll.id)
+          await notifyPollResults(db, poll);
+        }
+      }
     }
     catch (e) {
       const error = e as Error
@@ -51,7 +53,7 @@ async function notifyPollResults(db: VoteServiceStorage, poll: Poll) {
   }
 }
 
-async function notifyTelegram(chatId: string, botToken: string, message: string) {
+async function notifyTelegram(chatId: number, botToken: string, message: string) {
   return await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

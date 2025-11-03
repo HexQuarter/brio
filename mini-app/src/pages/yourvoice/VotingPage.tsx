@@ -15,7 +15,7 @@ import { retrieveRawInitData } from '@telegram-apps/sdk-react';
 
 export function VotingPage() {
   const params = useParams();
-  const pollId = params?.id ? parseInt(params.id) : 1;
+  const pollId = params?.id ? params.id : '1';
   const [userVote, setUserVote] = useState<'yes' | 'no' | undefined>(undefined);
   const [voteAttributes, setVoteAttributes] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true)
@@ -42,7 +42,7 @@ export function VotingPage() {
     }
 
     fetchPoll()
-  }, [])
+  }, [userVote])
 
   const handleVote = async (vote: 'yes' | 'no') => {
     setVoteIsPending(true)

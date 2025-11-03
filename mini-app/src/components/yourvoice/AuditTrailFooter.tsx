@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog';
 
 interface AuditTrailFooterProps {
-  pollId: number;
+  pollId: string;
   rollingHash?: string;
 }
 

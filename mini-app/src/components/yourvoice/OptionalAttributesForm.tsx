@@ -27,9 +27,9 @@ export default function OptionalAttributesForm({ countries = ['South Africa'], o
     gender?: string;
   }>({});
   const [selfAttestation, setSelfAttestation] = useState({
-    ageBracket: '',
-    gender: '',
-    residence: '',
+    ageBracket: undefined,
+    gender: undefined,
+    residence: undefined,
   });
 
   const handleSaIdChange = (value: string) => {

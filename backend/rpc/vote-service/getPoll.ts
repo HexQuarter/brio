@@ -3,7 +3,7 @@ import z from 'zod';
 import { VoteServiceStorage } from './storage';
 
 const PollSchema = z.object({
-  id: z.number()
+  id: z.string()
 });
 
 export const getPollHandler = async (req: { body: any, db: VoteServiceStorage }, res: any) => {
@@ -20,7 +20,7 @@ export const getPollHandler = async (req: { body: any, db: VoteServiceStorage },
     }
 
     const org = await req.db.getOrg(poll.org_id);
-    const aggregates = await req.db.getPollAggregates(poll.id);
+    const aggregates = await req.db.getPollAggregates(pollRequest.id);
 
     res.json({
       poll,

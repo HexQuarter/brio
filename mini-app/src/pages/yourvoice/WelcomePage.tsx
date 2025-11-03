@@ -3,16 +3,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { createOrg, createPoll, listActivePolls, listMyOrgs, listPastPolls } from '@/lib/yourvoice/api';
 import OrgRegistrationForm from '@/components/yourvoice/OrgRegistrationForm';
 import PollCreationForm from '@/components/yourvoice/PollCreationForm';
-import { Card,CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select';
 import type { Org, Poll } from '@/lib/yourvoice/schema';
 import { useNavigate } from 'react-router-dom';
@@ -32,7 +32,7 @@ export function YourVoiceWelcomePage() {
   const [pastPolls, setPastPolls] = useState<Poll[]>([]);
   const [pastPollsLoading, setPastPollsLoading] = useState(false);
 
-  const selectedOrg = orgs.find(org => org.id === Number(selectedOrgId));
+  const selectedOrg = orgs.find(org => org.id === selectedOrgId);
 
   const activeOrg = (selectedOrgId && selectedOrg) ? {
     id: selectedOrg.id,
@@ -42,7 +42,7 @@ export function YourVoiceWelcomePage() {
   const tgData = retrieveRawInitData() as string
 
   useEffect(() => {
-    const fetchOrgs = async() => {
+    const fetchOrgs = async () => {
       setOrgsLoading(true)
       const orgs = await listMyOrgs(tgData)
       setOrgsLoading(false)
@@ -120,155 +120,157 @@ export function YourVoiceWelcomePage() {
       </TabsList>
 
       <TabsContent value="create" className="mt-6 space-y-8">
-        <div>
-          <h2 className="text-xl mb-4">Create New Organization</h2>
-          <OrgRegistrationForm
-            onSubmit={handleCreateOrg}
-          />
-        </div>
-
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
-              Or
-            </span>
-          </div>
-        </div>
-
-        <div>
-          <h2 className="text-xl mb-4">Create Poll for Existing Organization</h2>
-          {orgsLoading ? (
-            <p className="text-muted-foreground">Loading organizations...</p>
-          ) : orgs.length === 0 ? (
-            <p className="text-muted-foreground">No organizations yet. Create one above to get started!</p>
-          ) : (
-            <div className="space-y-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="org-select">Select Organization</Label>
-                  <Select 
-                    value={selectedOrgId} 
-                    onValueChange={(value) => {
-                      setSelectedOrgId(value);
-                    }}
-                  >
-                    <SelectTrigger id="org-select" data-testid="select-org" className='w-full'>
-                      {selectedOrg ? (
-                        <div className="flex items-center gap-2">
-                          {selectedOrg.logo_url ? (
-                            <img
-                              src={selectedOrg.logo_url}
-                              alt={selectedOrg.name}
-                              className="w-5 h-5 rounded-full border border-border object-cover flex-shrink-0"
-                            />
-                          ) : (
-                            <div className="w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold border border-border flex-shrink-0">
-                              {selectedOrg.name.charAt(0).toUpperCase()}
+          {orgs.length > 0 &&
+            <div>
+              <h2 className="text-xl mb-4">Create Poll for Existing Organization</h2>
+              {orgsLoading ? (
+                <p className="text-muted-foreground">Loading organizations...</p>
+              ) : orgs.length === 0 ? (
+                <p className="text-muted-foreground">No organizations yet. Create one above to get started!</p>
+              ) : (
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="org-select">Select Organization</Label>
+                      <Select
+                        value={selectedOrgId}
+                        onValueChange={(value) => {
+                          setSelectedOrgId(value);
+                        }}
+                      >
+                        <SelectTrigger id="org-select" data-testid="select-org" className='w-full'>
+                          {selectedOrg ? (
+                            <div className="flex items-center gap-2">
+                              {selectedOrg.logo_url ? (
+                                <img
+                                  src={selectedOrg.logo_url}
+                                  alt={selectedOrg.name}
+                                  className="w-5 h-5 rounded-full border border-border object-cover flex-shrink-0"
+                                />
+                              ) : (
+                                <div className="w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold border border-border flex-shrink-0">
+                                  {selectedOrg.name.charAt(0).toUpperCase()}
+                                </div>
+                              )}
+                              <span>{selectedOrg.name}</span>
                             </div>
+                          ) : (
+                            <SelectValue placeholder="Choose an organization..." />
                           )}
-                          <span>{selectedOrg.name}</span>
-                        </div>
-                      ) : (
-                        <SelectValue placeholder="Choose an organization..." />
-                      )}
-                    </SelectTrigger>
-                    <SelectContent>
-                      {orgs.map((org: Org) => (
-                        <SelectItem key={org.id} value={String(org.id)}>
-                          <div className="flex items-center gap-2">
-                            {org.logo_url ? (
-                              <img
-                                src={org.logo_url}
-                                alt={org.name}
-                                className="w-5 h-5 rounded-full border border-border object-cover flex-shrink-0"
-                              />
-                            ) : (
-                              <div className="w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold border border-border flex-shrink-0">
-                                {org.name.charAt(0).toUpperCase()}
+                        </SelectTrigger>
+                        <SelectContent>
+                          {orgs.map((org: Org) => (
+                            <SelectItem key={org.id} value={String(org.id)}>
+                              <div className="flex items-center gap-2">
+                                {org.logo_url ? (
+                                  <img
+                                    src={org.logo_url}
+                                    alt={org.name}
+                                    className="w-5 h-5 rounded-full border border-border object-cover flex-shrink-0"
+                                  />
+                                ) : (
+                                  <div className="w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold border border-border flex-shrink-0">
+                                    {org.name.charAt(0).toUpperCase()}
+                                  </div>
+                                )}
+                                <span>{org.name}</span>
                               </div>
-                            )}
-                            <span>{org.name}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {activeOrg && selectedOrgId && (
+                    <PollCreationForm
+                      orgCountries={activeOrg.countries}
+                      onSubmit={handleCreatePoll}
+                    />
+                  )}
+                </div>
+              )}
+
+              <div className="relative flex justify-center text-xs uppercase mt-5 mb-5">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or
+                </span>
+              </div>
+              <div />
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
                 </div>
               </div>
+            </div>
+          }
 
-              {activeOrg && selectedOrgId && (
-                <PollCreationForm
-                  orgCountries={activeOrg.countries}
-                  onSubmit={handleCreatePoll}
-                />
-              )}
+          <div>
+            <h2 className="text-xl mb-4">Create New Organization</h2>
+            <OrgRegistrationForm
+              onSubmit={handleCreateOrg}
+            />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="active" className="mt-6">
+          <h2 className="text-xl mb-4">Active Polls</h2>
+          {activePollsLoading ? (
+            <p className="text-muted-foreground">Loading polls...</p>
+          ) : activePolls.length === 0 ? (
+            <p className="text-muted-foreground">No active polls</p>
+          ) : (
+            <div className="space-y-3">
+              {activePolls.map((poll: Poll) => (
+                <Card
+                  key={`${poll.org_id}-${poll.id}`}
+                  data-testid={`card-past-poll-${poll.org_id}-${poll.id}`}
+                  className="shadow-none bg-gray-50 border-gray-200 border-1 rounded-md cursor-pointer"
+                  onClick={() => navigate(`/app/yourvoice/poll/${poll.org_id}-${poll.id}`)}
+                >
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between gap-2">
+                      <span className='font-normal'>{poll.question}</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Ending: {new Date(poll.end_at * 1000).toLocaleString()}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              ))}
             </div>
           )}
-        </div>
-      </TabsContent>
+        </TabsContent>
 
-      <TabsContent value="active" className="mt-6">
-        <h2 className="text-xl mb-4">Active Polls</h2>
-        {activePollsLoading ? (
-          <p className="text-muted-foreground">Loading polls...</p>
-        ) : activePolls.length === 0 ? (
-          <p className="text-muted-foreground">No active polls</p>
-        ) : (
-          <div className="space-y-3">
-            {activePolls.map((poll: Poll) => (
-              <Card 
-                key={poll.id} 
-                data-testid={`card-past-poll-${poll.id}`}
-                className="shadow-none bg-gray-50 border-gray-200 border-1 rounded-md cursor-pointer"
-                onClick={() => navigate(`/app/yourvoice/poll/${poll.id}`)}
-              >
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between gap-2">
-                    <span className='font-normal'>{poll.question}</span>
-                    <Badge variant="secondary">Ended</Badge>
-                  </CardTitle>
-                  <CardDescription>
-                    Ended: {new Date(poll.end_at * 1000).toLocaleString()}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
-        )}
-      </TabsContent>
-
-      <TabsContent value="past" className="mt-6">
-        <h2 className="text-xl mb-4">Past Polls</h2>
-        {pastPollsLoading ? (
-          <p className="text-muted-foreground">Loading polls...</p>
-        ) : pastPolls.length === 0 ? (
-          <p className="text-muted-foreground">No past polls</p>
-        ) : (
-          <div className="space-y-3">
-            {pastPolls.map((poll: Poll) => (
-              <Card 
-                key={poll.id} 
-                data-testid={`card-past-poll-${poll.id}`}
-                className="shadow-none bg-gray-50 border-gray-200 border-1 rounded-md cursor-pointer"
-                onClick={() => navigate(`/app/yourvoice/poll/${poll.id}`)}
-              >
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between gap-2">
-                    <span className='font-normal'>{poll.question}</span>
-                    <Badge variant="secondary">Ended</Badge>
-                  </CardTitle>
-                  <CardDescription>
-                    Ended: {new Date(poll.end_at * 1000).toLocaleString()}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
-        )}
-      </TabsContent>
+        <TabsContent value="past" className="mt-6">
+          <h2 className="text-xl mb-4">Past Polls</h2>
+          {pastPollsLoading ? (
+            <p className="text-muted-foreground">Loading polls...</p>
+          ) : pastPolls.length === 0 ? (
+            <p className="text-muted-foreground">No past polls</p>
+          ) : (
+            <div className="space-y-3">
+              {pastPolls.map((poll: Poll) => (
+                <Card
+                  key={`${poll.org_id}-${poll.id}`}
+                  data-testid={`card-past-poll-${poll.org_id}-${poll.id}`}
+                  className="shadow-none bg-gray-50 border-gray-200 border-1 rounded-md cursor-pointer"
+                  onClick={() => navigate(`/app/yourvoice/poll/${poll.org_id}-${poll.id}`)}
+                >
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between gap-2">
+                      <span className='font-normal'>{poll.question}</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Ended: {new Date(poll.end_at * 1000).toLocaleString()}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
     </Tabs>
   );
 }

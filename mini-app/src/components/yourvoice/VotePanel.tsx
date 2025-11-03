@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Check, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 interface VotePanelProps {
-  pollId: number;
+  pollId: string;
   question: string;
   hasVoted?: boolean;
   userVote?: 'yes' | 'no';
@@ -20,7 +20,7 @@ export default function VotePanel({ question, hasVoted = false, userVote, onVote
 
   const handleVote = (vote: 'yes' | 'no') => {
     if (voted) return;
-    
+
     setVoted(true);
     setSelectedVote(vote);
     onVote?.(vote);
@@ -41,31 +41,33 @@ export default function VotePanel({ question, hasVoted = false, userVote, onVote
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <Button
-          size="lg"
-          onClick={() => handleVote('yes')}
-          disabled={voted}
-          className="min-h-24 flex-col gap-2 bg-green-600 text-lg text-white rounded-2xl shadow-lg disabled:opacity-50 active-elevate-2"
-          data-testid="button-vote-yes"
-        >
-          <ThumbsUp className="w-8 h-8" />
-          <span>YES</span>
-          {selectedVote === 'yes' && <Check className="w-5 h-5" />}
-        </Button>
+      {!hasVoted &&
+        <div className="grid grid-cols-2 gap-4">
+          <Button
+            size="lg"
+            onClick={() => handleVote('yes')}
+            disabled={voted}
+            className="min-h-24 flex-col gap-2 bg-green-600 text-lg text-white rounded-2xl shadow-lg disabled:opacity-50 active-elevate-2"
+            data-testid="button-vote-yes"
+          >
+            <ThumbsUp className="w-8 h-8" />
+            <span>YES</span>
+            {selectedVote === 'yes' && <Check className="w-5 h-5" />}
+          </Button>
 
-        <Button
-          size="lg"
-          onClick={() => handleVote('no')}
-          disabled={voted}
-          className="min-h-24 flex-col gap-2 text-lg bg-destructive text-white rounded-2xl shadow-lg disabled:opacity-50 active-elevate-2"
-          data-testid="button-vote-no"
-        >
-          <ThumbsDown className="w-8 h-8" />
-          <span>NO</span>
-          {selectedVote === 'no' && <Check className="w-5 h-5" />}
-        </Button>
-      </div>
+          <Button
+            size="lg"
+            onClick={() => handleVote('no')}
+            disabled={voted}
+            className="min-h-24 flex-col gap-2 text-lg bg-destructive text-white rounded-2xl shadow-lg disabled:opacity-50 active-elevate-2"
+            data-testid="button-vote-no"
+          >
+            <ThumbsDown className="w-8 h-8" />
+            <span>NO</span>
+            {selectedVote === 'no' && <Check className="w-5 h-5" />}
+          </Button>
+        </div>
+      }
     </div>
   );
 }

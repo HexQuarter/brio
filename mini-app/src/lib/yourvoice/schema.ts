@@ -1,5 +1,5 @@
 export type Org = {
-  id: number
+  id: string
   name: string,
   purpose: string | null,
   scope_level: 'countries' | 'region' | 'continent' | 'world' | 'city' | 'community',
@@ -11,8 +11,8 @@ export type Org = {
 };
 
 export type Poll = {
-  id: number,
-  org_id: number,
+  id: string,
+  org_id: string,
   question: string,
   scope_level: 'countries' | 'region' | 'continent' | 'world' | 'city' | 'community',
   geographic_scope: string,
@@ -26,7 +26,7 @@ export type Poll = {
 };
 
 export type PollAggregates = {
-  poll_id: number,
+  poll_id: string,
   total_votes: number,
   yes_count: number,
   no_count: number,
@@ -58,7 +58,7 @@ export type InsertOrg = {
 };
 
 export type InsertPoll = {
-  org_id: number,
+  org_id: string,
   question: string,
   scope_level: 'countries' | 'region' | 'continent' | 'world' | 'city' | 'community',
   geographic_scope: string,
@@ -68,7 +68,7 @@ export type InsertPoll = {
 };
 
 export type Vote = {
-  poll_id: number,
+  poll_id: string,
   vote: 'yes' | 'no',
   tgInitData: string,
   age_bracket: '<18' | '18-24' | '25-34' | '35-44' | '45-54' | '55+' | undefined,

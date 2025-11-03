@@ -32,7 +32,7 @@ export const createOrgHandler = async (req: { body: any, db: VoteServiceStorage 
     const params = new URLSearchParams(orgData.tgInitData);
     const { id } = JSON.parse(params.get('user') as string)
 
-    const orgId = req.db.createOrg({
+    const orgId = await req.db.createOrg({
       name: orgData.name,
       purpose: orgData.purpose,
       scope_level: orgData.scope_level,

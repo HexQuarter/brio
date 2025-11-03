@@ -53,7 +53,7 @@ export async function createPoll(data: InsertPoll) {
   })
 }
 
-export async function getActivePoll(id: number) {
+export async function getActivePoll(id: string) {
   return await fetch(new URL("/rpc", rpcEndpoint()), {
       method: 'POST',
       headers: {
@@ -129,7 +129,7 @@ export async function submitVote(voteData: Vote) {
   })
 }
 
-export async function canVote(pollId: number, tgInitData: string) {
+export async function canVote(pollId: string, tgInitData: string) {
     return await fetch(new URL("/rpc", rpcEndpoint()), {
       method: 'POST',
       headers: {

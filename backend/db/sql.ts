@@ -2,9 +2,9 @@ import Database from 'better-sqlite3';
 import { resolve } from 'path';
 import { mkdirSync } from 'fs';
 
-import { UserItem, UserServiceStorage } from "./rpc/user-service/storage"
-import { PaymentServiceStorage, PaymentItem } from './rpc/payment-service/storage';
-import { Org, OrgInsertion, Poll, PollAggregate, PollInsertion, VoteServiceStorage } from './rpc/vote-service/storage';
+import { UserItem, UserServiceStorage } from "../rpc/user-service/storage"
+import { PaymentServiceStorage, PaymentItem } from '../rpc/payment-service/storage';
+import { Org, OrgInsertion, Poll, PollAggregate, PollInsertion, VoteServiceStorage } from '../rpc/vote-service/storage';
 import { createHash, randomBytes } from 'crypto';
 
 const dataDir = resolve(process.cwd(), 'data');
@@ -168,7 +168,7 @@ export class SQLStorage implements UserServiceStorage, PaymentServiceStorage, Vo
     return row || null;
   }
 
-  createOrg(org: OrgInsertion): number {
+  createOrg(org: OrgInsertion): Promise<string> {
     const countries = org.scope_level === 'countries' ? org.geographic_scope : '';
 
     const stmt = db.prepare(
@@ -184,10 +184,10 @@ export class SQLStorage implements UserServiceStorage, PaymentServiceStorage, Vo
       org.chat_id
     );
 
-    return info.lastInsertRowid as number
+    return Promise.resolve(info.lastInsertRowid.toString())
   }
 
-  getOrg(id: number): Promise<Org | undefined> {
+  getOrg(id: string): Promise<Org | undefined> {
     const org = db.prepare('SELECT * FROM orgs WHERE id = ?').get(id) as Org | undefined;
     return Promise.resolve(org);
   }
@@ -197,7 +197,7 @@ export class SQLStorage implements UserServiceStorage, PaymentServiceStorage, Vo
     return Promise.resolve(org)
   }
 
-  createPoll(poll: PollInsertion): number {
+  createPoll(poll: PollInsertion): Promise<string> {
     const hashSalt = randomBytes(32).toString('hex');
 
     const countries = poll.scope_level === 'countries' ? poll.geographic_scope : '';
@@ -230,7 +230,7 @@ export class SQLStorage implements UserServiceStorage, PaymentServiceStorage, Vo
       'INSERT INTO poll_aggregates (poll_id) VALUES (?)'
     ).run(info.lastInsertRowid);
 
-    return info.lastInsertRowid as number
+    return Promise.resolve(info.lastInsertRowid.toString())
   }
 
   listPolls(): Promise<Poll[]> {
@@ -247,12 +247,11 @@ export class SQLStorage implements UserServiceStorage, PaymentServiceStorage, Vo
         ORDER BY created_at DESC
         `
     ).all() as Poll[];
-    console.log(polls)
     return Promise.resolve(polls);
   }
 
-  closePoll(pollId: number) {
-    db.prepare(`UPDATE polls SET status = 'closed' WHERE id = ?`).run(pollId);
+  closePoll(poll: Poll) {
+    db.prepare(`UPDATE polls SET status = 'closed' WHERE id = ?`).run(poll.id);
   }
 
   listPastPolls(): Promise<Poll[]> {
@@ -264,34 +263,34 @@ export class SQLStorage implements UserServiceStorage, PaymentServiceStorage, Vo
     return Promise.resolve(polls);
   }
 
-  getPoll(id: number): Promise<Poll | undefined> {
+  getPoll(id: string): Promise<Poll | undefined> {
     const poll = db.prepare('SELECT * FROM polls WHERE id = ?').get(id) as Poll | undefined;
     return Promise.resolve(poll);
   }
 
-  getPollAggregates(pollId: number): Promise<PollAggregate | undefined> {
+  getPollAggregates(pollId: string): Promise<PollAggregate | undefined> {
     const agg = db.prepare(
       'SELECT * FROM poll_aggregates WHERE poll_id = ?'
     ).get(pollId) as PollAggregate | undefined;
     return Promise.resolve(agg);
   }
 
-  hasVoted(pollId: number, voterHash: string): Promise<boolean> {
+  hasVoted(pollId: string, voterHash: string): Promise<boolean> {
     const result = db.prepare(
       'SELECT 1 FROM poll_voter_keys WHERE poll_id = ? AND voter_hash = ?'
     ).get(pollId, voterHash);
     return Promise.resolve(!!result);
   }
 
-  recordVote(pollId: number, voterHash: string): Promise<void> {
+  recordVote(pollId: string, voterHash: string): Promise<void> {
     db.prepare(
       'INSERT INTO poll_voter_keys (poll_id, voter_hash) VALUES (?, ?)'
     ).run(pollId, voterHash);
     return Promise.resolve();
   }
 
-  updateAggregates(
-    pollId: number,
+  async updateAggregates(
+    pollId: string,
     vote: 'yes' | 'no',
     attributes?: {
       age_bracket?: string;
@@ -361,8 +360,8 @@ export class SQLStorage implements UserServiceStorage, PaymentServiceStorage, Vo
     db.prepare(sql).run(pollId);
   }
 
-  appendAuditLog(
-    pollId: number,
+  async appendAuditLog(
+    pollId: string,
     vote: 'yes' | 'no',
     voterHash: string,
     attributes?: {
@@ -371,7 +370,7 @@ export class SQLStorage implements UserServiceStorage, PaymentServiceStorage, Vo
       residence?: string;
       verification_method?: string;
     }
-  ): void {
+  ) {
     const lastEntry = db.prepare(
       'SELECT seq, rolling_sha256 FROM poll_audit WHERE poll_id = ? ORDER BY seq DESC LIMIT 1'
     ).get(pollId) as { seq: number; rolling_sha256: string } | undefined;

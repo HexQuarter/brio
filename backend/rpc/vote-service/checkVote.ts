@@ -6,7 +6,7 @@ import { getBotId } from '../../bot/index';
 import { createVoterHash } from './registerVote'
 
 const CheckVoteSchema = z.object({
-  poll_id: z.number(),
+  poll_id: z.string(),
   tgInitData: z.string()
 });
 
@@ -34,8 +34,8 @@ export const checkVoteHandler = async (req: { body: any, db: VoteServiceStorage 
       return res.status(404).json({ error: "poll not exists" })
     }
 
-    const voterHash = createVoterHash(user.id, poll.id, poll.hash_salt)
-    const alreadyVoted = await req.db.hasVoted(poll.id, voterHash)
+    const voterHash = createVoterHash(user.id, checkVoteData.poll_id, poll.hash_salt)
+    const alreadyVoted = await req.db.hasVoted(checkVoteData.poll_id, voterHash)
     res.json({ canVote: !alreadyVoted })
   }
   catch (e) {

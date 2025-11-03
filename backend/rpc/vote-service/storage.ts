@@ -1,19 +1,19 @@
 export interface VoteServiceStorage {
-  createOrg(org: OrgInsertion): number
-  getOrg(id: number): Promise<Org | undefined>
-  listOrgByChatId(chatId: number): Promise<Org[]>
-  createPoll(poll: PollInsertion): number
-  listActivePolls(): Promise<Poll[]>
-  listPastPolls(): Promise<Poll[]>
-  getPoll(id: number): Promise<Poll | undefined>
-  getPollAggregates(pollId: number): Promise<PollAggregate | undefined>
-  hasVoted(pollId: number, voterHash: string): Promise<boolean>
-  recordVote(pollId: number, voterHash: string): Promise<void>
+  createOrg(org: OrgInsertion): Promise<string>
+  getOrg(id: string): Promise<Org | undefined>
+  listOrgByChatId(chatId: number): Promise<OrgListing[]>
+  createPoll(poll: PollInsertion): Promise<string>
+  listActivePolls(): Promise<PollListing[]>
+  listPastPolls(): Promise<PollListing[]>
   listPolls(): Promise<Poll[]>
-  closePoll(pollId: number): void
+  getPoll(id: string): Promise<Poll | undefined>
+  getPollAggregates(pollId: string): Promise<PollAggregate | undefined>
+  hasVoted(pollId: string, voterHash: string): Promise<boolean>
+  recordVote(pollId: string, voterHash: string): Promise<void>
+  closePoll(poll: Poll): void
 
   updateAggregates(
-    pollId: number,
+    pollId: string,
     vote: 'yes' | 'no',
     attributes?: {
       age_bracket?: string;
@@ -21,10 +21,10 @@ export interface VoteServiceStorage {
       residence?: string;
       verification_method?: string;
     }
-  ): void
+  ): Promise<void>
 
   appendAuditLog(
-    pollId: number,
+    pollId: string,
     vote: 'yes' | 'no',
     voterHash: string,
     attributes?: {
@@ -33,7 +33,7 @@ export interface VoteServiceStorage {
       residence?: string;
       verification_method?: string;
     }
-  ): void
+  ): Promise<void>
 }
 
 export type OrgInsertion = {
@@ -42,16 +42,16 @@ export type OrgInsertion = {
   scope_level: 'countries' | 'region' | 'continent' | 'world' | 'city' | 'community'
   geographic_scope: string
   logo_url: string | undefined
-  chat_id: string
+  chat_id: number
 }
 
 export type Org = OrgInsertion & {
-  id: number
+  id: string
   created_at: Number
 }
 
 export type PollInsertion = {
-  org_id: number
+  org_id: string
   question: string
   scope_level: 'countries' | 'region' | 'continent' | 'world' | 'city' | 'community'
   geographic_scope: string
@@ -59,15 +59,27 @@ export type PollInsertion = {
   end_at: number
 }
 
+export type OrgListing = {
+  id: string
+  name: string
+}
+
 export type Poll = PollInsertion & {
-  id: number
+  id: string
   hash_salt: string
   created_at: number
   status: 'active' | 'closed'
 };
 
+export type PollListing = {
+  id: string
+  end_at: number
+  question: string
+  org_id: string
+}
+
 export type PollAggregate = {
-  poll_id: number
+  poll_id: string
   total_votes: number
   yes_count: number
   no_count: number
