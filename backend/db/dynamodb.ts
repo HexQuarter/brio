@@ -150,38 +150,42 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
 
   async createOrg(org: OrgInsertion): Promise<string> {
     const orgID = createHash('sha256').update(`${org.chat_id}-${org.name}`).digest('hex') as string
-    let putCommand = new PutItemCommand({
-      TableName: POLLS_TABLE,
-      Item: {
-        PK: { S: `ORG#${orgID}` },
-        SK: { S: `ORG#${orgID}` },
-        Type: { S: 'Org' },
-        name: { S: org.name },
-        purpose: { S: org.purpose || '' },
-        scope_level: { S: org.scope_level },
-        geographic_scope: { S: org.geographic_scope },
-        countries: { S: org.scope_level === 'countries' ? org.geographic_scope : '' },
-        logo_url: { S: org.logo_url || '' },
-        chat_id: { N: org.chat_id.toString() },
-        created_at: { N: Date.now().toString() }
-      }
-    })
-    let commandRes = await this.db.send(putCommand);
-    if (commandRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(commandRes.$metadata.httpStatusCode?.toString())
-    }
 
-    putCommand = new PutItemCommand({
-      TableName: POLLS_TABLE,
-      Item: {
-        PK: { S: `CHAT#${org.chat_id}` },
-        SK: { S: `ORG#${orgID}` },
-        Type: { S: 'OrgChatRef' },
-        org_id: { S: orgID },
-        name: { S: org.name }
-      }
+    const command = new TransactWriteItemsCommand({
+      TransactItems: [
+        {
+          Put: {
+            TableName: POLLS_TABLE,
+            Item: {
+              PK: { S: `ORG#${orgID}` },
+              SK: { S: `ORG#${orgID}` },
+              Type: { S: 'Org' },
+              name: { S: org.name },
+              purpose: { S: org.purpose || '' },
+              scope_level: { S: org.scope_level },
+              geographic_scope: { S: org.geographic_scope },
+              countries: { S: org.scope_level === 'countries' ? org.geographic_scope : '' },
+              logo_url: { S: org.logo_url || '' },
+              chat_id: { N: org.chat_id.toString() },
+              created_at: { N: Date.now().toString() }
+            }
+          }
+        },
+        {
+          Put: {
+            TableName: POLLS_TABLE,
+            Item: {
+              PK: { S: `CHAT#${org.chat_id}` },
+              SK: { S: `ORG#${orgID}` },
+              Type: { S: 'OrgChatRef' },
+              org_id: { S: orgID },
+              name: { S: org.name }
+            }
+          }
+        }
+      ]
     })
-    commandRes = await this.db.send(putCommand);
+    const commandRes = await this.db.send(command);
     if (commandRes.$metadata.httpStatusCode !== 200) {
       throw new Error(commandRes.$metadata.httpStatusCode?.toString())
     }
@@ -269,7 +273,7 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
               SK: { S: `ORG#${poll.org_id}#POLL#${pollId}#${poll.end_at.toString()}` },
               Type: { S: 'ActivePollRef' },
               poll_id: { S: pollId },
-              org_id: { S: poll.org_id},
+              org_id: { S: poll.org_id },
               question: { S: poll.question },
               end_at: { N: poll.end_at.toString() },
             }
@@ -372,7 +376,7 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
 
   async closePoll(poll: Poll) {
     const pollKey = {
-      PK: { S: `ORG#${poll.org_id}`},
+      PK: { S: `ORG#${poll.org_id}` },
       SK: { S: `POLL#${poll.id}` }
     }
 
@@ -399,19 +403,19 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
           }
         },
         {
-        Put: {
-          TableName: POLLS_TABLE,
-          Item: {
-            PK: { S: "PAST_POLLS" },
-            SK: { S: `ORG#${poll.org_id}#POLL#${poll.id}#${poll.end_at}` },
-            Type: { S: "PastPollRef" },
-            org_id: { S: poll.org_id },
-            poll_id: { S: poll.id },
-            question: { S: poll.question },
-            end_at: { N: poll.end_at.toString() }
-          }
+          Put: {
+            TableName: POLLS_TABLE,
+            Item: {
+              PK: { S: "PAST_POLLS" },
+              SK: { S: `ORG#${poll.org_id}#POLL#${poll.id}#${poll.end_at}` },
+              Type: { S: "PastPollRef" },
+              org_id: { S: poll.org_id },
+              poll_id: { S: poll.id },
+              question: { S: poll.question },
+              end_at: { N: poll.end_at.toString() }
+            }
+          },
         },
-      },
       ]
     })
 
