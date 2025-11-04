@@ -35,7 +35,7 @@ async function notifyPollResults(db: VoteServiceStorage, poll: Poll) {
     if (org) {
       const message = 
       `
-      Poll #${aggregate.poll_id} has closed.
+      Poll '${poll.question}' has closed.
 
       Results:
       ✅ Yes: ${aggregate.yes_count}  
