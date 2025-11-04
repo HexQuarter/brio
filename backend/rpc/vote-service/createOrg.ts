@@ -6,6 +6,8 @@ const OrgSchema = z.object({
   scope_level: z.enum(['countries', 'region', 'continent', 'world', 'city', 'community']),
   geographic_scope: z.string(),
   logo_url: z.string().optional(),
+  id_verification_required: z.boolean().default(false),
+  telegram_handle: z.string().optional(),
   tgInitData: z.string()
 });
 
@@ -38,7 +40,9 @@ export const createOrgHandler = async (req: { body: any, db: VoteServiceStorage 
       scope_level: orgData.scope_level,
       geographic_scope: orgData.geographic_scope,
       logo_url: orgData.logo_url,
-      chat_id: id
+      chat_id: id,
+      telegram_handle: orgData.telegram_handle,
+      id_verification_required: orgData.id_verification_required
     })
 
     const org = await req.db.getOrg(orgId)

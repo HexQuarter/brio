@@ -33,7 +33,7 @@ export default function VotePanel({ question, hasVoted = false, userVote, onVote
         <h2 className="text-2xl md:text-3xl text-foreground leading-tight" data-testid="text-poll-question">
           {question}
         </h2>
-        {voted && (
+        {hasVoted && (
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <Check className="w-4 h-4 text-success" />
             <span>Your vote has been recorded</span>
@@ -46,7 +46,6 @@ export default function VotePanel({ question, hasVoted = false, userVote, onVote
           <Button
             size="lg"
             onClick={() => handleVote('yes')}
-            disabled={voted}
             className="min-h-24 flex-col gap-2 bg-green-600 text-lg text-white rounded-2xl shadow-lg disabled:opacity-50 active-elevate-2"
             data-testid="button-vote-yes"
           >
@@ -58,7 +57,6 @@ export default function VotePanel({ question, hasVoted = false, userVote, onVote
           <Button
             size="lg"
             onClick={() => handleVote('no')}
-            disabled={voted}
             className="min-h-24 flex-col gap-2 text-lg bg-destructive text-white rounded-2xl shadow-lg disabled:opacity-50 active-elevate-2"
             data-testid="button-vote-no"
           >

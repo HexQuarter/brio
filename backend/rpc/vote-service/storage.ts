@@ -11,6 +11,7 @@ export interface VoteServiceStorage {
   hasVoted(pollId: string, voterHash: string): Promise<boolean>
   recordVote(pollId: string, voterHash: string): Promise<void>
   closePoll(poll: Poll): Promise<void>
+  listOrgPolls(orgId: string): Promise<PollListing[]>
 
   updateAggregates(
     pollId: string,
@@ -43,6 +44,8 @@ export type OrgInsertion = {
   geographic_scope: string
   logo_url: string | undefined
   chat_id: number
+  id_verification_required: boolean
+  telegram_handle: string | undefined
 }
 
 export type Org = OrgInsertion & {

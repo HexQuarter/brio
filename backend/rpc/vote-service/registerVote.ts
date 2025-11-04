@@ -38,6 +38,11 @@ export const registerVoteHandler = async (req: { body: any, db: VoteServiceStora
       return res.status(404).json({ error: 'Poll not found' });
     }
 
+    const org = await req.db.getOrg(poll.org_id);
+    if (!org) {
+      return res.status(404).json({ error: 'Organization not found' });
+    }
+
     const now = new Date();
 
     if (now.getTime() < poll.start_at * 1000) {
@@ -53,6 +58,11 @@ export const registerVoteHandler = async (req: { body: any, db: VoteServiceStora
 
     if (hasVoted) {
       return res.status(400).json({ error: 'You have already voted in this poll' });
+    }
+
+    // Check if ID verification is required
+    if (org.id_verification_required === true && voteData.verification_method !== 'sa_id') {
+      return res.status(400).json({ error: 'This organization requires SA ID verification to vote' });
     }
 
     await req.db.recordVote(voteData.poll_id, voterHash);

@@ -4,7 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building2, Globe, Image, FileText } from 'lucide-react';
+import { Building2, Globe, Image, FileText, ShieldCheck, MessageCircle } from 'lucide-react';
+import { Checkbox } from '../ui/checkbox';
 
 interface OrgRegistrationFormProps {
   onSubmit?: (data: any) => void;
@@ -17,25 +18,33 @@ export default function OrgRegistrationForm({ onSubmit }: OrgRegistrationFormPro
     scopeLevel: 'countries' as 'countries' | 'region' | 'continent' | 'world' | 'city' | 'community',
     geographicScope: '',
     logo_url: '',
+    idVerificationRequired: false,
+    telegramHandle: ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.geographicScope) {
       console.error('Geographic scope is required');
       return;
     }
-    
+
     console.log('Org Registration:', formData);
     onSubmit?.({
       name: formData.name,
       purpose: formData.purpose || undefined,
       scope_level: formData.scopeLevel,
       geographic_scope: formData.geographicScope,
-      logo_url: formData.logo_url || undefined
+      logo_url: formData.logo_url || undefined,
+      id_verification_required: formData.idVerificationRequired,
+      telegram_handle: formData.telegramHandle
     });
   };
+
+  // Check if only South Africa is selected
+  const isSouthAfricaOnly = formData.scopeLevel === 'countries' &&
+    formData.geographicScope.trim().toLowerCase() === 'south africa';
 
   return (
     <div className="p-6 bg-gray-50 border-gray-200 border-1 rounded-md" data-testid="org-registration-form">
@@ -87,10 +96,10 @@ export default function OrgRegistrationForm({ onSubmit }: OrgRegistrationFormPro
               <Globe className="w-4 h-4" />
               Geographic Scope Level
             </Label>
-            <Select 
+            <Select
               value={formData.scopeLevel}
-              onValueChange={(value: string) => setFormData({ 
-                ...formData, 
+              onValueChange={(value: string) => setFormData({
+                ...formData,
                 scopeLevel: value as 'countries' | 'region' | 'continent' | 'world' | 'city' | 'community',
                 geographicScope: value === 'world' ? 'World' : ''
               })}
@@ -110,20 +119,52 @@ export default function OrgRegistrationForm({ onSubmit }: OrgRegistrationFormPro
           </div>
 
           {formData.scopeLevel === 'countries' && (
-            <div className="space-y-2">
-              <Label htmlFor="geographic-scope">Countries</Label>
-              <Input
-                id="geographic-scope"
-                type="text"
-                placeholder="South Africa, Kenya, Tanzania"
-                value={formData.geographicScope}
-                onChange={(e) => setFormData({ ...formData, geographicScope: e.target.value })}
-                required
-                data-testid="input-geographic-scope"
-              />
-              <p className="text-xs text-muted-foreground">
-                Comma-separated list of countries where you operate
-              </p>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="geographic-scope">Countries</Label>
+                <Input
+                  id="geographic-scope"
+                  type="text"
+                  placeholder="South Africa, Kenya, Tanzania"
+                  value={formData.geographicScope}
+                  onChange={(e) => setFormData({ ...formData, geographicScope: e.target.value })}
+                  required
+                  data-testid="input-geographic-scope"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Comma-separated list of countries where you operate
+                </p>
+              </div>
+
+              {isSouthAfricaOnly && (
+                <div className="space-y-3 p-4 border border-border rounded-lg bg-muted/30">
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id="id-verification"
+                      checked={formData.idVerificationRequired}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, idVerificationRequired: checked === true })
+                      }
+                      data-testid="checkbox-id-verification"
+                    />
+                    <div className="space-y-1 flex-1">
+                      <Label
+                        htmlFor="id-verification"
+                        className="flex items-center gap-2 cursor-pointer font-medium"
+                      >
+                        <ShieldCheck className="w-4 h-4 text-primary" />
+                        Require SA ID Verification
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        {formData.idVerificationRequired
+                          ? "Voters MUST verify their South African ID number before voting. This ensures authentic demographic data."
+                          : "ID verification is optional. Voters can self-attest their demographics or verify with SA ID."
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -240,6 +281,24 @@ export default function OrgRegistrationForm({ onSubmit }: OrgRegistrationFormPro
               />
             </div>
           )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="telegram-handle" className="flex items-center gap-2">
+            <MessageCircle className="w-4 h-4" />
+            Telegram Handle (Optional)
+          </Label>
+          <Input
+            id="telegram-handle"
+            type="text"
+            placeholder="@yourhandle"
+            value={formData.telegramHandle}
+            onChange={(e) => setFormData({ ...formData, telegramHandle: e.target.value })}
+            data-testid="input-telegram-handle"
+          />
+          <p className="text-xs text-muted-foreground">
+            Enter your Telegram handle to receive BTC donations via Brio
+          </p>
         </div>
 
         <Button type="submit" className="w-full" size="lg" data-testid="button-register-org">

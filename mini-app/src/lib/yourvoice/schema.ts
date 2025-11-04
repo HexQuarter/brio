@@ -7,6 +7,8 @@ export type Org = {
   countries: string,
   logo_url: string | null,
   chat_id: string | null,
+  telegram_handle: string | undefined,
+  id_verification_required: boolean,
   created_at: string,
 };
 
@@ -54,6 +56,8 @@ export type InsertOrg = {
   scope_level: 'countries' | 'region' | 'continent' | 'world' | 'city' | 'community',
   geographic_scope: string,
   logo_url: string | undefined,
+  idVerificationRequired: boolean,
+  telegram_handle: string | undefined,
   tgInitData: string
 };
 

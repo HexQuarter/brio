@@ -11,6 +11,8 @@ import { useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Org, Poll, PollAggregates } from '@/lib/yourvoice/schema';
 import { retrieveRawInitData } from '@telegram-apps/sdk-react';
+import { Card } from '@/components/ui/card';
+import { Heart, MessageCircle } from 'lucide-react';
 
 export function VotingPage() {
   const params = useParams();
@@ -45,6 +47,15 @@ export function VotingPage() {
 
   const handleVote = async (vote: 'yes' | 'no') => {
     setVoteIsPending(true)
+
+    // Check if ID verification is required but not completed
+    if (org?.id_verification_required === true && voteAttributes?.verification_method !== 'sa_id') {
+      toast.error('This organization requires SA ID verification to vote. Please verify your SA ID number above before voting.')
+      setVoteIsPending(false)
+      setHashVoted(false)
+      return;
+    }
+
     const res = await submitVote({
       poll_id: pollId,
       vote,
@@ -134,11 +145,38 @@ export function VotingPage() {
             </div>
           )}
 
+           {org?.telegram_handle && (
+            <Card className="p-4 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20" data-testid="card-donation">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Heart className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1 space-y-1">
+                  <p className="text-sm font-semibold text-foreground">Support {org.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    Donate BTC via Brio on Telegram
+                  </p>
+                  <a
+                    href={`https://t.me/${org.telegram_handle.replace('@', '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-sm font-medium text-primary hover-elevate active-elevate-2 bg-background border border-primary/30 rounded-lg px-3 py-1.5 mt-2"
+                    data-testid="link-telegram-donation"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    {org.telegram_handle}
+                  </a>
+                </div>
+              </div>
+            </Card>
+          )}
+
           <CountdownTimer endTime={pollEndTime} />
 
           {poll.status == 'active' && !hasVoted && !voteIsPending && (
             <OptionalAttributesForm
               countries={countries}
+              idVerificationRequired={org?.id_verification_required === true}
               onAttributesChange={setVoteAttributes}
             />
           )}

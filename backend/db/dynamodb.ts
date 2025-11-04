@@ -42,13 +42,13 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
     }
 
     return {
-      chatID: res.Item.chatID.S || '',
-      publicKey: res.Item.publicKey.S || '',
-      breezBtcAddress: res.Item.breezBtcAddress.S || '',
-      breezLnUrl: res.Item.breezLnUrl.S || '',
-      tapRootAddress: res.Item.tapRootAddress.S || '',
-      handle: res.Item.handle.S || '',
-      phoneNumber: res.Item.phoneNumber.S || ''
+      chatID: res.Item.chatID?.S || '',
+      publicKey: res.Item.publicKey?.S || '',
+      breezBtcAddress: res.Item.breezBtcAddress?.S || '',
+      breezLnUrl: res.Item.breezLnUrl?.S || '',
+      tapRootAddress: res.Item.tapRootAddress?.S || '',
+      handle: res.Item.handle?.S || '',
+      phoneNumber: res.Item.phoneNumber?.S || ''
     };
   }
 
@@ -57,7 +57,7 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
       TableName: WALLET_TABLE,
       Key: {
         PK: { S: `CONTACT#${contactDigest}` },
-        SK: { S: `LOOKUP`}
+        SK: { S: `LOOKUP` }
       }
     }));
     if (res.$metadata.httpStatusCode !== 200) {
@@ -69,10 +69,10 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
     }
 
     return {
-      chatID: res.Item?.chatID.S || '',
-      breezBtcAddress: res.Item?.breezBtcAddress.S || '',
-      breezLnUrl: res.Item?.breezLnUrl.S || '',
-      tapRootAddress: res.Item?.tapRootAddress.S || ''
+      chatID: res.Item.chatID?.S || '',
+      breezBtcAddress: res.Item.breezBtcAddress?.S || '',
+      breezLnUrl: res.Item.breezLnUrl?.S || '',
+      tapRootAddress: res.Item.tapRootAddress?.S || ''
     }
   }
 
@@ -120,7 +120,7 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
     const res = await this.db.send(new TransactWriteItemsCommand({
       TransactItems: items
     }))
-    if(res.$metadata.httpStatusCode !== 200) {
+    if (res.$metadata.httpStatusCode !== 200) {
       throw new Error(res.$metadata.httpStatusCode?.toString())
     }
   }
@@ -160,8 +160,8 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
 
     return {
       id: paymentId,
-      amount: Number(res.Item.amount.N) || 0,
-      method: res.Item.method.S || ''
+      amount: Number(res.Item.amount?.N || 0),
+      method: res.Item.method?.S || ''
     }
   }
 
@@ -184,6 +184,8 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
               countries: { S: org.scope_level === 'countries' ? org.geographic_scope : '' },
               logo_url: { S: org.logo_url || '' },
               chat_id: { N: org.chat_id.toString() },
+              id_verification_required: { BOOL: org.id_verification_required },
+              telegram_handle: { S: org.telegram_handle || '' },
               created_at: { N: Date.now().toString() }
             }
           }
@@ -213,48 +215,46 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
   }
 
   async getOrg(id: string): Promise<Org | undefined> {
-    const getCommand = new GetItemCommand({
+    const res = await this.db.send(new GetItemCommand({
       TableName: POLLS_TABLE,
       Key: {
         PK: { S: `ORG#${id}` },
         SK: { S: `ORG#${id}` }
       }
-    })
-
-    const commandRes = await this.db.send(getCommand);
-    if (commandRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(commandRes.$metadata.httpStatusCode?.toString())
+    }));
+    if (res.$metadata.httpStatusCode !== 200) {
+      throw new Error(res.$metadata.httpStatusCode?.toString())
     }
-    if (!commandRes.Item) {
+    if (!res.Item) {
       return undefined
     }
 
-    const scopeLevel = commandRes.Item.scope_level.S || 'world'
+    const scopeLevel = res.Item.scope_level?.S || 'world'
     return {
       id: id,
-      name: commandRes.Item.name.S || '',
-      chat_id: Number(commandRes.Item.chat_id.N) || 0,
+      name: res.Item.name?.S || '',
+      chat_id: Number(res.Item.chat_id?.N || '0'),
       scope_level: (scopeLevel as 'region' | 'countries' | 'continent' | 'world' | 'city' | 'community'),
-      logo_url: commandRes.Item.logo_url.S,
-      geographic_scope: commandRes.Item.geographic_scope.S || '',
-      purpose: commandRes.Item.purpose.S,
-      created_at: Number(commandRes.Item.created_at.N) || 0,
+      logo_url: res.Item.logo_url?.S || '',
+      geographic_scope: res.Item.geographic_scope?.S || '',
+      purpose: res.Item.purpose?.S || '',
+      created_at: Number(res.Item.created_at?.N || '0'),
+      telegram_handle: res.Item.telegram_handle?.S || '',
+      id_verification_required: res.Item.id_verification_required?.BOOL ?? false
     }
   }
 
   async listOrgByChatId(chatId: number): Promise<OrgListing[]> {
-    const queryCommand = new QueryCommand({
+    const res = await this.db.send( new QueryCommand({
       TableName: POLLS_TABLE,
       KeyConditionExpression: "PK = :pk",
       ExpressionAttributeValues: { ":pk": { S: `CHAT#${chatId}` } },
-    })
-
-    const queryCommandRes = await this.db.send(queryCommand);
-    if (queryCommandRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(queryCommandRes.$metadata.httpStatusCode?.toString())
+    }));
+    if (res.$metadata.httpStatusCode !== 200) {
+      throw new Error(res.$metadata.httpStatusCode?.toString())
     }
 
-    return (queryCommandRes.Items || []).map(item => ({
+    return (res.Items || []).map(item => ({
       id: item.org_id.S || '',
       name: item.name.S || '',
       countries: item.countries.S || '',
@@ -316,82 +316,75 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
       ]
     })
 
-    const commandRes = await this.db.send(transactCommand)
-    if (commandRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(commandRes.$metadata.httpStatusCode?.toString())
+    const res = await this.db.send(transactCommand)
+    if (res.$metadata.httpStatusCode !== 200) {
+      throw new Error(res.$metadata.httpStatusCode?.toString())
     }
 
     return Promise.resolve(pollPartitioner(pollId, poll.org_id))
   }
 
   async listPolls(): Promise<Poll[]> {
-    const queryCommand = new QueryCommand({
+    const res = await this.db.send(new QueryCommand({
       TableName: POLLS_TABLE,
       KeyConditionExpression: 'PK = :pk AND begins_with(SK, :poll)'
-    });
-
-    const commandRes = await this.db.send(queryCommand)
-    if (commandRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(commandRes.$metadata.httpStatusCode?.toString())
+    }))
+    if (res.$metadata.httpStatusCode !== 200) {
+      throw new Error(res.$metadata.httpStatusCode?.toString())
     }
 
-    return (commandRes.Items || []).map(item => ({
-      id: item.poll_id.S || '',
-      question: item.question.S || '',
-      hash_salt: item.hash_salt.S || '',
-      created_at: Number(item.create_at.N) || 0,
-      status: item.status.N || '',
-      end_at: item.end_at.N || 0,
-      start_at: item.start_at.N || 0,
-      org_id: item.org_id.S || '',
-      scope_level: item.scope_level.S || '',
-      geographic_scope: item.geographic_scope.S || ''
+    return (res.Items || []).map(item => ({
+      id: item.poll_id?.S || '',
+      question: item.question?.S || '',
+      hash_salt: item.hash_salt?.S || '',
+      created_at: Number(item.create_at?.N || '0'),
+      status: item.status?.S || '',
+      end_at: Number(item.end_at?.N || '0'),
+      start_at: Number(item.start_at?.N || '0'),
+      org_id: item.org_id?.S || '',
+      scope_level: item.scope_level?.S || '',
+      geographic_scope: item.geographic_scope?.S || ''
     })) as Poll[]
   }
 
-
   async listActivePolls(): Promise<PollListing[]> {
-    const queryCommand = new QueryCommand({
+    const res = await this.db.send(new QueryCommand({
       TableName: POLLS_TABLE,
       KeyConditionExpression: 'PK = :pk AND SK >= :now',
       ExpressionAttributeValues: {
         ":pk": { S: "ACTIVE_POLLS" },
         ":now": { S: Date.now().toString() },
       },
-    })
-
-    const commandRes = await this.db.send(queryCommand)
-    if (commandRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(commandRes.$metadata.httpStatusCode?.toString())
+    }))
+    if (res.$metadata.httpStatusCode !== 200) {
+      throw new Error(res.$metadata.httpStatusCode?.toString())
     }
 
-    return (commandRes.Items || []).map(item => ({
-      id: item.poll_id.S || '',
-      question: item.question.S || '',
-      end_at: item.end_at.N || 0,
-      org_id: item.org_id.S || ''
+    return (res.Items || []).map(item => ({
+      id: item.poll_id?.S || '',
+      question: item.question?.S || '',
+      end_at: Number(item.end_at?.N || '0'),
+      org_id: item.org_id?.S || ''
     })) as PollListing[]
   }
 
   async listPastPolls(): Promise<PollListing[]> {
-    const queryCommand = new QueryCommand({
+    const res = await this.db.send(new QueryCommand({
       TableName: POLLS_TABLE,
       KeyConditionExpression: "PK = :pk",
       ExpressionAttributeValues: {
         ":pk": { S: "PAST_POLLS" },
       }
-    })
-
-    const commandRes = await this.db.send(queryCommand)
-    if (commandRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(commandRes.$metadata.httpStatusCode?.toString())
+    }))
+    if (res.$metadata.httpStatusCode !== 200) {
+      throw new Error(res.$metadata.httpStatusCode?.toString())
     }
 
-    return (commandRes.Items || []).map(item => ({
-      id: item.poll_id.S || '',
-      question: item.question.S || '',
-      end_at: item.end_at.N || 0,
-      org_id: item.org_id.S || ''
+    return (res.Items || []).map(item => ({
+      id: item.poll_id?.S || '',
+      question: item.question?.S || '',
+      end_at: new Number(item.end_at?.N || '0'),
+      org_id: item.org_id?.S || ''
     })) as PollListing[]
   }
 
@@ -448,34 +441,32 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
 
   async getPoll(pollPartition: string): Promise<Poll | undefined> {
     const { orgId, pollId } = pollDepartitioner(pollPartition)
-    const command = new GetItemCommand({
+    const res = await this.db.send(new GetItemCommand({
       TableName: POLLS_TABLE,
       Key: {
         PK: { S: `ORG#${orgId}` },
         SK: { S: `POLL#${pollId}` }
       }
-    })
-
-    const commandRes = await this.db.send(command)
-    if (commandRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(commandRes.$metadata.httpStatusCode?.toString())
+    }))
+    if (res.$metadata.httpStatusCode !== 200) {
+      throw new Error(res.$metadata.httpStatusCode?.toString())
     }
 
-    if (!commandRes.Item) {
+    if (!res.Item) {
       return undefined
     }
 
     return {
       id: pollId,
-      hash_salt: commandRes.Item.hash_salt.S || '',
-      created_at: Number(commandRes.Item.created_at.N) || 0,
-      status: (commandRes.Item.status.S === 'active' ? 'active' : 'closed'),
+      hash_salt: res.Item.hash_salt?.S || '',
+      created_at: Number(res.Item.created_at?.N || 0),
+      status: (res.Item.status?.S === 'active' ? 'active' : 'closed'),
       org_id: orgId,
-      question: commandRes.Item.question.S || '',
-      scope_level: (commandRes.Item.scope_level.S || 'countries') as 'region' | 'countries' | 'continent' | 'world' | 'city' | 'community',
-      geographic_scope: commandRes.Item.geographic_scope.S || '',
-      start_at: Number(commandRes.Item.start_at.N) || 0,
-      end_at: Number(commandRes.Item.end_at.N) || 0
+      question: res.Item.question?.S || '',
+      scope_level: (res.Item.scope_level?.S || 'countries') as 'region' | 'countries' | 'continent' | 'world' | 'city' | 'community',
+      geographic_scope: res.Item.geographic_scope?.S || '',
+      start_at: Number(res.Item.start_at?.N || '0'),
+      end_at: Number(res.Item.end_at?.N || '0')
     }
   }
 
@@ -500,49 +491,47 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
 
     return {
       poll_id: pollId,
-      total_votes: Number(commandRes.Item.total_votes.N) || 0,
-      yes_count: Number(commandRes.Item.yes_count.N) || 0,
-      no_count: Number(commandRes.Item.no_count.N) || 0,
-      verified_total: commandRes.Item.verified_total ? Number(commandRes.Item.verified_total.N) : 0,
-      age_lt_18: commandRes.Item.age_lt_18 ? Number(commandRes.Item.age_lt_18.N) : 0,
-      age_18_24: commandRes.Item.age_18_24 ? Number(commandRes.Item.age_18_24.N) : 0,
-      age_25_34: commandRes.Item.age_25_34 ? Number(commandRes.Item.age_25_34.N) : 0,
-      age_35_44: commandRes.Item.age_35_44 ? Number(commandRes.Item.age_35_44.N) : 0,
-      age_45_54: commandRes.Item.age_45_54 ? Number(commandRes.Item.age_45_54.N) : 0,
-      age_55p: commandRes.Item.age_55p ? Number(commandRes.Item.age_55p.N) : 0,
-      gender_male: commandRes.Item.gender_male ? Number(commandRes.Item.gender_male.N) : 0,
-      gender_female: commandRes.Item.gender_female ? Number(commandRes.Item.gender_female.N) : 0,
-      gender_other: commandRes.Item.gender_other ? Number(commandRes.Item.gender_other.N) : 0,
-      gender_unspecified: commandRes.Item.gender_unspecified ? Number(commandRes.Item.gender_unspecified.N) : 0,
-      res_in_country: commandRes.Item.res_in_country ? Number(commandRes.Item.res_in_country.N) : 0,
-      res_outside: commandRes.Item.res_outside ? Number(commandRes.Item.res_outside.N) : 0,
-      res_unspecified: commandRes.Item.res_unspecified ? Number(commandRes.Item.res_unspecified.N) : 0,
-      verified_self_attest: commandRes.Item.verified_self_attest ? Number(commandRes.Item.verified_self_attest.N) : 0,
-      verified_sa_id: commandRes.Item.verified_sa_id ? Number(commandRes.Item.verified_sa_id.N) : 0
+      total_votes: Number(commandRes.Item.total_votes?.N || '0')|0,
+      yes_count: Number(commandRes.Item.yes_count?.N || '0')|0,
+      no_count: Number(commandRes.Item.no_count?.N || '0')|0,
+      verified_total: Number(commandRes.Item.verified_total?.N || '0') ,
+      age_lt_18: Number(commandRes.Item.age_lt_18?.N || '0') ,
+      age_18_24: Number(commandRes.Item.age_18_24?.N || '0') ,
+      age_25_34: Number(commandRes.Item.age_25_34?.N || '0') ,
+      age_35_44: Number(commandRes.Item.age_35_44?.N || '0') ,
+      age_45_54: Number(commandRes.Item.age_45_54?.N || '0') ,
+      age_55p:  Number(commandRes.Item.age_55p?.N || '0') ,
+      gender_male: Number(commandRes.Item.gender_male?.N || '0') ,
+      gender_female: Number(commandRes.Item.gender_female?.N || '0') ,
+      gender_other: Number(commandRes.Item.gender_other?.N || '0') ,
+      gender_unspecified: Number(commandRes.Item.gender_unspecified?.N || '0') ,
+      res_in_country:  Number(commandRes.Item.res_in_country?.N || '0') ,
+      res_outside: Number(commandRes.Item.res_outside?.N || '0') ,
+      res_unspecified: Number(commandRes.Item.res_unspecified?.N || '0') ,
+      verified_self_attest: Number(commandRes.Item.verified_self_attest?.N || '0') ,
+      verified_sa_id: Number(commandRes.Item.verified_sa_id?.N || '0') 
     }
   }
 
   async hasVoted(pollPartition: string, voterHash: string): Promise<boolean> {
     const { orgId, pollId } = pollDepartitioner(pollPartition)
-    const command = new GetItemCommand({
+    const res = await this.db.send( new GetItemCommand({
       TableName: POLLS_TABLE,
       Key: {
         PK: { S: `ORG#${orgId}` },
         SK: { S: `POLL#${pollId}#VOTER#${voterHash}` }
       }
-    })
-
-    const commandRes = await this.db.send(command)
-    if (commandRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(commandRes.$metadata.httpStatusCode?.toString())
+    }))
+    if (res.$metadata.httpStatusCode !== 200) {
+      throw new Error(res.$metadata.httpStatusCode?.toString())
     }
 
-    return !!commandRes.Item
+    return !!res.Item
   }
 
   async recordVote(pollPartition: string, voterHash: string): Promise<void> {
     const { orgId, pollId } = pollDepartitioner(pollPartition)
-    const command = new PutItemCommand({
+    const res = await this.db.send(new PutItemCommand({
       TableName: POLLS_TABLE,
       Item: {
         PK: { S: `ORG#${orgId}` },
@@ -551,11 +540,9 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
         created_at: { N: Date.now().toString() }
       },
       ConditionExpression: 'attribute_not_exists(SK)'
-    })
-
-    const commandRes = await this.db.send(command)
-    if (commandRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(commandRes.$metadata.httpStatusCode?.toString())
+    }))
+    if (res.$metadata.httpStatusCode !== 200) {
+      throw new Error(res.$metadata.httpStatusCode?.toString())
     }
   }
 
@@ -640,9 +627,9 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
       ReturnValues: "UPDATED_NEW",
     });
 
-    const commandRes = await this.db.send(command);
-    if (commandRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(commandRes.$metadata.httpStatusCode?.toString())
+    const res = await this.db.send(command);
+    if (res.$metadata.httpStatusCode !== 200) {
+      throw new Error(res.$metadata.httpStatusCode?.toString())
     }
   }
 
@@ -670,17 +657,17 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
       Limit: 1,
     });
 
-    let commandRes = await this.db.send(lastQuery);
-    if (commandRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(commandRes.$metadata.httpStatusCode?.toString())
+    let res = await this.db.send(lastQuery);
+    if (res.$metadata.httpStatusCode !== 200) {
+      throw new Error(res.$metadata.httpStatusCode?.toString())
     }
 
-    if (!commandRes.Items) {
+    if (!res.Items) {
       return
     }
 
-    const lastEntry = commandRes.Items[0];
-    const lastSeq = commandRes.Items.length > 0 ? parseInt(lastEntry?.SK?.S?.split("#").pop()!) : 0;
+    const lastEntry = res.Items[0];
+    const lastSeq = res.Items.length > 0 ? parseInt(lastEntry?.SK?.S?.split("#").pop()!) : 0;
     const prevHash = lastEntry?.rolling_sha256 || "0".repeat(64);
 
     const nextSeq = lastSeq + 1;
@@ -704,7 +691,7 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
       rolling_sha256: { S: rollingHash },
     };
 
-    commandRes = await this.db.send(
+    res = await this.db.send(
       new PutItemCommand({
         TableName: POLLS_TABLE,
         Item: newAuditItem,
@@ -712,8 +699,35 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
       })
     );
 
-    if (commandRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(commandRes.$metadata.httpStatusCode?.toString())
+    if (res.$metadata.httpStatusCode !== 200) {
+      throw new Error(res.$metadata.httpStatusCode?.toString())
     }
+  }
+
+  async listOrgPolls(orgId: string): Promise<PollListing[]> {
+    const res = await this.db.send(new QueryCommand({
+      TableName: POLLS_TABLE,
+      KeyConditionExpression: "PK = :pk AND begins_with(SK, :prefix)",
+      FilterExpression: "#t = :pollType",
+      ExpressionAttributeNames: {
+        "#t": "Type",
+      },
+      ExpressionAttributeValues: {
+        ":pk": { S: `ORG#${orgId}` },
+        ":prefix": { S: "POLL#" },
+        ":pollType": { S: "Poll" },
+      },
+    }))
+
+    if (res.$metadata.httpStatusCode !== 200) {
+      throw new Error(res.$metadata.httpStatusCode?.toString())
+    }
+
+    return (res.Items || []).map(item => ({
+      id: item.SK?.S?.split('#')[1] || '',
+      question: item.question?.S || '',
+      end_at: item.end_at?.N || 0,
+      org_id: orgId
+    })) as PollListing[]
   }
 }

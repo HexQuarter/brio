@@ -147,3 +147,20 @@ export async function canVote(pollId: string, tgInitData: string) {
   .then(r => r.json())
   .then(({ canVote }) => canVote as boolean)
 }
+
+export async function listOrgPolls(orgId: string) {
+    return await fetch(new URL("/rpc", rpcEndpoint()), {
+      method: 'POST',
+      headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+      },
+      body: JSON.stringify({
+          operation: 'list-org-polls',
+          payload: {
+            org_id: orgId,
+          }
+      })
+  })
+  .then(r => r.json())
+}

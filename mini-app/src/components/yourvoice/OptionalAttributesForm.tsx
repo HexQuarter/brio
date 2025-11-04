@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { ShieldCheck, AlertCircle } from 'lucide-react';
 
 interface OptionalAttributesFormProps {
   countries?: string[];
+  idVerificationRequired?: boolean;
   onAttributesChange?: (attributes: {
     age_bracket?: string;
     gender?: string;
@@ -17,9 +18,9 @@ interface OptionalAttributesFormProps {
   }) => void;
 }
 
-export default function OptionalAttributesForm({ countries = ['South Africa'], onAttributesChange }: OptionalAttributesFormProps) {
+export default function OptionalAttributesForm({ countries = ['South Africa'], idVerificationRequired = false, onAttributesChange }: OptionalAttributesFormProps) {
   const isSouthAfricaOnly = countries.length === 1 && countries[0].toLowerCase().includes('south africa');
-  const [useSaId, setUseSaId] = useState(false);
+  const [useSaId, setUseSaId] = useState(idVerificationRequired);
   const [saId, setSaId] = useState('');
   const [saIdValid, setSaIdValid] = useState<boolean | null>(null);
   const [extractedData, setExtractedData] = useState<{
@@ -31,6 +32,14 @@ export default function OptionalAttributesForm({ countries = ['South Africa'], o
     gender: undefined,
     residence: undefined,
   });
+
+  // Sync useSaId with idVerificationRequired when it changes
+  useEffect(() => {
+    if (idVerificationRequired) {
+      setUseSaId(true);
+    }
+  }, [idVerificationRequired]);
+
 
   const handleSaIdChange = (value: string) => {
     setSaId(value);
@@ -79,13 +88,18 @@ export default function OptionalAttributesForm({ countries = ['South Africa'], o
   return (
     <Card className="p-6 space-y-6 bg-gray-50 border-gray-200 border-1 rounded-md" data-testid="optional-attributes-form">
       <div className="space-y-2">
-        <h3 className="text-lg text-foreground">Optional Verification & Information</h3>
+        <h3 className="text-lg font-semibold text-foreground">
+          {idVerificationRequired ? 'Required ID Verification' : 'Optional Verification & Information'}
+        </h3>
         <p className="text-sm text-muted-foreground">
-          Help us understand our community better. This information is aggregated only - no personal data is stored.
+          {idVerificationRequired 
+            ? 'This organization requires SA ID verification to vote. Your ID validates your age and gender automatically.'
+            : 'Help us understand our community better. This information is aggregated only - no personal data is stored.'
+          }
         </p>
       </div>
 
-      {isSouthAfricaOnly && (
+      {isSouthAfricaOnly && !idVerificationRequired && (
         <div className="flex items-center space-x-2">
           <Checkbox
             id="use-sa-id"
@@ -147,7 +161,7 @@ export default function OptionalAttributesForm({ countries = ['South Africa'], o
         </div>
       )}
 
-      {(!useSaId || (useSaId && saIdValid !== true)) && (
+      {!idVerificationRequired && (!useSaId || (useSaId && saIdValid !== true)) && (
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>Age Bracket</Label>
