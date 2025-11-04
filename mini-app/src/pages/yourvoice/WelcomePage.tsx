@@ -18,9 +18,14 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { retrieveRawInitData } from "@telegram-apps/sdk-react";
 
+type OrgListing = {
+  id: string
+  countries: string
+}
+
 export function YourVoiceWelcomePage() {
   const [activeTab, setActiveTab] = useState('create');
-  const [createdOrg, setCreatedOrg] = useState<{ id: number; countries: string } | null>(null);
+  const [createdOrg, setCreatedOrg] = useState<OrgListing | null>(null);
   const [selectedOrgId, setSelectedOrgId] = useState<string>('');
   const navigate = useNavigate();
 
@@ -30,13 +35,25 @@ export function YourVoiceWelcomePage() {
   const [activePollsLoading, setActivePollsLoading] = useState(false);
   const [pastPolls, setPastPolls] = useState<Poll[]>([]);
   const [pastPollsLoading, setPastPollsLoading] = useState(false);
+  const [activeOrg, setActiveOrg] = useState<OrgListing | null>(null)
+  const [selectedOrg, setSelectedOrg] = useState<Org | null>(null)
 
-  const selectedOrg = orgs.find(org => org.id === selectedOrgId);
+  useEffect(() => {
+    const selectedOrg = orgs.find(org => org.id === selectedOrgId);
+    if (selectedOrg) {
+      setSelectedOrg(selectedOrg)
+    }
+  }, [selectedOrgId])
 
-  const activeOrg = (selectedOrgId && selectedOrg) ? {
-    id: selectedOrg.id,
-    countries: selectedOrg.countries
-  } : (selectedOrgId ? null : createdOrg);
+   useEffect(() => {
+      const _activeOrg = (selectedOrgId && selectedOrg) ? {
+        id: selectedOrg.id,
+        countries: selectedOrg.countries
+      } : (selectedOrgId ? null : createdOrg);
+      if (_activeOrg) {
+        setActiveOrg(_activeOrg)
+      }
+   }, [selectedOrg, selectedOrgId])
 
   const tgData = retrieveRawInitData() as string
 

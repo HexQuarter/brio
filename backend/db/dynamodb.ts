@@ -196,7 +196,8 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
               SK: { S: `ORG#${orgID}` },
               Type: { S: 'OrgChatRef' },
               org_id: { S: orgID },
-              name: { S: org.name }
+              name: { S: org.name },
+              countries: { S: org.scope_level === 'countries' ? org.geographic_scope : '' },
             }
           }
         }
@@ -254,7 +255,8 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
 
     return (queryCommandRes.Items || []).map(item => ({
       id: item.org_id.S || '',
-      name: item.name.S || ''
+      name: item.name.S || '',
+      countries: item.countries.S || ''
     })) as OrgListing[]
   }
 

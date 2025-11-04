@@ -62,6 +62,7 @@ export type PollInsertion = {
 export type OrgListing = {
   id: string
   name: string
+  countries: string
 }
 
 export type Poll = PollInsertion & {
