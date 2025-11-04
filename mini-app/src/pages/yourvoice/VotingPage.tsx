@@ -178,8 +178,7 @@ export function VotingPage() {
           </Tabs>
         </div>
       </main>
-
-      <AuditTrailFooter pollId={pollId} />
+      {/* <AuditTrailFooter pollId={pollId} /> */}
     </div>
   );
 }
