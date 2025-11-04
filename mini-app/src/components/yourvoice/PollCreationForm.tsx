@@ -84,7 +84,7 @@ export default function PollCreationForm({ orgCountries, onSubmit }: PollCreatio
                   geographicScope: value === 'world' ? 'World' : ''
                 })}
               >
-                <SelectTrigger data-testid="select-scope-level">
+                <SelectTrigger data-testid="select-scope-level" className='w-full'>
                   <SelectValue placeholder="Select scope level" />
                 </SelectTrigger>
                 <SelectContent>
@@ -138,7 +138,7 @@ export default function PollCreationForm({ orgCountries, onSubmit }: PollCreatio
                   value={formData.geographicScope}
                   onValueChange={(value) => setFormData({ ...formData, geographicScope: value })}
                 >
-                  <SelectTrigger data-testid="select-continent">
+                  <SelectTrigger data-testid="select-continent" className='w-full'>
                     <SelectValue placeholder="Select continent" />
                   </SelectTrigger>
                   <SelectContent>
@@ -200,7 +200,7 @@ export default function PollCreationForm({ orgCountries, onSubmit }: PollCreatio
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="flex flex-col gap-10">
           <div className="space-y-2">
             <Label htmlFor="start-date" className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />

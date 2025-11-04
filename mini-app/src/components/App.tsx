@@ -79,7 +79,6 @@ export function App() {
             </Route>
             <Route path="upcoming" Component={ComingSoonPage} />
           </Route>
-          <Route path="upcoming" Component={ComingSoonPage} />
         </Routes>
       </HashRouter>
     </AppRoot>

@@ -10,7 +10,9 @@ export function MainPage() {
         <div className="flex flex-col h-dvh pb-10">
             <AppList apps={apps} onChange={(app: App) => navigate(`${app.path}`)} />
             <Page back={true}>
-                <Outlet />
+                <div className="mt-10">
+                    <Outlet />
+                </div>
             </Page>
         </div>
     );

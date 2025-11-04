@@ -41,7 +41,7 @@ export const AppList: React.FC<AppListProps> = ({ apps, onChange }) => {
                     <span className={`text-sm text-center`}>{t(app.name)}</span>
                 </div>
             ))}
-            <div className='flex flex-col items-center gap-2 p-2' onClick={() => navigate('/upcoming')}>
+            <div className='flex flex-col items-center gap-2 p-2' onClick={() => navigate('/app/upcoming')}>
                 <BiCollection className='w-10 h-10 text-gray-500 bg-gray-200 rounded-full p-2'/>
                 <span className={`text-sm text-center`}>{t('next_apps')}</span>
             </div>
