@@ -30,17 +30,10 @@ export const notifyPaymentHandler = async (req: { body: any, db: PaymentServiceS
 
     const { chatID } = contactData
 
-    const userData = await req.db.getUserByChatID(chatID);
-    if (!userData) {
-      console.log(`'cannot retrieve user data for ${chatID}`)
-      return res.status(500).json({ error: "user's chat info is missing" })
-    }
-
-
     const prod = process.env['PROD'] || "true"
     if (prod === "true" && req.bot) {
       const botInfo = await req.bot.telegram.getMe();
-      const postResponse = await notifyTelegram(chatID, getBotToken(), notifyPaymentRequest.paymentId, botInfo)
+      const postResponse = await notifyTelegram(chatID, getBotToken(), payment.id, botInfo)
       if (postResponse.status >= 400) {
         const errMsg = await postResponse.json()
         console.log('Error in posting payment notification: ', errMsg)

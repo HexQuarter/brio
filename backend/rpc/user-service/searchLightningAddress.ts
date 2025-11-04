@@ -19,21 +19,13 @@ export const searchLightningAddressHandler = async (req: { body: any, db: UserSe
       return res.status(404).json({ error: "user not found" })
     }
 
-    const { chatID } = contactData
-
-    const userData = await req.db.getUserByChatID(chatID);
-    if (!userData) {
-      console.log(`'cannot retrieve user data for ${chatID}`)
-      return res.status(500).json({ error: "user's chat info is missing" })
-    }
-
-    const { breezLnUrl: breezLnUrlData } = userData;
-    if (!breezLnUrlData) {
+    const { chatID, breezLnUrl } = contactData
+    if (!breezLnUrl) {
       console.log(`'cannot retrieve LN URL for ${chatID}`)
       return res.status(500).json({ error: 'cannot retrieve LN URL' })
     }
 
-    res.status(200).json({ address: breezLnUrlData })
+    res.status(200).json({ address: breezLnUrl })
   }
   catch (e) {
     const error = e as Error

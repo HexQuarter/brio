@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import { Poll, VoteServiceStorage } from '../rpc/vote-service/storage';
+import { Poll, PollListing, VoteServiceStorage } from '../rpc/vote-service/storage';
 import { getBotToken } from '../bot';
 
 export const startCronClosingPolls = (db: VoteServiceStorage) => {
@@ -7,17 +7,19 @@ export const startCronClosingPolls = (db: VoteServiceStorage) => {
     try {
       const now = new Date()
       const polls = await db.listActivePolls()
-      for (const p of polls) {
-        if (now.getTime() > p.end_at * 1000) {
-          const poll = await db.getPoll(`${p.org_id}-${p.id}`)
-          if (!poll) {
-            return
-          }
-          await db.closePoll(poll)
-          console.log('Closing poll ', poll.id)
-          await notifyPollResults(db, poll);
-        }
-      }
+      await Promise.allSettled(
+        polls
+          .filter(p => now.getTime() > p.end_at * 1000)
+          .map(async (p: PollListing) => {
+            const poll = await db.getPoll(`${p.org_id}-${p.id}`)
+            if (!poll) {
+              return
+            }
+            await db.closePoll(poll)
+            console.log('Closing poll ', poll.id)
+            await notifyPollResults(db, poll);
+          })
+      )
     }
     catch (e) {
       const error = e as Error

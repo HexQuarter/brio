@@ -1,14 +1,12 @@
-import { UserItem, UserServiceStorage } from "../rpc/user-service/storage"
+import { UserContact, UserItem, UserServiceStorage } from "../rpc/user-service/storage"
 import { PaymentServiceStorage, PaymentItem } from '../rpc/payment-service/storage';
 import { Org, OrgInsertion, OrgListing, Poll, PollAggregate, PollInsertion, PollListing, VoteServiceStorage } from '../rpc/vote-service/storage';
 import { createHash, randomBytes } from 'crypto';
 
-import { DynamoDBClient, GetItemCommand, PutItemCommand, QueryCommand, TransactWriteItemsCommand, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, GetItemCommand, PutItemCommand, QueryCommand, TransactWriteItem, TransactWriteItemsCommand, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
 
 const prod = process.env['PROD'] || true
-const USER_TABLE = prod === true ? 'users' : 'users_dev'
-const USER_CONTACT_TABLE = prod === true ? 'user_contacts' : 'user_contacts_dev'
-const PAYMENT_TABLE = prod === true ? 'payments' : 'payments_dev'
+const WALLET_TABLE = prod === true ? 'wallet' : 'wallet_dev'
 const POLLS_TABLE = prod === true ? 'polls' : 'polls_dev'
 
 const pollPartitioner = (pollId: string, orgId: string) => `${orgId}-${pollId}`
@@ -26,125 +24,143 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
   }
 
   async getUserByChatID(chatID: string): Promise<UserItem | null> {
-    const userCommand = new GetItemCommand({
-      TableName: USER_TABLE,
+    const res = await this.db.send(new GetItemCommand({
+      TableName: WALLET_TABLE,
       Key: {
-        chatID: { S: chatID }
+        PK: { S: `USER#${chatID}` },
+        SK: { S: "PROFILE" }
       }
-    })
-    const commandRes = await this.db.send(userCommand);
-    if (commandRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(commandRes.$metadata.httpStatusCode?.toString())
+    }));
+
+    if (res.$metadata.httpStatusCode !== 200) {
+      throw new Error(res.$metadata.httpStatusCode?.toString())
     }
 
-    if (!commandRes.Item) {
+    if (!res.Item) {
       return null
     }
 
-    const item = commandRes.Item;
     return {
-      chatID: item.chatID.S || '',
-      publicKey: item.publicKey.S || '',
-      breezBtcAddress: item.breezBtcAddress.S || '',
-      breezLnUrl: item.breezLnUrl.S || '',
-      tapRootAddress: item.tapRootAddress.S || '',
-      handle: item.handle.S || '',
-      phoneNumber: item.phoneNumber.S || ''
+      chatID: res.Item.chatID.S || '',
+      publicKey: res.Item.publicKey.S || '',
+      breezBtcAddress: res.Item.breezBtcAddress.S || '',
+      breezLnUrl: res.Item.breezLnUrl.S || '',
+      tapRootAddress: res.Item.tapRootAddress.S || '',
+      handle: res.Item.handle.S || '',
+      phoneNumber: res.Item.phoneNumber.S || ''
     };
   }
 
-  async getUserContact(contactDigest: string): Promise<{ contactDigest: string, chatID: string } | null> {
-    const contactCommand = new GetItemCommand({
-      TableName: USER_CONTACT_TABLE,
+  async getUserContact(contactDigest: string): Promise<UserContact | null> {
+    const res = await this.db.send(new GetItemCommand({
+      TableName: WALLET_TABLE,
       Key: {
-        contactDigest: { S: contactDigest }
+        PK: { S: `CONTACT#${contactDigest}` },
+        SK: { S: `LOOKUP`}
       }
-    })
-
-    const commandRes = await this.db.send(contactCommand);
-    if (commandRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(commandRes.$metadata.httpStatusCode?.toString())
+    }));
+    if (res.$metadata.httpStatusCode !== 200) {
+      throw new Error(res.$metadata.httpStatusCode?.toString())
     }
 
-    if (!commandRes.Item) {
+    if (!res.Item) {
       return null
     }
 
     return {
-      contactDigest: commandRes.Item?.contactDigest.S || '',
-      chatID: commandRes.Item?.chatID.S || ''
-    }
-  }
-
-  async addUserContact(contactDigest: string, chatID: string): Promise<void> {
-    const putCommand = new PutItemCommand({
-      TableName: USER_CONTACT_TABLE,
-      Item: {
-        contactDigest: { S: contactDigest },
-        chatID: { S: chatID }
-      }
-    })
-    const commandRes = await this.db.send(putCommand);
-    if (commandRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(commandRes.$metadata.httpStatusCode?.toString())
+      chatID: res.Item?.chatID.S || '',
+      breezBtcAddress: res.Item?.breezBtcAddress.S || '',
+      breezLnUrl: res.Item?.breezLnUrl.S || '',
+      tapRootAddress: res.Item?.tapRootAddress.S || ''
     }
   }
 
   async createUser(user: UserItem): Promise<void> {
-    const putCommand = new PutItemCommand({
-      TableName: USER_TABLE,
-      Item: {
-        chatID: { S: user.chatID },
-        publicKey: { S: user.publicKey },
-        breezBtcAddress: { S: user.breezBtcAddress },
-        breezLnUrl: { S: user.breezLnUrl },
-        tapRootAddress: { S: user.tapRootAddress },
-        handle: { S: user.handle || "" },
-        phoneNumber: { S: user.phoneNumber || "" }
+    const items: TransactWriteItem[] = [];
+
+    // user profile
+    items.push({
+      Put: {
+        TableName: WALLET_TABLE,
+        Item: {
+          PK: { S: `USER#${user.chatID}` },
+          SK: { S: "PROFILE" },
+          Type: { S: "User" },
+          chatID: { S: user.chatID },
+          publicKey: { S: user.publicKey },
+          breezBtcAddress: { S: user.breezBtcAddress },
+          breezLnUrl: { S: user.breezLnUrl },
+          tapRootAddress: { S: user.tapRootAddress },
+          handle: { S: user.handle || "" },
+          phoneNumber: { S: user.phoneNumber || "" },
+        },
       }
     })
-    const commandRes = await this.db.send(putCommand);
-    if (commandRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(commandRes.$metadata.httpStatusCode?.toString())
+
+    // contact lookups
+    for (const contact of [user.handle, user.phoneNumber]) {
+      if (!contact) continue;
+      items.push({
+        Put: {
+          TableName: WALLET_TABLE,
+          Item: {
+            PK: { S: `CONTACT#${contact}` },
+            SK: { S: `LOOKUP` },
+            Type: { S: "ContactLookup" },
+            chatID: { S: user.chatID },
+            breezBtcAddress: { S: user.breezBtcAddress },
+            breezLnUrl: { S: user.breezLnUrl },
+            tapRootAddress: { S: user.tapRootAddress }
+          }
+        },
+      });
+    }
+
+    const res = await this.db.send(new TransactWriteItemsCommand({
+      TransactItems: items
+    }))
+    if(res.$metadata.httpStatusCode !== 200) {
+      throw new Error(res.$metadata.httpStatusCode?.toString())
     }
   }
 
   async createPayment(paymentItem: PaymentItem): Promise<void> {
-    const putCommand = new PutItemCommand({
-      TableName: PAYMENT_TABLE,
+    const res = await this.db.send(new PutItemCommand({
+      TableName: WALLET_TABLE,
       Item: {
+        PK: { S: `PAYMENT#${paymentItem.id}` },
+        SK: { S: "DETAILS" },
+        Type: { S: "Payment" },
         paymentId: { S: paymentItem.id },
         amount: { N: paymentItem.amount.toString() },
         method: { S: paymentItem.method }
       }
-    })
-    const commandRes = await this.db.send(putCommand);
-    if (commandRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(commandRes.$metadata.httpStatusCode?.toString())
+    }));
+    if (res.$metadata.httpStatusCode !== 200) {
+      throw new Error(res.$metadata.httpStatusCode?.toString())
     }
   }
 
   async getPayment(paymentId: string): Promise<PaymentItem | null> {
-    const paymentCommand = new GetItemCommand({
-      TableName: PAYMENT_TABLE,
+    const res = await this.db.send(new GetItemCommand({
+      TableName: WALLET_TABLE,
       Key: {
-        paymentId: { S: paymentId }
+        PK: { S: `PAYMENT#${paymentId}` },
+        SK: { S: "DETAILS" }
       }
-    })
-
-    const commandRes = await this.db.send(paymentCommand);
-    if (commandRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(commandRes.$metadata.httpStatusCode?.toString())
+    }));
+    if (res.$metadata.httpStatusCode !== 200) {
+      throw new Error(res.$metadata.httpStatusCode?.toString())
     }
 
-    if (!commandRes.Item) {
+    if (!res.Item) {
       return null
     }
 
     return {
       id: paymentId,
-      amount: Number(commandRes.Item.amount.N) || 0,
-      method: commandRes.Item.method.S || ''
+      amount: Number(res.Item.amount.N) || 0,
+      method: res.Item.method.S || ''
     }
   }
 

@@ -10,7 +10,7 @@ export interface VoteServiceStorage {
   getPollAggregates(pollId: string): Promise<PollAggregate | undefined>
   hasVoted(pollId: string, voterHash: string): Promise<boolean>
   recordVote(pollId: string, voterHash: string): Promise<void>
-  closePoll(poll: Poll): void
+  closePoll(poll: Poll): Promise<void>
 
   updateAggregates(
     pollId: string,

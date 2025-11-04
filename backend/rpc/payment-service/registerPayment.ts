@@ -2,7 +2,6 @@ import * as z from "zod";
 import { PaymentServiceStorage } from "./storage.js";
 import { UserServiceStorage } from "../user-service/storage";
 import { Telegraf } from "telegraf";
-import { UserFromGetMe } from "@telegraf/types";
 
 const RegisterSchema = z.object({
   method: z.string(),

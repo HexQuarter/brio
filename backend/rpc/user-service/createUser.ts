@@ -52,14 +52,6 @@ export const createUserHandler = async (req: { body: any, db: UserServiceStorage
       }
     )
 
-    if (username) {
-      req.db.addUserContact(hashHandle as string, id.toString())
-    }
-
-    if (createUserRequest.hashedPhoneNumber) {
-      req.db.addUserContact(createUserRequest.hashedPhoneNumber, id.toString())
-    }
-
     const startParam = params.get('start_param')
     if (startParam) {
       const referralChatID = new URLSearchParams(startParam).get('referral')
