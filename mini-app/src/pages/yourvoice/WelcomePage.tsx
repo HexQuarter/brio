@@ -107,6 +107,7 @@ export function YourVoiceWelcomePage() {
 
     await new Promise(r => setTimeout(r, 500));
     setSelectedOrgId(org.id)
+    window.location.reload()
   }
 
   const handleCreatePoll = async (data: any) => {
