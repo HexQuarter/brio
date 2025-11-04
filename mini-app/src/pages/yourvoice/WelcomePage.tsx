@@ -4,7 +4,6 @@ import { createOrg, createPoll, listActivePolls, listMyOrgs, listPastPolls } fro
 import OrgRegistrationForm from '@/components/yourvoice/OrgRegistrationForm';
 import PollCreationForm from '@/components/yourvoice/PollCreationForm';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 
 import {
