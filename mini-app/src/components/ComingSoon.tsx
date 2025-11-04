@@ -15,6 +15,11 @@ export const ComingSoon: React.FC<Props> = ({ carousel = true }) => {
             background: 'conic-gradient(from 0.25turn at 50% 50%, rgb(229, 90, 35), rgb(255, 148, 44))'
         },
         {
+            description: t('comingSoon.feature2.description'),
+            title: t('comingSoon.feature2.title'),
+            background: '#d4b21cff'
+        },
+        {
             description: t('comingSoon.feature3.description'),
             title: t('comingSoon.feature3.title'),
             background: 'radial-gradient(#BE3FF4, #C0A0E7)'

@@ -1,6 +1,6 @@
 {
     "welcome.title": "Bienvenido a",
-    "welcome.description": "Ahora puedes enviar y recibir Bitcoin de forma segura a cualquier persona de la comunidad de Telegram — usando solo su usuario de Telegram o número",
+    "welcome.description": "Haz más cosas juntos en Telegram: mueve valor, crea comunidades y descubre nuevas experiencias sociales impulsadas por Bitcoin.",
     "welcome.button": "Comenzar",
     "welcome.whattodo": "¿Qué quieres hacer hoy?",
 
@@ -41,9 +41,10 @@
     "walletSecure.noLightningAddressGenerated": "No se pudo recuperar la dirección Lightning desde la frase mnemotécnica dada.",
 
     "main.nowalletTitle": "¡Tus amigos Bitcoin te están esperando!",
-    "main.nowalletDescription_1": "Para unirte a la diversión — enviar, compartir, jugar, pagar — necesitarás una cartera.",
-    "main.nowalletDescription_2": "Piénsala como tu boleto de entrada.",
+    "main.nowalletDescription_1": "Ahora puedes enviar y recibir Bitcoin de forma segura a cualquier persona de la comunidad de Telegram, simplemente usando su nombre de usuario o número de Telegram.",
+    "main.nowalletDescription_2": "Para unirte a la diversión necesitarás una cartera.",
     "main.nowalletDescription_3": "No te preocupes, es rápida, gratuita y solo tuya.",
+
     "main.createButton": "Crear cartera",
     "main.restoreButton": "Restaurar mi cartera",
     "main.welcomeTitle": "¡Bienvenido de nuevo a Brio!",

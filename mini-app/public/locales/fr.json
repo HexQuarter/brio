@@ -1,6 +1,6 @@
 {
     "welcome.title": "Bienvenue sur",
-    "welcome.description": "Vous pouvez maintenant envoyer et recevoir du Bitcoin de manière sécurisée à quiconque dans la communauté Telegram — en utilisant simplement leur pseudo Telegram ou numéro",
+    "welcome.description": "Faites-en plus ensemble sur Telegram : créez de la valeur, bâtissez des communautés et découvrez de nouvelles expériences sociales grâce au Bitcoin.",
     "welcome.button": "Commencer",
     "welcome.whattodo": "Que voulez-vous faire aujourd'hui ?",
 
@@ -41,8 +41,8 @@
     "walletSecure.noLightningAddressGenerated": "Impossible de récupérer l’adresse Lightning depuis la phrase mnémonique donnée.",
 
     "main.nowalletTitle": "Vos amis Bitcoin vous attendent !",
-    "main.nowalletDescription_1": "Pour rejoindre le fun — envoyer, partager, jouer, payer — vous aurez besoin d’un portefeuille.",
-    "main.nowalletDescription_2": "Considérez-le comme votre ticket d’entrée.",
+    "main.nowalletDescription_1": "Vous pouvez désormais envoyer et recevoir des Bitcoins en toute sécurité à n'importe quel membre de la communauté Telegram, simplement en utilisant son identifiant ou son numéro Telegram.",
+    "main.nowalletDescription_2": "Pour participer, vous aurez besoin d'un portefeuille.",
     "main.nowalletDescription_3": "Pas de souci, c’est rapide, gratuit, et rien qu’à vous.",
     "main.createButton": "Créer un portefeuille",
     "main.restoreButton": "Restaurer mon portefeuille",

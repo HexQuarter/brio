@@ -1,6 +1,6 @@
 {
     "welcome.title": "Welcome to",
-    "welcome.description": "Now you can send and receive Bitcoin securely to anyone in the telegram community - just using their telegram handle or number",
+    "welcome.description": "Do more together on Telegram — move value, build communities, and unlock new social experiences powered by Bitcoin.",
     "welcome.button": "Get Started",
     "welcome.whattodo": "What do you want to do today ?",
 
@@ -41,8 +41,8 @@
     "walletSecure.noLightningAddressGenerated": "Unable to retrieve the Lightning address from the given mnemonic.",
 
     "main.nowalletTitle": "Your Bitcoin buddies are waiting!",
-    "main.nowalletDescription_1": "To join the fun — sending, sharing, playing, and paying — you will need a wallet.",
-    "main.nowalletDescription_2": "Think of it as your ticket in.",
+    "main.nowalletDescription_1": "Now you can send and receive Bitcoin securely to anyone in the telegram community - just using their telegram handle or number",
+    "main.nowalletDescription_2": "To join the fun you will need a wallet.",
     "main.nowalletDescription_3": "No worries, it is quick, free, and yours only.",
     "main.createButton": "Create Wallet",
     "main.restoreButton": "Restore My Wallet",

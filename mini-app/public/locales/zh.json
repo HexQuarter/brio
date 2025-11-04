@@ -1,6 +1,6 @@
 {
     "welcome.title": "欢迎使用",
-    "welcome.description": "现在您可以通过 Telegram 社区使用对方的 Telegram 用户名或电话号码，安全地发送和接收比特币",
+    "welcome.description": "在 Telegram 上一起做更多事情——创造价值、建立社区，并解锁由比特币驱动的全新社交体验。",
     "welcome.button": "开始使用",
     "welcome.whattodo": "你今天想做什么",
 
@@ -41,9 +41,10 @@
     "walletSecure.noLightningAddressGenerated": "无法从给定助记词获取 Lightning 地址。",
 
     "main.nowalletTitle": "您的比特币好友在等你！",
-    "main.nowalletDescription_1": "要加入发送、分享、游戏和支付的乐趣——你需要一个钱包。",
-    "main.nowalletDescription_2": "把它当作你的入场券。",
+    "main.nowalletDescription_1": "现在，您只需使用 Telegram 社区成员的 Telegram 用户名或号码，即可安全地向他们发送和接收比特币。",
+    "main.nowalletDescription_2": "想要参与其中，你需要一个钱包。",
     "main.nowalletDescription_3": "别担心，它快捷、免费、只属于你。",
+
     "main.createButton": "创建钱包",
     "main.restoreButton": "恢复我的钱包",
     "main.welcomeTitle": "欢迎回到 Brio！",
