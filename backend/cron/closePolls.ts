@@ -29,7 +29,7 @@ export const startCronClosingPolls = (db: VoteServiceStorage) => {
 }
 
 async function notifyPollResults(db: VoteServiceStorage, poll: Poll) {
-  const aggregate = await db.getPollAggregates(poll.id);
+  const aggregate = await db.getPollAggregates(`${poll.org_id}-${poll.id}`);
   if (aggregate) {
     const org = await db.getOrg(poll.org_id);
     if (org) {
@@ -49,7 +49,9 @@ async function notifyPollResults(db: VoteServiceStorage, poll: Poll) {
       - Gender: Male (${aggregate.gender_male}), Female (${aggregate.gender_female}), Other (${aggregate.gender_other}), Unspecified (${aggregate.gender_unspecified})
       - Residency: In-country (${aggregate.res_in_country}), Abroad (${aggregate.res_outside}), Unspecified (${aggregate.res_unspecified})
       `;
-      console.log(message);
+      if (process.env['PROD'] ==='false') {
+        console.log(message)
+      }
       notifyTelegram(org.chat_id, getBotToken(), message);
     }
   }
