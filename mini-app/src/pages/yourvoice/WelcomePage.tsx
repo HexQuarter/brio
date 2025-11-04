@@ -151,129 +151,129 @@ export function YourVoiceWelcomePage() {
         <TabsTrigger className="rounded-sm" value="past" data-testid="tab-past">Past Polls</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="home" className="mt-6 space-y-8">
-        <div className='bg-gray-100 p-5 rounded-sm'>
-              <div className="text-center mb-8 flex flex-col gap-10">
-                <h1 className="text-3xl text-foreground mb-2" data-testid="text-welcome">
-                  Welcome to Your Voice Your Vote
-                </h1>
-                <p className="text-muted-foreground">
-                  Select an organization to view and participate in their polls
-                </p>
-              </div>
-              
-              {orgsLoading ? (
-                <p className="text-muted-foreground">Loading organizations...</p>
-              ) : orgs.length === 0 ? (
-                <Card className='shadow-none bg-gray-50 border-gray-200 border-1 rounded-md cursor-pointer'>
-                  <CardContent className="pt-6">
-                    <p className="text-muted-foreground text-center">
-                      No organizations available yet. Check back later!
-                    </p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="voter-org-select">Choose an Organization</Label>
-                    <Select 
-                      value={voterSelectedOrgId} 
-                      onValueChange={setVoterSelectedOrgId}
-                    >
-                      <SelectTrigger id="voter-org-select" data-testid="select-voter-org">
-                        {orgs.find(o => o.id === voterSelectedOrgId) ? (
-                          <div className="flex items-center gap-2">
-                            {orgs.find(o => o.id === voterSelectedOrgId)!.logo_url ? (
-                              <img
-                                src={orgs.find(o => o.id === voterSelectedOrgId)!.logo_url!}
-                                alt={orgs.find(o => o.id === voterSelectedOrgId)!.name}
-                                className="w-5 h-5 rounded-full border border-border object-cover flex-shrink-0"
-                              />
-                            ) : (
-                              <div className="w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold border border-border flex-shrink-0">
-                                {orgs.find(o => o.id === voterSelectedOrgId)!.name.charAt(0).toUpperCase()}
-                              </div>
-                            )}
-                            <span>{orgs.find(o => o.id === voterSelectedOrgId)!.name}</span>
-                          </div>
-                        ) : (
-                          <SelectValue placeholder="Select an organization to see polls..." />
-                        )}
-                      </SelectTrigger>
-                       <SelectContent>
-                          {orgs.map((org) => (
-                            <SelectItem key={org.id} value={org.id}>
-                              <div className="flex items-center gap-2">
-                                {org.logo_url ? (
-                                  <img
-                                    src={org.logo_url}
-                                    alt={org.name}
-                                    className="w-5 h-5 rounded-full border border-border object-cover flex-shrink-0"
-                                  />
-                                ) : (
-                                  <div className="w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold border border-border flex-shrink-0">
-                                    {org.name.charAt(0).toUpperCase()}
-                                  </div>
-                                )}
-                                <span>{org.name}</span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                    </Select>
-                  </div>
+      <TabsContent value="home" className="mt-6 space-y-8 p-0">
+        <div className='bg-gray-100 rounded-sm p-5'>
+          <div className="text-center mb-8 flex flex-col gap-10">
+            <h1 className="text-3xl text-foreground mb-2" data-testid="text-welcome">
+              Welcome to Your Voice Your Vote
+            </h1>
+            <p className="text-muted-foreground">
+              Select an organization to view and participate in their polls
+            </p>
+          </div>
 
-                  {voterSelectedOrgId && (
-                    <div className="space-y-4">
-                      <h3 className="text-lg">Polls from {orgs.find(o => o.id === voterSelectedOrgId)?.name}</h3>
-                      {orgPollsLoading ? (
-                        <p className="text-muted-foreground">Loading polls...</p>
-                      ) : orgPolls.length === 0 ? (
-                        <Card>
-                          <CardContent className="pt-6">
-                            <p className="text-muted-foreground text-center">
-                              No polls available from this organization yet.
-                            </p>
-                          </CardContent>
-                        </Card>
-                      ) : (
-                        <div className="space-y-3">
-                          {orgPolls.map((poll: Poll) => {
-                            const now = new Date().getTime();
-                            const endTime = poll.end_at * 1000;
-                            const isPast = now > endTime;
-                            const isActive = now <= endTime;
-                            
-                            return (
-                              <Card 
-                                key={poll.id} 
-                                data-testid={`card-org-poll-${poll.id}`}
-                                className="shadow-none bg-gray-50 border-gray-200 border-1 rounded-md cursor-pointer"
-                                onClick={() => navigate(`/app/yourvoice/poll/${poll.org_id}-${poll.id}`)}
-                              >
-                                <CardHeader>
-                                  <CardTitle className="flex items-center justify-between gap-2">
-                                    <span className='font-normal'>{poll.question}</span>
-                                    {isActive && <Badge variant="default">Active</Badge>}
-                                    {isPast && <Badge variant="secondary">Ended</Badge>}
-                                  </CardTitle>
-                                  <CardDescription>
-                                    {isPast ? 'Ended' : 'Ends'}: {new Date(poll.end_at * 1000).toLocaleString()}
-                                  </CardDescription>
-                                </CardHeader>
-                              </Card>
-                            );
-                          })}
+          {orgsLoading ? (
+            <p className="text-muted-foreground">Loading organizations...</p>
+          ) : orgs.length === 0 ? (
+            <Card className='shadow-none bg-gray-50 border-gray-200 border-1 rounded-md cursor-pointer'>
+              <CardContent className="pt-6">
+                <p className="text-muted-foreground text-center">
+                  No organizations available yet. Check back later!
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="voter-org-select">Choose an Organization</Label>
+                <Select
+                  value={voterSelectedOrgId}
+                  onValueChange={setVoterSelectedOrgId}
+                >
+                  <SelectTrigger id="voter-org-select" data-testid="select-voter-org w-full">
+                    {orgs.find(o => o.id === voterSelectedOrgId) ? (
+                      <div className="flex items-center gap-2">
+                        {orgs.find(o => o.id === voterSelectedOrgId)!.logo_url ? (
+                          <img
+                            src={orgs.find(o => o.id === voterSelectedOrgId)!.logo_url!}
+                            alt={orgs.find(o => o.id === voterSelectedOrgId)!.name}
+                            className="w-5 h-5 rounded-full border border-border object-cover flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold border border-border flex-shrink-0">
+                            {orgs.find(o => o.id === voterSelectedOrgId)!.name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <span>{orgs.find(o => o.id === voterSelectedOrgId)!.name}</span>
+                      </div>
+                    ) : (
+                      <SelectValue placeholder="Select an organization to see polls..." />
+                    )}
+                  </SelectTrigger>
+                  <SelectContent>
+                    {orgs.map((org) => (
+                      <SelectItem key={org.id} value={org.id}>
+                        <div className="flex items-center gap-2">
+                          {org.logo_url ? (
+                            <img
+                              src={org.logo_url}
+                              alt={org.name}
+                              className="w-5 h-5 rounded-full border border-border object-cover flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold border border-border flex-shrink-0">
+                              {org.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <span>{org.name}</span>
                         </div>
-                      )}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {voterSelectedOrgId && (
+                <div className="space-y-4">
+                  <h3 className="text-lg">Polls from {orgs.find(o => o.id === voterSelectedOrgId)?.name}</h3>
+                  {orgPollsLoading ? (
+                    <p className="text-muted-foreground">Loading polls...</p>
+                  ) : orgPolls.length === 0 ? (
+                    <Card>
+                      <CardContent className="pt-6">
+                        <p className="text-muted-foreground text-center">
+                          No polls available from this organization yet.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <div className="space-y-3">
+                      {orgPolls.map((poll: Poll) => {
+                        const now = new Date().getTime();
+                        const endTime = poll.end_at * 1000;
+                        const isPast = now > endTime;
+                        const isActive = now <= endTime;
+
+                        return (
+                          <Card
+                            key={poll.id}
+                            data-testid={`card-org-poll-${poll.id}`}
+                            className="shadow-none bg-gray-50 border-gray-200 border-1 rounded-md cursor-pointer"
+                            onClick={() => navigate(`/app/yourvoice/poll/${poll.org_id}-${poll.id}`)}
+                          >
+                            <CardHeader>
+                              <CardTitle className="flex items-center justify-between gap-2">
+                                <span className='font-normal'>{poll.question}</span>
+                                {isActive && <Badge variant="default">Active</Badge>}
+                                {isPast && <Badge variant="secondary">Ended</Badge>}
+                              </CardTitle>
+                              <CardDescription>
+                                {isPast ? 'Ended' : 'Ends'}: {new Date(poll.end_at * 1000).toLocaleString()}
+                              </CardDescription>
+                            </CardHeader>
+                          </Card>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
               )}
             </div>
+          )}
+        </div>
       </TabsContent>
 
-      <TabsContent value="create" className="mt-6 space-y-8">
+      <TabsContent value="create" className="mt-6 space-y-8 p-0">
         {orgs.length > 0 &&
           <div>
             <h2 className="text-xl mb-4">Create Poll for Existing Organization</h2>
@@ -368,7 +368,7 @@ export function YourVoiceWelcomePage() {
         </div>
       </TabsContent>
 
-      <TabsContent value="active" className="mt-6">
+      <TabsContent value="active" className="mt-6 p-0">
         <h2 className="text-xl mb-4">Active Polls</h2>
         {activePollsLoading ? (
           <p className="text-muted-foreground">Loading polls...</p>
@@ -397,7 +397,7 @@ export function YourVoiceWelcomePage() {
         )}
       </TabsContent>
 
-      <TabsContent value="past" className="mt-6">
+      <TabsContent value="past" className="mt-6 p-0">
         <h2 className="text-xl mb-4">Past Polls</h2>
         {pastPollsLoading ? (
           <p className="text-muted-foreground">Loading polls...</p>
