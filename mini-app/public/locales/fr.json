@@ -14,6 +14,7 @@
 
     "wallet": "Portefeuille",
     "next_apps": "Prochainement",
+    "home": "Accueil",
 
     "walletSetup.title": "Votre portefeuille pour envoyer – recevoir du Bitcoin ?",
     "walletSetup.description": "Créez votre portefeuille maintenant ou plus tard. Jamais de KYC requis",

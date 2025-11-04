@@ -14,6 +14,7 @@
 
     "wallet": "钱包",
     "next_apps": "即将推出",
+    "home": "开始",
 
     "walletSetup.title": "用于发送 – 接收比特币的钱包？",
     "walletSetup.description": "现在创建钱包或稍后再做。永远不需要 KYC",
