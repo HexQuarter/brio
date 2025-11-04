@@ -6,8 +6,9 @@ import { createHash, randomBytes } from 'crypto';
 import { DynamoDBClient, GetItemCommand, PutItemCommand, QueryCommand, TransactWriteItem, TransactWriteItemsCommand, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
 
 const prod = process.env['PROD'] || true
-const WALLET_TABLE = prod === true ? 'wallet' : 'wallet_dev'
-const POLLS_TABLE = prod === true ? 'polls' : 'polls_dev'
+const dev = process.env['DEV'] || false
+const WALLET_TABLE = prod === true && dev === false ? 'wallet' : 'wallet_dev'
+const POLLS_TABLE = prod === true && dev === false ? 'polls' : 'polls_dev'
 
 const pollPartitioner = (pollId: string, orgId: string) => `${orgId}-${pollId}`
 const pollDepartitioner = (pollPartition: String) => {
