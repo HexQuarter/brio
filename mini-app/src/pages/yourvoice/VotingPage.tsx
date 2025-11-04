@@ -3,7 +3,6 @@ import PollHeader from '@/components/yourvoice/PollHeader';
 import VotePanel from '@/components/yourvoice/VotePanel';
 import CountdownTimer from '@/components/yourvoice/CountdownTimer';
 import OptionalAttributesForm from '@/components/yourvoice/OptionalAttributesForm';
-import AuditTrailFooter from '@/components/yourvoice/AuditTrailFooter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import StatsTiles from '@/components/yourvoice/StatsTiles';
 import DemographicCharts from '@/components/yourvoice/DemographicCharts';
