@@ -21,7 +21,7 @@ export function MainPage() {
     }, [location])
 
     return (
-        <div className="flex flex-col h-dvh pb-10">
+        <div className="flex flex-col pb-10 h-screen gap-5">
             <div className="flex gap-5 justify-center">
                 <div className={`flex flex-col items-center gap-2 p-2`} onClick={() => window.location.replace(`#/apps`)}>
                     <GrAppsRounded className={`w-10 h-10 text-gray-800 rounded-full p-2`} />
@@ -36,7 +36,7 @@ export function MainPage() {
             </div>
 
             <Page back={true}>
-                <div className="mt-10">
+                <div className="flex-1 rounded-md">
                     <Outlet />
                 </div>
             </Page>

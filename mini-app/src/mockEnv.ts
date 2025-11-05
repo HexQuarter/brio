@@ -71,6 +71,7 @@ if (import.meta.env.DEV) {
           ['signature', 'some-signature'],
           ['user', JSON.stringify({ id: 1, first_name: 'Vladislav', username: 'vlad' })],
           // ['start_param', 'payment=fd447af8cbeb9343e6839d918fb8249c14264c10efb49417964a859a262ecee9']
+          // ['start_param', 'route=/app/yourvoice']
         ]).toString()],
         ['tgWebAppVersion', '8.4'],
         ['tgWebAppPlatform', 'tdesktop'],

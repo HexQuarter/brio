@@ -1,5 +1,6 @@
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface PollHeaderProps {
   orgName: string;
@@ -8,13 +9,14 @@ interface PollHeaderProps {
 }
 
 export default function PollHeader({ orgName, orgLogo, pollQuestion }: PollHeaderProps) {
+  const navigate = useNavigate()
   return (
     <header className="" data-testid="poll-header">
       <div className="flex items-center gap-3 p-4 max-w-6xl mx-auto">
         <Button
           size="icon"
           variant="ghost"
-          onClick={() => window.location.replace('#/app/yourvoice')}
+          onClick={() => navigate(-1) }
           className="flex-shrink-0"
           data-testid="button-back-home"
         >

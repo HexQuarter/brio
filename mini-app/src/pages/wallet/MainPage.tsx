@@ -1,7 +1,7 @@
 import { WalletBalance } from '@/components/wallet/WalletBalance';
 
 import { Outlet } from 'react-router-dom';
-import { WalletMenu } from '@/components/wallet/Menu';
+import { Menu } from '@/components/Menu';
 import { useWallet } from '@/lib/wallet/context';
 
 import { useEffect, useState } from 'react';
@@ -12,6 +12,9 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CiCircleAlert } from "react-icons/ci";
 import { fetchPrice } from '@/lib/wallet/api';
 
+import { GoDownload, GoHistory, GoUpload } from "react-icons/go"
+import { t } from 'i18next';
+
 export const WalletMainPage = () => {
     const { breezSdk, currency } = useWallet()
     const [btcBalance, setBtcBalance] = useState(0)
@@ -19,6 +22,24 @@ export const WalletMainPage = () => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
     const [price, setPrice] = useState(0)
+
+    const menuItems = [
+        {
+            name: t('wallet.menuReceiveBTC'),
+            icon: GoDownload,
+            path: '/app/wallet/receive',
+        },
+        {
+            name: t('wallet.menuSendBTC'),
+            icon: GoUpload,
+            path: '/app/wallet/send',
+        },
+        {
+            name: t('wallet.menuActivity'),
+            icon: GoHistory,
+            path: '/app/wallet/activity',
+        }
+    ]
 
     useEffect(() => {
         const refreshPrice = async () => {
@@ -31,8 +52,8 @@ export const WalletMainPage = () => {
         const interval = setInterval(async () => await refreshPrice(), 5000)
         return () => clearInterval(interval)
     }, [currency])
-    
-    useEffect(() => { 
+
+    useEffect(() => {
         const loadBalance = async (breezSdk: BreezSdk, ensureSync: boolean = false) => {
             try {
                 const walletInfo = await breezSdk.getInfo({
@@ -44,7 +65,7 @@ export const WalletMainPage = () => {
                 setBtcBalance(btc)
                 setFiatBalance(btc * price)
             }
-            catch(e) {
+            catch (e) {
                 setError((e as Error).message)
             }
             finally {
@@ -54,51 +75,26 @@ export const WalletMainPage = () => {
 
         if (breezSdk) {
             loadBalance(breezSdk)
-            
+
             const interval = setInterval(async () => await loadBalance(breezSdk, true), 1000)
             return () => clearInterval(interval)
         }
 
     }, [breezSdk, currency, price])
 
-    //  if (!walletExists && location.search == '?visit') {
-    //     return (
-    //         <Page back={true}>
-    //             <div className="bg-gray-100 p-5 rounded-xl flex-1 flex flex-col">
-    //                 <div className="p-5 bg-white rounded-xl flex-1">
-    //                     <div className='flex flex-col gap-5'>
-    //                         <div className="flex flex-col gap-10">
-    //                             <div className="flex flex-col gap-10">
-    //                                 <h3 className='text-2xl font-medium'>{t('main.nowalletTitle')}</h3>
-    //                                 <p>{t('main.nowalletDescription_1')}</p>
-    //                                 <p>{t('main.nowalletDescription_2')}</p>
-    //                                 <p>{t('main.nowalletDescription_3')}</p>
-    //                             </div>
-    //                             <div className="flex flex-col gap-5 items-center">
-    //                                 <Button className="w-full" onClick={() => navigate('/onboarding/create-wallet')}>{t('main.createButton')}</Button>
-    //                                 <Button variant="secondary" className="w-full" onClick={() => navigate('/onboarding/restore-wallet')}>{t('main.restoreButton')}</Button>
-    //                             </div>
-    //                         </div>
-    //                     </div>
-    //                 </div>
-    //             </div>
-    //         </Page>
-    //     )
-    // }
-
     return (
         <div className='flex flex-col h-full'>
-            { loading && <div className="flex flex-col items-center "><Spinner size='l' /></div>}
-            { !loading && !error && 
+            {loading && <div className="flex flex-col items-center "><Spinner size='l' /></div>}
+            {!loading && !error &&
                 <div className="flex flex-col gap-5 h-full ">
                     {loading && <Spinner size='s' />}
-                    <WalletBalance btcBalance={btcBalance} fiatBalance={fiatBalance} currency={currency}/>
-                        <div className="bg-gray-100 p-1 rounded-xl flex-1 flex flex-col">
-                            <div className="flex flex-col gap-20 mt-5 p-2">
-                                <WalletMenu />
-                                <Outlet context={[btcBalance]}/>
-                            </div>
+                    <WalletBalance btcBalance={btcBalance} fiatBalance={fiatBalance} currency={currency} />
+                    <div className="bg-gray-100 p-1 rounded-xl flex-1 flex flex-col">
+                        <div className="flex flex-col gap-20 mt-5 p-2">
+                            <Menu items={menuItems} />
+                            <Outlet context={[btcBalance]} />
                         </div>
+                    </div>
                 </div>
             }
             {error &&
@@ -114,5 +110,5 @@ export const WalletMainPage = () => {
                 </Alert>
             }
         </div>
-  );
+    );
 };

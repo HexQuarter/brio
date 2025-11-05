@@ -81,7 +81,7 @@ export function VotingPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="flex items-center justify-center">
         <div className="text-center">
           <div className="text-lg text-muted-foreground">Loading poll...</div>
         </div>
@@ -91,7 +91,7 @@ export function VotingPage() {
 
   if (!data) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="flex items-center justify-center">
         <div className="text-center">
           <div className="text-lg text-foreground font-semibold">Poll not found</div>
         </div>
@@ -129,47 +129,49 @@ export function VotingPage() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100 p-6 rounded-md">
+    <div className="flex flex-col gap-5">
       <PollHeader
         orgName={org?.name || 'Organization'}
         orgLogo={org?.logo_url || undefined}
         pollQuestion={poll.question}
       />
 
-      <main className="flex-1 overflow-auto mt-10">
-        <div className="max-w-6xl mx-auto space-y-6 pb-24">
-          {org?.purpose && (
-            <div className="bg-muted/50 border border-border rounded-lg p-4">
-              <p className="text-sm text-muted-foreground font-medium mb-1">About {org.name}</p>
-              <p className="text-sm text-foreground">{org.purpose}</p>
-            </div>
-          )}
+      <div className="flex flex-col gap-10">
+        {org?.purpose && (
+          <div className="bg-muted/50 border border-border rounded-lg p-4">
+            <p className="text-sm text-muted-foreground font-medium mb-1">About <span className='font-semibold'>{org.name}</span></p>
+            <p className="text-sm text-foreground">{org.purpose}</p>
+          </div>
+        )}
 
-           {org?.telegram_handle && (
-            <Card className="p-4 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20" data-testid="card-donation">
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Heart className="w-5 h-5 text-primary" />
-                </div>
-                <div className="flex-1 space-y-1">
-                  <p className="text-sm font-semibold text-foreground">Support {org.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Donate BTC via Brio on Telegram
-                  </p>
-                  <a
-                    href={`https://t.me/${org.telegram_handle.replace('@', '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-sm font-medium text-primary hover-elevate active-elevate-2 bg-background border border-primary/30 rounded-lg px-3 py-1.5 mt-2"
-                    data-testid="link-telegram-donation"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    {org.telegram_handle}
-                  </a>
-                </div>
+          {org?.telegram_handle && (
+          <Card className="p-4 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20" data-testid="card-donation">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Heart className="w-5 h-5 text-primary" />
               </div>
-            </Card>
-          )}
+              <div className="flex-1 space-y-1">
+                <p className="text-sm font-semibold text-foreground">Support {org.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  Donate BTC via Brio on Telegram
+                </p>
+                <a
+                  href={`https://t.me/${org.telegram_handle.replace('@', '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-sm font-medium text-primary hover-elevate active-elevate-2 bg-background border border-primary/30 rounded-lg px-3 py-1.5 mt-2"
+                  data-testid="link-telegram-donation"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  {org.telegram_handle}
+                </a>
+              </div>
+            </div>
+          </Card>
+        )}
+
+
+        <div className='flex flex-col gap-5 bg-white p-5 rounded-sm'>
 
           <CountdownTimer endTime={pollEndTime} />
 
@@ -188,34 +190,33 @@ export function VotingPage() {
             userVote={userVote}
             onVote={handleVote}
           />}
-
-          <Tabs defaultValue="stats" className="w-full ">
-            <TabsList className="w-full flex rounded-sm gap-2 bg-none">
-              <TabsTrigger className="rounded-sm" value="stats" data-testid="tab-stats">Live Stats</TabsTrigger>
-              <TabsTrigger className="rounded-sm" value="demographics" data-testid="tab-demographics">Demographics</TabsTrigger>
-            </TabsList>
-            <TabsContent value="stats" className="space-y-6 mt-15 p-0">
-              <StatsTiles
-                totalVotes={aggregates.total_votes}
-                yesPercentage={yesPercentage}
-                noPercentage={noPercentage}
-                verifiedCount={aggregates.verified_total}
-              />
-            </TabsContent>
-            <TabsContent value="demographics" className="space-y-6 mt-15 p-0">
-              <DemographicCharts
-                ageBrackets={ageBrackets}
-                genderBreakdown={genderBreakdown}
-                residenceBreakdown={{
-                  inCountry: aggregates.res_in_country,
-                  outside: aggregates.res_outside,
-                }}
-              />
-            </TabsContent>
-          </Tabs>
         </div>
-      </main>
-      {/* <AuditTrailFooter pollId={pollId} /> */}
+
+        <Tabs defaultValue="stats">
+          <TabsList className="w-full flex rounded-sm gap-2 bg-none">
+            <TabsTrigger className="rounded-sm" value="stats" data-testid="tab-stats">Live Stats</TabsTrigger>
+            <TabsTrigger className="rounded-sm" value="demographics" data-testid="tab-demographics">Demographics</TabsTrigger>
+          </TabsList>
+          <TabsContent value="stats" className="p-0 pt-5">
+            <StatsTiles
+              totalVotes={aggregates.total_votes}
+              yesPercentage={yesPercentage}
+              noPercentage={noPercentage}
+              verifiedCount={aggregates.verified_total}
+            />
+          </TabsContent>
+          <TabsContent value="demographics" className="p-0 pt-5">
+            <DemographicCharts
+              ageBrackets={ageBrackets}
+              genderBreakdown={genderBreakdown}
+              residenceBreakdown={{
+                inCountry: aggregates.res_in_country,
+                outside: aggregates.res_outside,
+              }}
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }

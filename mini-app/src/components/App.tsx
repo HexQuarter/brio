@@ -21,6 +21,10 @@ import { AppsPage } from '@/pages/AppsPage';
 import { YourVoiceWelcomePage } from '@/pages/yourvoice/WelcomePage';
 import { YourVoiceMainPage } from '@/pages/yourvoice/MainPage';
 import { VotingPage } from '@/pages/yourvoice/VotingPage';
+import { YourVoiceCreateOrgPage } from '@/pages/yourvoice/CreateOrgPage';
+import { YourVoiceCreatePollPage } from '@/pages/yourvoice/CreatePollPage';
+import { YourVoiceActivePollsPage } from '@/pages/yourvoice/ActivePolls';
+import { YourVoicePastPollsPage } from '@/pages/yourvoice/PastPollsPage';
 
 function WalletRoute({ children }: PropsWithChildren<{}>) {
   const wallet = useWallet()
@@ -74,8 +78,11 @@ export function App() {
             </Route>
             <Route path="yourvoice" Component={YourVoiceMainPage}>
               <Route index element={<YourVoiceWelcomePage />} />
+              <Route path="create-org" element={<YourVoiceCreateOrgPage />} />
+              <Route path="create-poll" element={<YourVoiceCreatePollPage />} />
               <Route path="poll/:id" element={<VotingPage />} />
-              {/* <Route path="past-polls/:id" element={PastPollsPage} /> */}
+              <Route path="active-polls" element={<YourVoiceActivePollsPage />} />
+              <Route path="past-polls" element={<YourVoicePastPollsPage />} />
             </Route>
             <Route path="upcoming" Component={ComingSoonPage} />
           </Route>

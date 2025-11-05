@@ -76,7 +76,7 @@ export const WalletActivityPage : React.FC = () => {
     }, [breezSdk])
 
     return (
-        <div className="flex flex-col gap-5 text-center w-full h-full rounded-sm">
+        <div className="flex flex-col gap-5 text-center">
             <h3 className="text-2xl font-medium">{t('walletActivities.title')}</h3>
             <div className='flex flex-col p-2'>
                 {loading && <Spinner size='s'/>}

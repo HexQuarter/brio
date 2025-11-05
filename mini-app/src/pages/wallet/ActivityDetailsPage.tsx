@@ -41,7 +41,7 @@ export const WalletActivityDetailsPage : React.FC = () => {
     }
 
     return (
-        <div className="flex flex-col gap-10 w-full h-full ">
+        <div className="flex flex-col gap-10">
             <div className='flex gap-2 items-center'>
                 <ArrowLeft onClick={() => navigate('/app/wallet/activity')} />
                 <h3 className="text-2xl font-medium">{t('walletActivity.title')}</h3>

@@ -28,8 +28,8 @@ export default function VotePanel({ question, hasVoted = false, userVote, onVote
   };
 
   return (
-    <div className="space-y-6" data-testid="vote-panel">
-      <div className="text-center space-y-2">
+    <div className="flex flex-col gap-5" data-testid="vote-panel">
+      <div className="text-center flex flex-col gap-2">
         <h2 className="text-2xl md:text-3xl text-foreground leading-tight" data-testid="text-poll-question">
           {question}
         </h2>
