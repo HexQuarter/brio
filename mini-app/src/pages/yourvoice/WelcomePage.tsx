@@ -73,10 +73,13 @@ export function YourVoiceWelcomePage() {
         <p className="text-muted-foreground">Loading organizations...</p>
       ) : orgs.length === 0 ? (
         <Card className='shadow-none bg-gray-50 border-gray-200 border-1 rounded-md cursor-pointer'>
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 flex flex-col gap-5">
             <p className="text-muted-foreground text-center">
-              No organizations available yet. Check back later!
+              No organizations available yet
             </p>
+            <div className='flex'>
+              <Button className='w-full border-primary text-primary h-5' variant="outline" onClick={() => navigate(`/app/yourvoice/create-org`)}>Create a new organization</Button>
+            </div>
           </CardContent>
         </Card>
       ) : (
