@@ -30,21 +30,20 @@ export const createOrgHandler = async (req: { body: any, db: VoteServiceStorage 
       if (!verifyTelegramAuth(orgData.tgInitData, getBotId())) {
         return res.status(401).json({ error: "invalid Telegram InitData" })
       }
+    }
 
+    let params = new URLSearchParams(orgData.tgInitData);
+    if (!params.has('start_param')) {
       const params = new URLSearchParams(orgData.tgInitData);
-      if (!params.has('start_param')) {
-        return res.status(400).json({ error: 'no start_param in tgInitData' }) 
-      }
+      const user = JSON.parse(params.get('user') as string)
+      chatID = user.id
+    }
+    else {
       const startParams = new URLSearchParams(params.get('start_param') as string)
       if (!startParams.has('chat_id')) {
         return res.status(400).json({ error: 'no chat_id in start_param' }) 
       }
       chatID = new URLSearchParams(startParams).get('chat_id') as string
-    }
-    else {
-      const params = new URLSearchParams(orgData.tgInitData);
-      const user = JSON.parse(params.get('user') as string)
-      chatID = user.id
     }
 
     const orgId = await req.db.createOrg({

@@ -30,30 +30,30 @@ export const createPollHandler = async (req: { body: any, db: VoteServiceStorage
     }
 
     let chatID
-    let tgInitParams = new URLSearchParams(pollData.tgInitData);
 
     const prod = process.env["PROD"] || "true"
     if (prod === "true") {
       if (!verifyTelegramAuth(pollData.tgInitData, getBotId())) {
         return res.status(401).json({ message: "invalid Telegram InitData" })
       }
-
-      if (!tgInitParams.has('start_param')) {
-        return res.status(400).json({ error: 'no start_param in tgInitData' }) 
-      }
-      const startParams = new URLSearchParams(tgInitParams.get('start_param') as string)
+    }
+    
+    let params = new URLSearchParams(pollData.tgInitData);
+    if (!params.has('start_param')) {
+      const params = new URLSearchParams(pollData.tgInitData);
+      const user = JSON.parse(params.get('user') as string)
+      chatID = user.id
+    }
+    else {
+      const startParams = new URLSearchParams(params.get('start_param') as string)
       if (!startParams.has('chat_id')) {
         return res.status(400).json({ error: 'no chat_id in start_param' }) 
       }
       chatID = new URLSearchParams(startParams).get('chat_id') as string
     }
-    else {
-      const user = JSON.parse(tgInitParams.get('user') as string)
-      chatID = user.id
-    }
 
     if (req.bot) {
-      const { id: userID } = JSON.parse(tgInitParams.get('user') as string)
+      const { id: userID } = JSON.parse(params.get('user') as string)
       const admins = await req.bot.telegram.getChatAdministrators(chatID)
       if (!admins.some(a => a.user.id == userID)) {
         return res.status(401).json({ error: "only the owner of the organization can create poll" })
