@@ -86,18 +86,7 @@ export const createPollHandler = async (req: { body: any, db: VoteServiceStorage
     const pollId = await req.db.createPoll(pollData)
 
     if (req.bot) {
-      const botUsername = req.bot.botInfo?.username
-      const startParam = encodeURIComponent(`route=/app/yourvoice/poll/${pollId}`)
-      const miniappLink = `https://t.me/${botUsername}?startapp=${startParam}`;
-      await req.bot.telegram.sendMessage(chatID, `A new poll have been created: ${pollData.question}`, {
-        reply_markup: {
-          inline_keyboard: [
-            [
-              { text: 'Check it out', url: miniappLink }
-            ]
-          ]
-        }
-      })
+      await req.bot.telegram.sendMessage(chatID, `A new poll have been created: ${pollData.question}`)
     }
 
     res.status(201).json({ id: pollId });
