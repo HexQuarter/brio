@@ -53,15 +53,18 @@ export const createPollHandler = async (req: { body: any, db: VoteServiceStorage
     }
 
     if (req.bot) {
-      const { id: userID } = JSON.parse(params.get('user') as string)
-      const admins = await req.bot.telegram.getChatAdministrators(chatID)
-      if (!admins.some(a => a.user.id == userID)) {
-        return res.status(401).json({ error: "only the owner of the organization can create poll" })
+      const chat = await req.bot.telegram.getChat(chatID)
+      if (chat.type == 'private') {
+        if (org.chat_id != chatID) {
+          return res.status(401).json({ error: "only the owner of the organization can create poll" })
+        }
       }
-    }
-    else {
-      if (org.chat_id != chatID) {
-        return res.status(401).json({ error: "only the owner of the organization can create poll" })
+      else {
+        const { id: userID } = JSON.parse(params.get('user') as string)
+        const admins = await req.bot.telegram.getChatAdministrators(chatID)
+        if (!admins.some(a => a.user.id == userID)) {
+          return res.status(401).json({ error: "only the owner of the organization can create poll" })
+        }
       }
     }
 
