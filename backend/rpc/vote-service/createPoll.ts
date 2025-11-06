@@ -29,45 +29,58 @@ export const createPollHandler = async (req: { body: any, db: VoteServiceStorage
       return res.status(400).json({ message: "invalid org id" })
     }
 
+    let chatID
+    let tgInitParams = new URLSearchParams(pollData.tgInitData);
+
     const prod = process.env["PROD"] || "true"
     if (prod === "true") {
       if (!verifyTelegramAuth(pollData.tgInitData, getBotId())) {
         return res.status(401).json({ message: "invalid Telegram InitData" })
       }
+
+      if (!tgInitParams.has('start_param')) {
+        return res.status(400).json({ error: 'no start_param in tgInitData' }) 
+      }
+      const startParams = new URLSearchParams(tgInitParams.get('start_param') as string)
+      if (!startParams.has('chat_id')) {
+        return res.status(400).json({ error: 'no chat_id in start_param' }) 
+      }
+      chatID = new URLSearchParams(startParams).get('chat_id') as string
+    }
+    else {
+      const user = JSON.parse(tgInitParams.get('user') as string)
+      chatID = user.id
     }
 
-    const params = new URLSearchParams(pollData.tgInitData);
-    if (!params.has('start_param')) {
-      return res.status(400).json({ error: 'no start_param in tgInitData' })
-    }
-    const startParams = new URLSearchParams(params.get('start_param') as string)
-    if (!startParams.has('chat_id')) {
-      return res.status(400).json({ error: 'no chat_id in start_param' })
-    }
-    const { id: userID } = JSON.parse(params.get('user') as string)
-    const chatID = new URLSearchParams(startParams).get('chat_id') as string
     if (req.bot) {
+      const { id: userID } = JSON.parse(tgInitParams.get('user') as string)
       const admins = await req.bot.telegram.getChatAdministrators(chatID)
       if (!admins.some(a => a.user.id == userID)) {
-        return res.status(401).json({ message: "only the owner of the organization can create poll" })
+        return res.status(401).json({ error: "only the owner of the organization can create poll" })
       }
     }
     else {
       if (org.chat_id != chatID) {
-        return res.status(401).json({ message: "only the owner of the organization can create poll" })
+        return res.status(401).json({ error: "only the owner of the organization can create poll" })
       }
     }
 
+    const now = new Date().getTime()
+
     if (pollData.start_at <= 0) {
-      return res.status(400).json({ message: "start date must be a valid date" })
+      return res.status(400).json({ error: "start date must be a valid date" })
+    }
+
+    if (pollData.start_at * 1000 <= now) {
+      return res.status(400).json({ error: "start date cannot be in the past" })
     }
 
     if (pollData.end_at <= 0) {
-      return res.status(400).json({ message: "end date must be a valid date" })
+      return res.status(400).json({ error: "end date must be a valid date" })
     }
 
     if (pollData.end_at < pollData.start_at) {
-      return res.status(400).json({ message: "end date must be after the start date" })
+      return res.status(400).json({ error: "end date must be after the start date" })
     }
 
     const pollId = await req.db.createPoll(pollData)

@@ -26,7 +26,7 @@ export const registerVoteHandler = async (req: { body: any, db: VoteServiceStora
     const prod = process.env["PROD"]
     if (prod === "true") {
       if (!verifyTelegramAuth(voteData.tgInitData, getBotId())) {
-        return res.status(401).json({ message: "invalid Telegram InitData" })
+        return res.status(401).json({ error: "invalid Telegram InitData" })
       }
     }
 

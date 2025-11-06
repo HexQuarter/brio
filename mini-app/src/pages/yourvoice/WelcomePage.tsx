@@ -159,7 +159,7 @@ export function YourVoiceWelcomePage() {
                         key={poll.id}
                         data-testid={`card-org-poll-${poll.id}`}
                         className="shadow-none bg-gray-50 border-gray-200 border-1 rounded-md cursor-pointer"
-                        onClick={() => navigate(`/app/yourvoice/poll/${poll.org_id}-${poll.id}`)}
+                        onClick={() => navigate(`/app/yourvoice/poll/${poll.id}`)}
                       >
                         <CardHeader>
                           <CardTitle className="flex items-center justify-between gap-2">

@@ -22,7 +22,7 @@ export const checkVoteHandler = async (req: { body: any, db: VoteServiceStorage 
     const prod = process.env["PROD"] || "true"
     if (prod === "true") {
       if (!verifyTelegramAuth(checkVoteData.tgInitData, getBotId())) {
-        return res.status(401).json({ message: "invalid Telegram InitData" })
+        return res.status(401).json({ error: "invalid Telegram InitData" })
       }
     }
 

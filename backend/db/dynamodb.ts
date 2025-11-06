@@ -166,7 +166,7 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
   }
 
   async createOrg(org: OrgInsertion): Promise<string> {
-    const orgID = createHash('sha256').update(`${org.chat_id}-${org.name}`).digest('hex') as string
+    const orgID = createHash('sha256').update(randomBytes(32)).digest('hex').slice(0, 16)
 
     const command = new TransactWriteItemsCommand({
       TransactItems: [
@@ -233,7 +233,7 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
     return {
       id: id,
       name: res.Item.name?.S || '',
-      chat_id: Number(res.Item.chat_id?.N || '0'),
+      chat_id: res.Item.chat_id?.N || '0',
       scope_level: (scopeLevel as 'region' | 'countries' | 'continent' | 'world' | 'city' | 'community'),
       logo_url: res.Item.logo_url?.S || '',
       geographic_scope: res.Item.geographic_scope?.S || '',
@@ -244,7 +244,7 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
     }
   }
 
-  async listOrgByChatId(chatId: number): Promise<OrgListing[]> {
+  async listOrgByChatId(chatId: string): Promise<OrgListing[]> {
     const res = await this.db.send( new QueryCommand({
       TableName: POLLS_TABLE,
       KeyConditionExpression: "PK = :pk",
@@ -264,7 +264,7 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
 
   async createPoll(poll: PollInsertion): Promise<string> {
     const hashSalt = randomBytes(32).toString('hex')
-    const pollId = createHash('sha256').update(hashSalt).digest('hex')
+    const pollId = createHash('sha256').update(hashSalt).digest('hex').slice(0, 16)
     const transactCommand = new TransactWriteItemsCommand({
       TransactItems: [
         {
@@ -723,11 +723,13 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
       throw new Error(res.$metadata.httpStatusCode?.toString())
     }
 
-    return (res.Items || []).map(item => ({
-      id: item.SK?.S?.split('#')[1] || '',
-      question: item.question?.S || '',
-      end_at: item.end_at?.N || 0,
-      org_id: orgId
-    })) as PollListing[]
+    return (res.Items || []).map((item) => {
+      return {
+        id: pollPartitioner(item.SK?.S?.split('#')[1] || '', orgId),
+        question: item.question?.S || '',
+        end_at: item.end_at?.N || 0,
+        org_id: orgId
+      }
+    }) as PollListing[]
   }
 }
