@@ -30,8 +30,6 @@ export const registerVoteHandler = async (req: { body: any, db: VoteServiceStora
       }
     }
 
-    
-
     const params = new URLSearchParams(voteData.tgInitData);
     const user = JSON.parse(params.get('user') as string)
 

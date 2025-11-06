@@ -24,11 +24,15 @@ export const listChatIdOrgsHandler = async (req: { body: any, db: VoteServiceSto
     }
 
     const params = new URLSearchParams(orgData.tgInitData);
-    if (!params.has('chat_instance')) {
-      return res.status(400).json({ error: 'no chat instance in tgInitData' }) 
+    if (!params.has('start_param')) {
+      return res.status(400).json({ error: 'no start_param in tgInitData' }) 
     }
-    const id = params.get('chat_instance') as string
-    const orgs = await req.db.listOrgByChatId(id)
+    const startParams = new URLSearchParams(params.get('start_param') as string)
+    if (!startParams.has('chat_id')) {
+      return res.status(400).json({ error: 'no chat_id in start_param' }) 
+    }
+    const chatID = new URLSearchParams(startParams).get('chat_id') as string
+    const orgs = await req.db.listOrgByChatId(chatID)
     res.status(200).json(orgs);
   }
   catch (e) {

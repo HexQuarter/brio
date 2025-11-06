@@ -54,8 +54,12 @@ export const startBot = async (token: string) => {
 }
 
 const onStart = async(ctx: any) => {
+  const chatId = ctx.chat.id;
   const username = ctx.botInfo.username;
-  const link = `https://t.me/${username}?startapp`;
+  const startParam = new URLSearchParams()
+  startParam.append('chat_id', chatId)
+  const encodedStartParam = encodeURIComponent(startParam.toString())
+  const link = `https://t.me/${username}?startapp=${encodedStartParam}`;
 
   await ctx.reply(
     '🚀 Welcome to Brio! You can enjoy Bitcoin securely to anyone in the telegram community. To get started click on `Launch Brio',

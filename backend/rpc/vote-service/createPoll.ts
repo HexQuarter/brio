@@ -37,19 +37,23 @@ export const createPollHandler = async (req: { body: any, db: VoteServiceStorage
     }
 
     const params = new URLSearchParams(pollData.tgInitData);
-    if (!params.has('chat_instance')) {
-      return res.status(400).json({ error: 'no chat instance in tgInitData' }) 
+    if (!params.has('start_param')) {
+      return res.status(400).json({ error: 'no start_param in tgInitData' }) 
     }
-    const chat_id = params.get('chat_instance') as string
+    const startParams = new URLSearchParams(params.get('start_param') as string)
+    if (!startParams.has('chat_id')) {
+      return res.status(400).json({ error: 'no chat_id in start_param' }) 
+    }
     const { id: userID } = JSON.parse(params.get('user') as string)
+    const chatID = new URLSearchParams(startParams).get('chat_id') as string
     if (req.bot) {
-      const admins = await req.bot.telegram.getChatAdministrators(chat_id)
+      const admins = await req.bot.telegram.getChatAdministrators(chatID)
       if (!admins.some(a => a.user.id == userID)) {
         return res.status(401).json({ message: "only the owner of the organization can create poll" })
       }
     }
     else {
-      if (org.chat_id != chat_id) {
+      if (org.chat_id != chatID) {
         return res.status(401).json({ message: "only the owner of the organization can create poll" })
       }
     }
@@ -69,7 +73,7 @@ export const createPollHandler = async (req: { body: any, db: VoteServiceStorage
     const pollId = await req.db.createPoll(pollData)
 
     if (req.bot) {
-      await req.bot.telegram.sendMessage(chat_id, `A new poll have been created: ${pollData.question}`)
+      await req.bot.telegram.sendMessage(chatID, `A new poll have been created: ${pollData.question}`)
     }
 
     res.status(201).json({ id: pollId });

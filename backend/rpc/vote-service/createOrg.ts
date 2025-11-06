@@ -32,10 +32,14 @@ export const createOrgHandler = async (req: { body: any, db: VoteServiceStorage 
     }
 
     const params = new URLSearchParams(orgData.tgInitData);
-    if (!params.has('chat_instance')) {
-      return res.status(400).json({ error: 'no chat instance in tgInitData' }) 
+    if (!params.has('start_param')) {
+      return res.status(400).json({ error: 'no start_param in tgInitData' }) 
     }
-    const id = params.get('chat_instance') as string
+    const startParams = new URLSearchParams(params.get('start_param') as string)
+    if (!startParams.has('chat_id')) {
+      return res.status(400).json({ error: 'no chat_id in start_param' }) 
+    }
+    const chatID = new URLSearchParams(startParams).get('chat_id') as string
 
     const orgId = await req.db.createOrg({
       name: orgData.name,
@@ -43,7 +47,7 @@ export const createOrgHandler = async (req: { body: any, db: VoteServiceStorage 
       scope_level: orgData.scope_level,
       geographic_scope: orgData.geographic_scope,
       logo_url: orgData.logo_url,
-      chat_id: id,
+      chat_id: chatID,
       telegram_handle: orgData.telegram_handle,
       id_verification_required: orgData.id_verification_required
     })
