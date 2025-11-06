@@ -26,11 +26,18 @@ export const startBot = async (token: string) => {
 
   bot.start((ctx: Context) => onStart(ctx));
 
-  bot.telegram.setMyCommands([{
+  bot.telegram.setMyCommands([
+    {
+      command: 'open',
+      description: 'Open Brio app'
+    },
+    {
     command: 'support',
-    description: 'Report a problem'
-  }])
+      description: 'Report a problem from Brio'
+    }
+  ])
 
+  bot.command('open', onStart)
 
   bot.command('support', async (ctx: any) => {
     await ctx.reply(`Please describe the issue you’re facing. Include any steps to reproduce or screenshot if possible. Our team will review it and get back to you shortly.`)
@@ -46,8 +53,22 @@ export const startBot = async (token: string) => {
   return bot
 }
 
-const onStart = (ctx: any) => {
-  ctx.reply("Welcome to Brio! You can enjoy Bitcoin securely to anyone in the telegram community. To get started click on `Launch Brio`");
+const onStart = async(ctx: any) => {
+  const username = ctx.botInfo.username;
+  const link = `https://t.me/${username}?startapp`;
+
+  await ctx.reply(
+    '🚀 Welcome to Brio! You can enjoy Bitcoin securely to anyone in the telegram community. To get started click on `Launch Brio',
+    {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { text: 'Launch Brio', url: link }
+          ]
+        ]
+      }
+    }
+  )
 }
 
 const onMessage = async (ctx: any) => {
