@@ -24,8 +24,10 @@ export const listChatIdOrgsHandler = async (req: { body: any, db: VoteServiceSto
     }
 
     const params = new URLSearchParams(orgData.tgInitData);
-    const { id } = JSON.parse(params.get('user') as string)
-
+    if (!params.has('chat_instance')) {
+      return res.status(400).json({ error: 'no chat instance in tgInitData' }) 
+    }
+    const id = params.get('chat_instance') as string
     const orgs = await req.db.listOrgByChatId(id)
     res.status(200).json(orgs);
   }

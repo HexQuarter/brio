@@ -32,7 +32,10 @@ export const createOrgHandler = async (req: { body: any, db: VoteServiceStorage 
     }
 
     const params = new URLSearchParams(orgData.tgInitData);
-    const { id } = JSON.parse(params.get('user') as string)
+    if (!params.has('chat_instance')) {
+      return res.status(400).json({ error: 'no chat instance in tgInitData' }) 
+    }
+    const id = params.get('chat_instance') as string
 
     const orgId = await req.db.createOrg({
       name: orgData.name,

@@ -57,7 +57,7 @@ async function notifyPollResults(db: VoteServiceStorage, poll: Poll) {
   }
 }
 
-async function notifyTelegram(chatId: number, botToken: string, message: string) {
+async function notifyTelegram(chatId: string, botToken: string, message: string) {
   return await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

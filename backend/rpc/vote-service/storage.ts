@@ -1,7 +1,7 @@
 export interface VoteServiceStorage {
   createOrg(org: OrgInsertion): Promise<string>
   getOrg(id: string): Promise<Org | undefined>
-  listOrgByChatId(chatId: number): Promise<OrgListing[]>
+  listOrgByChatId(chatId: string): Promise<OrgListing[]>
   createPoll(poll: PollInsertion): Promise<string>
   listActivePolls(): Promise<PollListing[]>
   listPastPolls(): Promise<PollListing[]>
@@ -43,7 +43,7 @@ export type OrgInsertion = {
   scope_level: 'countries' | 'region' | 'continent' | 'world' | 'city' | 'community'
   geographic_scope: string
   logo_url: string | undefined
-  chat_id: number
+  chat_id: string
   id_verification_required: boolean
   telegram_handle: string | undefined
 }
