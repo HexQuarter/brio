@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { useEffect, type FC } from 'react';
 
 import { ComingSoon } from '@/components/ComingSoon';
 
@@ -7,16 +7,16 @@ import { Button } from '@/components/ui/button';
 
 import { useNavigate } from "react-router-dom";
 import { useWallet } from '@/lib/wallet/context';
-import { retrieveLaunchParams } from '@telegram-apps/sdk-react';
+import { useLaunchParams } from '@telegram-apps/sdk-react';
 
 export const WelcomePage: FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
   const wallet = useWallet()
+  const tgData = useLaunchParams()
 
-  const tgData = retrieveLaunchParams()
-  if (tgData) {
+  useEffect(() => {
     const startParam = tgData.tgWebAppData?.start_param
     if (startParam) {
       const params = new URLSearchParams(startParam)
@@ -39,13 +39,13 @@ export const WelcomePage: FC = () => {
         fetchPaymentId(paymentHash)
       }
 
-      const route = params.get('route')
-      if (route) {
-        window.location.replace(`#${route}`)
+      const app = params.get('app')
+      if (app) {
+        window.location.replace(`#/app/${app}`)
         return
       }
     }
-  }
+  }, [tgData])
 
   if (wallet.walletExists) {
     window.location.replace('#/apps')
