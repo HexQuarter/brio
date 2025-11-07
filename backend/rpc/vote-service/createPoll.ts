@@ -29,27 +29,23 @@ export const createPollHandler = async (req: { body: any, db: VoteServiceStorage
       return res.status(400).json({ message: "invalid org id" })
     }
 
-    let chatID
-
     const prod = process.env["PROD"] || "true"
     if (prod === "true") {
       if (!verifyTelegramAuth(pollData.tgInitData, getBotId())) {
         return res.status(401).json({ message: "invalid Telegram InitData" })
       }
     }
-    
-    let params = new URLSearchParams(pollData.tgInitData);
-    if (!params.has('start_param')) {
-      const params = new URLSearchParams(pollData.tgInitData);
-      const user = JSON.parse(params.get('user') as string)
-      chatID = user.id
-    }
-    else {
+
+    let chatID
+    const params = new URLSearchParams(pollData.tgInitData);
+    const user = JSON.parse(params.get('user') as string)
+    chatID = user.id
+
+    if (params.has('start_param')) {
       const startParams = new URLSearchParams(params.get('start_param') as string)
-      if (!startParams.has('chat_id')) {
-        return res.status(400).json({ error: 'no chat_id in start_param' }) 
+      if (startParams.has('chat_id')) {
+        chatID = new URLSearchParams(startParams).get('chat_id') as string
       }
-      chatID = new URLSearchParams(startParams).get('chat_id') as string
     }
 
     if (req.bot) {
