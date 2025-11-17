@@ -40,7 +40,6 @@ export default function OptionalAttributesForm({ countries = ['South Africa'], i
     }
   }, [idVerificationRequired]);
 
-
   const handleSaIdChange = (value: string) => {
     setSaId(value);
     const result = validateSAId(value);
@@ -205,39 +204,41 @@ export default function OptionalAttributesForm({ countries = ['South Africa'], i
         </div>
       )}
 
-      <div className="space-y-2">
-        <Label>Residence</Label>
-        <RadioGroup
-          value={selfAttestation.residence}
-          onValueChange={(value) => handleSelfAttestationChange('residence', value)}
-          data-testid="radio-residence"
-        >
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="in-country" id="res-in" />
-              <Label htmlFor="res-in" className="cursor-pointer font-normal">
-                {countries.length === 1 
-                  ? `Inside ${countries[0]}`
-                  : countries.length > 1 
-                    ? `Inside ${countries.join(', ')}`
-                    : 'Inside home country/countries'
-                }
-              </Label>
+      { countries && countries.length > 0 && countries[0] != '' &&
+        <div className="space-y-2">
+          <Label>Residence</Label>
+          <RadioGroup
+            value={selfAttestation.residence}
+            onValueChange={(value) => handleSelfAttestationChange('residence', value)}
+            data-testid="radio-residence"
+          >
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="in-country" id="res-in" />
+                <Label htmlFor="res-in" className="cursor-pointer font-normal">
+                  {countries.length === 1 
+                    ? `Inside ${countries[0]}`
+                    : countries.length > 1 
+                      ? `Inside ${countries.join(', ')}`
+                      : 'Inside home country/countries'
+                  }
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="outside" id="res-out" />
+                <Label htmlFor="res-out" className="cursor-pointer font-normal">
+                  {countries.length === 1
+                    ? `Outside ${countries[0]}`
+                    : countries.length > 1
+                      ? `Outside ${countries.join(', ')}`
+                      : 'Outside home country/countries'
+                  }
+                </Label>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="outside" id="res-out" />
-              <Label htmlFor="res-out" className="cursor-pointer font-normal">
-                {countries.length === 1
-                  ? `Outside ${countries[0]}`
-                  : countries.length > 1
-                    ? `Outside ${countries.join(', ')}`
-                    : 'Outside home country/countries'
-                }
-              </Label>
-            </div>
-          </div>
-        </RadioGroup>
-      </div>
+          </RadioGroup>
+        </div>
+      }
     </Card>
   );
 }

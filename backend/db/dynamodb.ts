@@ -265,6 +265,12 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
   async createPoll(poll: PollInsertion): Promise<string> {
     const hashSalt = randomBytes(32).toString('hex')
     const pollId = createHash('sha256').update(hashSalt).digest('hex').slice(0, 16)
+
+    const org = await this.getOrg(poll.org_id)
+    if (!org) {
+      throw new Error('Undefined org')
+    }
+
     const transactCommand = new TransactWriteItemsCommand({
       TransactItems: [
         {
@@ -275,9 +281,9 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
               SK: { S: `POLL#${pollId}` },
               Type: { S: 'Poll' },
               question: { S: poll.question },
-              scope_level: { S: poll.scope_level },
-              geographic_scope: { S: poll.geographic_scope },
-              countries: { S: poll.scope_level === 'countries' ? poll.geographic_scope : '' },
+              scope_level: { S: org.scope_level },
+              geographic_scope: { S: org.geographic_scope },
+              countries: { S: org.scope_level },
               start_at: { N: poll.start_at.toString() },
               end_at: { N: poll.end_at.toString() },
               hash_salt: { S: hashSalt },

@@ -56,8 +56,6 @@ export type Org = OrgInsertion & {
 export type PollInsertion = {
   org_id: string
   question: string
-  scope_level: 'countries' | 'region' | 'continent' | 'world' | 'city' | 'community'
-  geographic_scope: string
   start_at: number
   end_at: number
 }
@@ -72,6 +70,8 @@ export type Poll = PollInsertion & {
   id: string
   hash_salt: string
   created_at: number
+  scope_level: 'countries' | 'region' | 'continent' | 'world' | 'city' | 'community'
+  geographic_scope: string
   status: 'active' | 'closed'
 };
 

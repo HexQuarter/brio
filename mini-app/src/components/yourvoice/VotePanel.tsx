@@ -45,8 +45,9 @@ export default function VotePanel({ question, hasVoted = false, userVote, onVote
         <div className="grid grid-cols-2 gap-4">
           <Button
             size="lg"
+            variant='outline'
             onClick={() => handleVote('yes')}
-            className="min-h-24 flex-col gap-2 bg-green-600 text-lg text-white rounded-2xl shadow-lg disabled:opacity-50 active-elevate-2"
+            className="min-h-24 flex-col gap-2 bg-green-100 text-green-500 text-lg rounded-2xl shadow-lg disabled:opacity-50 active-elevate-2"
             data-testid="button-vote-yes"
           >
             <ThumbsUp className="w-8 h-8" />
@@ -56,8 +57,9 @@ export default function VotePanel({ question, hasVoted = false, userVote, onVote
 
           <Button
             size="lg"
+            variant='outline'
             onClick={() => handleVote('no')}
-            className="min-h-24 flex-col gap-2 text-lg bg-destructive text-white rounded-2xl shadow-lg disabled:opacity-50 active-elevate-2"
+            className="min-h-24 flex-col gap-2 text-lg bg-red-100 text-red-500 rounded-2xl shadow-lg disabled:opacity-50 active-elevate-2"
             data-testid="button-vote-no"
           >
             <ThumbsDown className="w-8 h-8" />

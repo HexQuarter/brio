@@ -3,14 +3,14 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { MessageSquare, Calendar, Globe } from 'lucide-react';
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from '@/components/ui/select';
+import { MessageSquare, Calendar } from 'lucide-react';
 import { Spinner } from '@telegram-apps/telegram-ui';
 
 interface PollCreationFormProps {
@@ -81,7 +81,7 @@ export default function PollCreationForm({ orgCountries, onSubmit }: PollCreatio
         />
       </div>
 
-      {!orgCountries && (
+      {/* {!orgCountries && (
         <div className="flex flex-col gap-2">
           <div className="flex flex-col gap-2">
             <Label htmlFor="scope-level" className="flex items-center gap-2">
@@ -210,7 +210,7 @@ export default function PollCreationForm({ orgCountries, onSubmit }: PollCreatio
             </div>
           )}
         </div>
-      )}
+      )} */}
 
       <div className="flex flex-col gap-10">
         <div className="flex flex-col gap-2">

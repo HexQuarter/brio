@@ -64,8 +64,6 @@ export type InsertOrg = {
 export type InsertPoll = {
   org_id: string,
   question: string,
-  scope_level: 'countries' | 'region' | 'continent' | 'world' | 'city' | 'community',
-  geographic_scope: string,
   start_at: number,
   end_at: number,
   init_data: string | undefined,
