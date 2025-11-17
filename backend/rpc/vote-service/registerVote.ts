@@ -43,13 +43,13 @@ export const registerVoteHandler = async (req: { body: any, db: VoteServiceStora
       return res.status(404).json({ error: 'Organization not found' });
     }
 
-    const now = new Date();
+    const now = Math.floor(Math.floor(new Date().getTime() / 1000) / 60) * 60
 
-    if (now.getTime() < poll.start_at * 1000) {
+    if (now < poll.start_at) {
       return res.status(400).json({ error: 'Poll has not started yet' });
     }
 
-    if (now.getTime() > poll.end_at * 1000) {
+    if (now > poll.end_at) {
       return res.status(400).json({ error: 'Poll has ended' });
     }
 
