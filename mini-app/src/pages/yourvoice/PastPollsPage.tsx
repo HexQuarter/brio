@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { listPastPolls } from '@/lib/yourvoice/api';
-import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 import type { Poll } from '@/lib/yourvoice/schema';
 import { useNavigate } from 'react-router-dom';
+import { FiArrowRightCircle } from 'react-icons/fi';
+import { Button } from '@/components/ui/button';
 
 export function YourVoicePastPollsPage() {
   const navigate = useNavigate();
@@ -44,9 +46,17 @@ export function YourVoicePastPollsPage() {
                   <span className='font-normal'>{poll.question}</span>
                 </CardTitle>
                 <CardDescription>
-                  Ended: {new Date(poll.end_at * 1000).toLocaleString()}
+                  Ended at: {new Date(poll.end_at * 1000).toLocaleString()}
                 </CardDescription>
               </CardHeader>
+              <CardFooter>
+                <Button onClick={() => navigate(`/app/yourvoice/poll/${poll.id}`)}
+                  size='lg'
+                  variant='outline'
+                  className='w-full border-primary text-sm text-primary'>
+                  Open poll <FiArrowRightCircle />
+                </Button>
+              </CardFooter>
             </Card>
           ))}
         </div>

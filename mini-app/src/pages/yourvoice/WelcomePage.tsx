@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { listMyOrgs, listOrgPolls } from '@/lib/yourvoice/api';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 
 import {
@@ -15,6 +15,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { retrieveRawInitData } from "@telegram-apps/sdk-react";
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { FiArrowRightCircle } from 'react-icons/fi';
 
 export function YourVoiceWelcomePage() {
   const navigate = useNavigate();
@@ -150,27 +151,45 @@ export function YourVoiceWelcomePage() {
                 <div className="flex flex-col gap-2">
                   {orgPolls.map((poll: Poll) => {
                     const now = new Date().getTime();
+                    const startTime = poll.start_at * 1000
                     const endTime = poll.end_at * 1000;
-                    const isPast = now > endTime;
-                    const isActive = now <= endTime;
+                    const isFuture = startTime > now
+                    const isPast = !isFuture && now > endTime;
+                    const isActive = !isFuture && now <= endTime;
 
                     return (
                       <Card
                         key={poll.id}
                         data-testid={`card-org-poll-${poll.id}`}
                         className="shadow-none bg-gray-50 border-gray-200 border-1 rounded-md cursor-pointer"
-                        onClick={() => navigate(`/app/yourvoice/poll/${poll.id}`)}
                       >
                         <CardHeader>
                           <CardTitle className="flex items-center justify-between gap-2">
                             <span className='font-normal'>{poll.question}</span>
+                            {isFuture && <Badge variant="default">Scheduled</Badge>}
                             {isActive && <Badge variant="default">Active</Badge>}
                             {isPast && <Badge variant="secondary">Ended</Badge>}
                           </CardTitle>
                           <CardDescription>
-                            {isPast ? 'Ended' : 'Ends'}: {new Date(poll.end_at * 1000).toLocaleString()}
+                            {isFuture && (
+                              <span>Starts at: {new Date(poll.start_at * 1000).toLocaleString()}</span>
+                            )}
+                            {isActive && (
+                              <span>Ends at: {new Date(poll.end_at * 1000).toLocaleString()}</span>
+                            )}
+                            {isPast && (
+                              <span>Ended at: {new Date(poll.end_at * 1000).toLocaleString()}</span>
+                            )}
                           </CardDescription>
                         </CardHeader>
+                        <CardFooter>
+                            <Button onClick={() => navigate(`/app/yourvoice/poll/${poll.id}`)} 
+                              size='sm' 
+                              variant='outline' 
+                              className='w-full border-primary text-sm text-primary'>
+                                Open poll <FiArrowRightCircle />
+                            </Button>
+                        </CardFooter>
                       </Card>
                     );
                   })}
@@ -178,7 +197,7 @@ export function YourVoiceWelcomePage() {
               )}
                
               <div className='flex'>
-                <Button className='w-full border-primary text-primary h-5' variant="outline" onClick={() => navigate(`/app/yourvoice/create-poll?org=${voterSelectedOrgId}`)}>Create a new poll</Button>
+                <Button className='w-full border-primary h-5' onClick={() => navigate(`/app/yourvoice/create-poll?org=${voterSelectedOrgId}`)}>Create a new poll</Button>
               </div>
             </div>
           )}
