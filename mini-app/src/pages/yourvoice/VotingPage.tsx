@@ -67,7 +67,7 @@ export function VotingPage() {
     })
 
     setVoteIsPending(false)
-    setHashVoted(true)
+   
 
     if (res.status != 200) {
       const { error } = await res.json()
@@ -75,6 +75,7 @@ export function VotingPage() {
       return
     }
 
+    setHashVoted(true)
     toast.success('Your vote has been successfully recorded.')
     setUserVote(vote);
   };
