@@ -296,6 +296,7 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
               poll_id: { S: pollId },
               org_id: { S: poll.org_id },
               question: { S: poll.question },
+              start_at: { N: poll.start_at.toString() },
               end_at: { N: poll.end_at.toString() },
             }
           }
@@ -360,12 +361,18 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
       throw new Error(res.$metadata.httpStatusCode?.toString())
     }
 
-    return (res.Items || []).map(item => ({
+    const items = (res.Items || []).map(item => ({
       id: item.poll_id?.S || '',
       question: item.question?.S || '',
       end_at: Number(item.end_at?.N || '0'),
+      start_at: Number(item.start_at?.N || '0'),
       org_id: item.org_id?.S || ''
     })) as PollListing[]
+
+    const now = Math.floor(Math.floor(new Date().getTime() / 1000) / 60) * 60
+    return items
+      .filter(i => i.start_at < now)
+      .sort((p1, p2) => p2.start_at - p1.start_at)
   }
 
   async listPastPolls(): Promise<PollListing[]> {
@@ -380,12 +387,15 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
       throw new Error(res.$metadata.httpStatusCode?.toString())
     }
 
-    return (res.Items || []).map(item => ({
+    const polls = (res.Items || []).map(item => ({
       id: item.poll_id?.S || '',
       question: item.question?.S || '',
+      start_at: Number(item.start_at?.N || '0'),
       end_at: new Number(item.end_at?.N || '0'),
       org_id: item.org_id?.S || ''
     })) as PollListing[]
+    
+    return polls.sort((p1, p2) => p2.start_at - p1.start_at)
   }
 
   async closePoll(poll: Poll) {
@@ -723,13 +733,16 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
       throw new Error(res.$metadata.httpStatusCode?.toString())
     }
 
-    return (res.Items || []).map((item) => {
+    const polls = (res.Items || []).map((item) => {
       return {
         id: pollPartitioner(item.SK?.S?.split('#')[1] || '', orgId),
         question: item.question?.S || '',
+        start_at: Number(item.start_at?.N || '0'),
         end_at: item.end_at?.N || 0,
         org_id: orgId
       }
     }) as PollListing[]
+
+    return polls.sort((p1, p2) => p2.start_at - p1.start_at)
   }
 }

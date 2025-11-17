@@ -105,6 +105,8 @@ export function VotingPage() {
     ? poll.geographic_scope.split(',').map((c: string) => c.trim())
     : [];
   const pollEndTime = new Date(poll.end_at * 1000);
+  const pollStartTime = new Date(poll.start_at * 1000)
+  const isFuture = pollStartTime.getTime() > new Date().getTime()
 
   const yesPercentage = aggregates.total_votes > 0 
     ? Math.round((aggregates.yes_count / aggregates.total_votes) * 100) 
@@ -171,12 +173,10 @@ export function VotingPage() {
           </Card>
         )}
 
-
         <div className='flex flex-col gap-5 bg-white p-5 rounded-sm'>
+          <CountdownTimer startTime={pollStartTime} endTime={pollEndTime} />
 
-          <CountdownTimer endTime={pollEndTime} />
-
-          {poll.status == 'active' && !hasVoted && !voteIsPending && (
+          {!isFuture && poll.status == 'active' && !hasVoted && !voteIsPending && (
             <OptionalAttributesForm
               countries={countries}
               idVerificationRequired={org?.id_verification_required === true}
@@ -184,7 +184,7 @@ export function VotingPage() {
             />
           )}
 
-          {poll.status == 'active' && <VotePanel
+          {!isFuture && poll.status == 'active' && <VotePanel
             pollId={pollId}
             question={poll.question}
             hasVoted={hasVoted}

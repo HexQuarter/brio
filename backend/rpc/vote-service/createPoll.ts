@@ -65,9 +65,6 @@ export const createPollHandler = async (req: { body: any, db: VoteServiceStorage
     }
 
     const now = Math.floor(Math.floor(new Date().getTime() / 1000) / 60) * 60
-    console.log('now', now)
-    console.log('poll start', pollData.start_at)
-
 
     if (pollData.start_at < now) {
       return res.status(400).json({ error: "start date cannot be in the past" })

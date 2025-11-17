@@ -2,17 +2,18 @@ import { useEffect, useState } from 'react';
 import { Clock } from 'lucide-react';
 
 interface CountdownTimerProps {
+  startTime: Date;
   endTime: Date;
   onExpire?: () => void;
 }
 
-export default function CountdownTimer({ endTime, onExpire }: CountdownTimerProps) {
+export default function CountdownTimer({ startTime, endTime, onExpire }: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState('');
 
   useEffect(() => {
     const updateTimer = () => {
       const now = new Date();
-      const diff = endTime.getTime() - now.getTime();
+      const diff = now.getTime() < startTime.getTime() ? startTime.getTime() - now.getTime() : endTime.getTime() - now.getTime();
 
       if (diff <= 0) {
         setTimeLeft('Poll Closed');
@@ -25,12 +26,14 @@ export default function CountdownTimer({ endTime, onExpire }: CountdownTimerProp
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
+      const indication = now.getTime() < startTime.getTime() ? 'before to start' : 'remaining'
+
       if (days > 0) {
-        setTimeLeft(`${days}d ${hours}h ${minutes}m remaining`);
+        setTimeLeft(`${days}d ${hours}h ${minutes}m ${indication}`);
       } else if (hours > 0) {
-        setTimeLeft(`${hours}h ${minutes}m ${seconds}s remaining`);
+        setTimeLeft(`${hours}h ${minutes}m ${seconds}s ${indication}`);
       } else {
-        setTimeLeft(`${minutes}m ${seconds}s remaining`);
+        setTimeLeft(`${minutes}m ${seconds}s ${indication}`);
       }
     };
 
@@ -39,19 +42,41 @@ export default function CountdownTimer({ endTime, onExpire }: CountdownTimerProp
     return () => clearInterval(interval);
   }, [endTime, onExpire]);
 
-  const progress = Math.max(0, Math.min(100, ((new Date().getTime() - (endTime.getTime() - 7 * 24 * 60 * 60 * 1000)) / (7 * 24 * 60 * 60 * 1000)) * 100));
+  const progress = computeProgress(startTime, endTime)
   return (
-    <div className="space-y-2" data-testid="countdown-timer">
+    <div className="flex flex-col gap-2">
       <div className="flex items-center justify-center gap-2 text-lg text-foreground">
         <Clock className="w-5 h-5 text-primary" />
         <span className="font-mono" data-testid="text-time-remaining">{timeLeft}</span>
       </div>
-      <div className="relative h-2 w-full bg-muted rounded-full overflow-hidden">
-        <div
-          className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary to-primary/70 transition-all duration-1000"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+      { (progress > 0 && progress < 100) &&
+        <div className="relative h-2 w-full bg-muted rounded-full overflow-hidden">
+          <div
+            className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary to-primary/70 transition-all duration-1000"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      }
     </div>
   );
+}
+
+function computeProgress(startTime: Date, endTime: Date) {
+  const now = Date.now();
+  const start = startTime.getTime();
+  const end = endTime.getTime();
+
+  if (now < start) {
+    return 0
+  }
+
+  if (now <= end) {
+    // Progress from startTime → endTime
+    const total = end - start;
+    const elapsed = now - start;
+    return Math.max(0, Math.min(100, (elapsed / total) * 100));
+  }
+
+  // After endTime
+  return 100;
 }

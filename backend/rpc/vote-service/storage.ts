@@ -77,6 +77,7 @@ export type Poll = PollInsertion & {
 
 export type PollListing = {
   id: string
+  start_at: number
   end_at: number
   question: string
   org_id: string
