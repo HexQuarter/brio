@@ -32,6 +32,9 @@ export function YourVoiceWelcomePage() {
 
   useEffect(() => {
     const loadingPolls = async () => {
+      if (voterSelectedOrgId == '') {
+        return
+      }
       setOrgPollsLoading(true)
       const polls = await listOrgPolls(voterSelectedOrgId)
       setOrgPollsLoading(false)
