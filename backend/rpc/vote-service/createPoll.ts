@@ -77,7 +77,12 @@ export const createPollHandler = async (req: { body: any, db: VoteServiceStorage
     const pollId = await req.db.createPoll(pollData)
 
     if (req.bot) {
-      await req.bot.telegram.sendMessage(chatID, `A new poll have been created: ${pollData.question}`)
+      try {
+        await req.bot.telegram.sendMessage(chatID, `A new poll have been created: ${pollData.question}`)
+      }
+      catch(e) {
+        console.error('Failed to send Telegram message about new poll creation:', e);
+      }
     }
 
     res.status(201).json({ id: pollId });
