@@ -54,7 +54,7 @@ export async function createPoll(data: InsertPoll) {
 }
 
 export async function getActivePoll(id: string) {
-  return await fetch(new URL("/rpc", rpcEndpoint()), {
+  const response =  await fetch(new URL("/rpc", rpcEndpoint()), {
       method: 'POST',
       headers: {
           "Content-Type": "application/json",
@@ -65,7 +65,12 @@ export async function getActivePoll(id: string) {
           payload: { id }
       })
   })
-  .then(r => r.json())
+
+  if (response.status != 200) {
+    throw new Error('Failed to fetch poll')
+  }
+
+  return await response.json()
 }
 
 export async function listActivePolls() {
@@ -159,6 +164,24 @@ export async function listOrgPolls(orgId: string) {
           operation: 'list-org-polls',
           payload: {
             org_id: orgId,
+          }
+      })
+  })
+  .then(r => r.json())
+}
+
+export async function removeOrg(orgId: string, tgInitData: string) {
+    return await fetch(new URL("/rpc", rpcEndpoint()), {
+      method: 'POST',
+      headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+      },
+      body: JSON.stringify({
+          operation: 'remove-org',
+          payload: {
+            org_id: orgId,
+            tgInitData: tgInitData
           }
       })
   })

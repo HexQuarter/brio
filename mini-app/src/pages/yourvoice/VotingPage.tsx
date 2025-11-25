@@ -34,12 +34,17 @@ export function VotingPage() {
 
   useEffect(() => {
     const fetchPoll = async () => {
-      const poll = await getActivePoll(pollId) as ActivePoll
-      setData(poll)
-      setIsLoading(false)
+      try {
+        const poll = await getActivePoll(pollId) as ActivePoll
+        setData(poll)
+        setIsLoading(false)
 
-      const votingPower = await canVote(pollId, tgData)
-      setHashVoted(!votingPower)
+        const votingPower = await canVote(pollId, tgData)
+        setHashVoted(!votingPower)
+      } catch (err) {
+        setIsLoading(false)
+        setData(undefined)
+      }
     }
 
     fetchPoll()
@@ -91,17 +96,12 @@ export function VotingPage() {
   }
 
   if (!data) {
-    return (
-      <div className="flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-lg text-foreground font-semibold">Poll not found</div>
-        </div>
-      </div>
-    );
+    window.location.href = '#/app/yourvoice';
+    return null;  
   }
 
   const { poll, org, aggregates } = data;
-  const countries = poll.scope_level === 'countries' 
+  const countries = poll && poll.scope_level === 'countries' 
     ? poll.geographic_scope.split(',').map((c: string) => c.trim())
     : [];
   const pollEndTime = new Date(poll.end_at * 1000);

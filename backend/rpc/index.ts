@@ -15,6 +15,7 @@ import { registerVoteHandler } from "./vote-service/registerVote";
 import { checkVoteHandler } from "./vote-service/checkVote";
 import { listChatIdOrgsHandler } from "./vote-service/listChatIdOrg";
 import { listOrgPollsHandler } from "./vote-service/listOrgPolls";
+import { removeOrgHandler } from "./vote-service/removeOrg";
 
 const OperationSchema = z.object({
   operation: z.string(),
@@ -36,7 +37,8 @@ const handlers: { [key: string]: any } = {
   "get-poll": getPollHandler,
   "register-vote": registerVoteHandler,
   "check-vote": checkVoteHandler,
-  'list-org-polls': listOrgPollsHandler
+  'list-org-polls': listOrgPollsHandler,
+  'remove-org': removeOrgHandler
 }
 
 export const rpcHandler = async (req: any, res: any) => {

@@ -12,6 +12,7 @@ export interface VoteServiceStorage {
   recordVote(pollId: string, voterHash: string): Promise<void>
   closePoll(poll: Poll): Promise<void>
   listOrgPolls(orgId: string): Promise<PollListing[]>
+  removeOrg(orgId: string): Promise<void>
 
   updateAggregates(
     pollId: string,

@@ -3,7 +3,7 @@ import { PaymentServiceStorage, PaymentItem } from '../rpc/payment-service/stora
 import { Org, OrgInsertion, OrgListing, Poll, PollAggregate, PollInsertion, PollListing, VoteServiceStorage } from '../rpc/vote-service/storage';
 import { createHash, randomBytes } from 'crypto';
 
-import { DynamoDBClient, GetItemCommand, PutItemCommand, QueryCommand, TransactWriteItem, TransactWriteItemsCommand, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
+import { DeleteItemCommand, DynamoDBClient, GetItemCommand, PutItemCommand, QueryCommand, TransactWriteItem, TransactWriteItemsCommand, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
 
 const prod = process.env['PROD'] || true
 const dev = process.env['DEV'] || false
@@ -245,7 +245,7 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
   }
 
   async listOrgByChatId(chatId: string): Promise<OrgListing[]> {
-    const res = await this.db.send( new QueryCommand({
+    const res = await this.db.send(new QueryCommand({
       TableName: POLLS_TABLE,
       KeyConditionExpression: "PK = :pk",
       ExpressionAttributeValues: { ":pk": { S: `CHAT#${chatId}` } },
@@ -355,12 +355,13 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
   }
 
   async listActivePolls(): Promise<PollListing[]> {
+    const now = Math.floor(Math.floor(new Date().getTime() / 1000) / 60) * 60
     const res = await this.db.send(new QueryCommand({
       TableName: POLLS_TABLE,
       KeyConditionExpression: 'PK = :pk AND SK >= :now',
       ExpressionAttributeValues: {
         ":pk": { S: "ACTIVE_POLLS" },
-        ":now": { S: Date.now().toString() },
+        ":now": { S: now.toString() },
       },
     }))
     if (res.$metadata.httpStatusCode !== 200) {
@@ -375,9 +376,8 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
       org_id: item.org_id?.S || ''
     })) as PollListing[]
 
-    const now = Math.floor(Math.floor(new Date().getTime() / 1000) / 60) * 60
     return items
-      .filter(i => i.start_at < now)
+      .filter(i => i.start_at <= now)
       .sort((p1, p2) => p2.start_at - p1.start_at)
   }
 
@@ -400,7 +400,7 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
       end_at: new Number(item.end_at?.N || '0'),
       org_id: item.org_id?.S || ''
     })) as PollListing[]
-    
+
     return polls.sort((p1, p2) => p2.start_at - p1.start_at)
   }
 
@@ -507,31 +507,31 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
 
     return {
       poll_id: pollId,
-      total_votes: Number(commandRes.Item.total_votes?.N || '0')|0,
-      yes_count: Number(commandRes.Item.yes_count?.N || '0')|0,
-      no_count: Number(commandRes.Item.no_count?.N || '0')|0,
-      verified_total: Number(commandRes.Item.verified_total?.N || '0') ,
-      age_lt_18: Number(commandRes.Item.age_lt_18?.N || '0') ,
-      age_18_24: Number(commandRes.Item.age_18_24?.N || '0') ,
-      age_25_34: Number(commandRes.Item.age_25_34?.N || '0') ,
-      age_35_44: Number(commandRes.Item.age_35_44?.N || '0') ,
-      age_45_54: Number(commandRes.Item.age_45_54?.N || '0') ,
-      age_55p:  Number(commandRes.Item.age_55p?.N || '0') ,
-      gender_male: Number(commandRes.Item.gender_male?.N || '0') ,
-      gender_female: Number(commandRes.Item.gender_female?.N || '0') ,
-      gender_other: Number(commandRes.Item.gender_other?.N || '0') ,
-      gender_unspecified: Number(commandRes.Item.gender_unspecified?.N || '0') ,
-      res_in_country:  Number(commandRes.Item.res_in_country?.N || '0') ,
-      res_outside: Number(commandRes.Item.res_outside?.N || '0') ,
-      res_unspecified: Number(commandRes.Item.res_unspecified?.N || '0') ,
-      verified_self_attest: Number(commandRes.Item.verified_self_attest?.N || '0') ,
-      verified_sa_id: Number(commandRes.Item.verified_sa_id?.N || '0') 
+      total_votes: Number(commandRes.Item.total_votes?.N || '0') | 0,
+      yes_count: Number(commandRes.Item.yes_count?.N || '0') | 0,
+      no_count: Number(commandRes.Item.no_count?.N || '0') | 0,
+      verified_total: Number(commandRes.Item.verified_total?.N || '0'),
+      age_lt_18: Number(commandRes.Item.age_lt_18?.N || '0'),
+      age_18_24: Number(commandRes.Item.age_18_24?.N || '0'),
+      age_25_34: Number(commandRes.Item.age_25_34?.N || '0'),
+      age_35_44: Number(commandRes.Item.age_35_44?.N || '0'),
+      age_45_54: Number(commandRes.Item.age_45_54?.N || '0'),
+      age_55p: Number(commandRes.Item.age_55p?.N || '0'),
+      gender_male: Number(commandRes.Item.gender_male?.N || '0'),
+      gender_female: Number(commandRes.Item.gender_female?.N || '0'),
+      gender_other: Number(commandRes.Item.gender_other?.N || '0'),
+      gender_unspecified: Number(commandRes.Item.gender_unspecified?.N || '0'),
+      res_in_country: Number(commandRes.Item.res_in_country?.N || '0'),
+      res_outside: Number(commandRes.Item.res_outside?.N || '0'),
+      res_unspecified: Number(commandRes.Item.res_unspecified?.N || '0'),
+      verified_self_attest: Number(commandRes.Item.verified_self_attest?.N || '0'),
+      verified_sa_id: Number(commandRes.Item.verified_sa_id?.N || '0')
     }
   }
 
   async hasVoted(pollPartition: string, voterHash: string): Promise<boolean> {
     const { orgId, pollId } = pollDepartitioner(pollPartition)
-    const res = await this.db.send( new GetItemCommand({
+    const res = await this.db.send(new GetItemCommand({
       TableName: POLLS_TABLE,
       Key: {
         PK: { S: `ORG#${orgId}` },
@@ -750,5 +750,80 @@ export class DynamodbStorage implements UserServiceStorage, PaymentServiceStorag
     }) as PollListing[]
 
     return polls.sort((p1, p2) => p2.start_at - p1.start_at)
+  }
+
+  async removeOrg(orgId: string): Promise<void> {
+    const org = await this.getOrg(orgId)
+    const itemsToDelete: any = [
+      {
+        Delete: {
+          TableName: POLLS_TABLE,
+          Key: {
+            PK: { S: `CHAT#${org?.chat_id}` },
+            SK: { S: `ORG#${orgId}` }
+          }
+        }
+      }
+    ];
+
+    let lastKey = undefined;
+
+    do {
+      const res: any = await this.db.send(
+        new QueryCommand({
+          TableName: POLLS_TABLE,
+          KeyConditionExpression: "PK = :pk",
+          ExpressionAttributeValues: { ":pk": { S: `ORG#${orgId}` } },
+          ExclusiveStartKey: lastKey
+        })
+      );
+
+      res.Items.forEach((item: any) => {
+        itemsToDelete.push(
+          {
+            Delete: {
+              TableName: POLLS_TABLE,
+              Key: { PK: item.PK, SK: item.SK }
+            }
+          }
+        )
+      });
+
+      lastKey = res.LastEvaluatedKey;
+    } while (lastKey);
+
+    const pollsDeleteItems = (await this.listOrgPolls(orgId)).flatMap(p => {
+      const { orgId, pollId} = pollDepartitioner(p.id)
+      return [
+        {
+          Delete: {
+            TableName: POLLS_TABLE,
+            Key: {
+              PK: { S: `ACTIVE_POLLS` },
+              SK: { S: `ORG#${orgId}#POLL#${pollId}#${p.end_at.toString()}` }
+            },
+          }
+        },
+        {
+          Delete: {
+            TableName: POLLS_TABLE,
+            Key: {
+              PK: { S: `PAST_POLLS` },
+              SK: { S: `ORG#${orgId}#POLL#${pollId}#${p.end_at.toString()}` }
+            },
+          }
+        }
+      ]
+    })
+
+    itemsToDelete.push(...pollsDeleteItems)
+
+    const res = await this.db.send(new TransactWriteItemsCommand({
+      TransactItems: itemsToDelete
+    }));
+
+    if (res.$metadata.httpStatusCode !== 200) {
+      throw new Error(res.$metadata.httpStatusCode?.toString())
+    }
   }
 }

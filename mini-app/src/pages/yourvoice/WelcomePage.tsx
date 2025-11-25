@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { listMyOrgs, listOrgPolls } from '@/lib/yourvoice/api';
+import { listMyOrgs, listOrgPolls, removeOrg } from '@/lib/yourvoice/api';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 
@@ -16,6 +16,7 @@ import { retrieveRawInitData } from "@telegram-apps/sdk-react";
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { FiArrowRightCircle } from 'react-icons/fi';
+import { MdAdd, MdOutlineDelete } from 'react-icons/md';
 
 export function YourVoiceWelcomePage() {
   const navigate = useNavigate();
@@ -61,6 +62,22 @@ export function YourVoiceWelcomePage() {
       setVoterSelectedOrgId(query.get('org') as string)
     }
   }, [location])
+
+  const handleRemoveOrg = (orgId: string) => async () => {
+    const confirm = window.confirm("Are you sure you want to remove this organization?")
+    if (!confirm) {
+      return
+    }
+
+    setOrgsLoading(true)
+    await removeOrg(orgId, tgData)
+    const updatedOrgs = await listMyOrgs(tgData)
+    setOrgs(updatedOrgs)
+    setOrgsLoading(false)
+    if (voterSelectedOrgId === orgId) {
+      setVoterSelectedOrgId('')
+    }
+  }
 
   return (
     <div className='flex flex-col gap-10'>
@@ -186,21 +203,26 @@ export function YourVoiceWelcomePage() {
                           </CardDescription>
                         </CardHeader>
                         <CardFooter>
-                            <Button onClick={() => navigate(`/app/yourvoice/poll/${poll.id}`)} 
-                              size='sm' 
-                              variant='outline' 
-                              className='w-full border-primary text-sm text-primary'>
-                                Open poll <FiArrowRightCircle />
-                            </Button>
+                          <Button onClick={() => navigate(`/app/yourvoice/poll/${poll.id}`)}
+                            size='sm'
+                            variant='outline'
+                            className='w-full border-primary text-sm text-primary'>
+                            Open poll <FiArrowRightCircle />
+                          </Button>
                         </CardFooter>
                       </Card>
                     );
                   })}
                 </div>
               )}
-               
-              <div className='flex'>
-                <Button className='w-full border-primary h-5' onClick={() => navigate(`/app/yourvoice/create-poll?org=${voterSelectedOrgId}`)}>Create a new poll</Button>
+
+              <div className='flex flex-col gap-5'>
+                <Button className='w-full border-primary h-5' onClick={() => navigate(`/app/yourvoice/create-poll?org=${voterSelectedOrgId}`)}>
+                  Create a new poll <MdAdd />
+                </Button>
+                <Button variant='secondary' className='w-full border-primary h-5' onClick={handleRemoveOrg(voterSelectedOrgId)}>
+                  Delete the organization <MdOutlineDelete />
+                </Button>
               </div>
             </div>
           )}
